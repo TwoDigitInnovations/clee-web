@@ -147,7 +147,7 @@ function StatCard({
   return (
     <div className="relative bg-white rounded-[12px] px-5 py-5 shadow-sm overflow-hidden">
  
-      <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-blue-600 to-blue-300 rounded-t-2xl" />
+      <div className="absolute top-0 left-0 right-0 h-[3px] bg-custom-blue rounded-t-2xl" />
 
       <div className="flex items-center justify-between mb-2">
         <span className="text-[14px] font-medium text-slate-400">{label}</span>
@@ -343,7 +343,7 @@ export default function Dashboard() {
                         key={t}
                         onClick={() => setChartToggle(t)}
                         className={`px-3 py-1 rounded-md text-xs font-semibold transition-all
-                    ${chartToggle === t ? "bg-blue-700 text-white" : "text-slate-500"}`}
+                    ${chartToggle === t ? "bg-custom-blue text-white" : "text-slate-500"}`}
                       >
                         {t}
                       </button>

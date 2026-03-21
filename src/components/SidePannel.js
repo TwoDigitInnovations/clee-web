@@ -6,7 +6,18 @@ import { useContext, useState } from "react";
 import { FiX, FiLogOut } from "react-icons/fi";
 import { MdDashboard, MdOutlineMeetingRoom } from "react-icons/md";
 import { FaRegCircleUser } from "react-icons/fa6";
-import { BadgeCent, Calendar, ChartNoAxesColumn, MessageSquareMore, ParkingMeter, User2, UserPlusIcon, Users } from "lucide-react";
+import {
+  BadgeCent,
+  Calendar,
+  ChartNoAxesColumn,
+  MessageSquareMore,
+  ParkingMeter,
+  Settings,
+  Settings2,
+  User,
+  User2,
+  Users,
+} from "lucide-react";
 import { userContext } from "@/pages/_app";
 import { ChevronRight } from "lucide-react";
 import { FiFileText, FiShield, FiBell } from "react-icons/fi";
@@ -14,11 +25,13 @@ import { PiUserList } from "react-icons/pi";
 import Swal from "sweetalert2";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { logoutUser } from "@/redux/slices/userSlice";
+import SidebarMenu from "./sidebarMenu";
 
 function SidePannel({ open, setOpen }) {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.user.user);
+  const [openMenu, setOpenMenu] = useState(null);
 
   const managementMenu = [
     {
@@ -52,6 +65,11 @@ function SidePannel({ open, setOpen }) {
       title: "Messages",
       icon: <MessageSquareMore size={20} />,
       access: ["user"],
+      children: [
+        { title: "SMS Inbox", href: "/messages/inbox" },
+        { title: "Sent Messages", href: "/messages/sent" },
+        { title: "SMS Campaigns", href: "/messages/draft" },
+      ],
     },
 
     {
@@ -59,6 +77,38 @@ function SidePannel({ open, setOpen }) {
       title: "Sales",
       icon: <BadgeCent size={20} />,
       access: ["user"],
+      children: [
+        { title: "View Invoices", href: "/messages/inbox" },
+        { title: "Create Invoices", href: "/messages/sent" },
+        { title: "Search Gift Vouchers", href: "/messages/draft" },
+      ],
+    },
+  ];
+
+  const SystemMenu = [
+    {
+      href: "/setup",
+      title: "Setup",
+      icon: <Settings size={20} />,
+      access: ["user"],
+      children: [
+        { title: "Business Details", href: "/messages/inbox" },
+        { title: "Stock", href: "/messages/sent" },
+        { title: "Sales Tools", href: "/messages/draft" },
+        { title: "Notifications", href: "/messages/draft" },
+      ],
+    },
+
+    {
+      href: "/Sales",
+      title: "Account",
+      icon: <User size={20} />,
+      access: ["user"],
+      children: [
+        { title: "View Invoices", href: "/messages/inbox" },
+        { title: "Create Invoices", href: "/messages/sent" },
+        { title: "Search Gift Vouchers", href: "/messages/draft" },
+      ],
     },
   ];
 
@@ -108,7 +158,7 @@ function SidePannel({ open, setOpen }) {
           <div className="flex justify-center gap-14">
             <img
               className="w-[40px]  "
-              src="images/logo.png"
+              src="/images/logo.png"
               onClick={() => router.push("/")}
               alt="Logo"
             />
@@ -123,55 +173,12 @@ function SidePannel({ open, setOpen }) {
         </div>
 
         <div className="flex-1 overflow-y-auto px-4">
-        
-          {managementMenu.map((item, i) =>
-            item.access.includes(user?.role) ? (
-              <Link
-                key={i}
-                href={item.href}
-                onClick={() => setOpen(false)}
-                className={`flex items-center justify-between px-4 py-2 rounded-md mb-1 transition-all
-                ${
-                  router.pathname === item.href
-                    ? "bg-white text-black"
-                    : "text-gray-300 hover:bg-white/10"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  {item.icon}
-                  <span className="font-medium">{item.title}</span>
-                </div>
-                <ChevronRight size={18} />
-              </Link>
-            ) : null,
-          )}
+          <SidebarMenu menu={managementMenu} user={user} />
 
           <p className=" mt-8 uppercase text-gray-400 text-xs mb-3 px-2 tracking-wider">
             System
           </p>
-
-          <Link
-            href="/setup"
-            className={`flex items-center justify-between px-4 py-2 rounded-xl  ${
-              router.pathname === "/Settings"
-                ? "bg-white text-black"
-                : "text-gray-300 hover:bg-white/10"
-            }`}
-          >
-            <span>Setup</span>
-            <ChevronRight size={18} />
-          </Link>
-          <Link
-            href="/account"
-            className={`flex items-center justify-between px-4 py-2 rounded-xl  ${
-              router.pathname === "/Settings"
-                ? "bg-white text-black"
-                : "text-gray-300 hover:bg-white/10"
-            }`}
-          >
-            <span>Account</span>
-            <ChevronRight size={18} />
-          </Link>
+          <SidebarMenu menu={SystemMenu} user={user} />
         </div>
 
         <div className="p-4 border-t border-white/10">
@@ -179,13 +186,15 @@ function SidePannel({ open, setOpen }) {
             className="bg-white cursor-pointer text-black rounded-xl p-3 flex items-center gap-3 mb-3"
             onClick={() => router.push("/profile")}
           >
-            {/* <img
-              src="https://i.pravatar.cc/40"
-              className="w-10 h-10 rounded-full"
-            /> */}
-            <div className="bg-black rounded-4xl w-8 h-8 flex justify-center items-center">
-              <User2 className="text-white" />
+            {/* ✅ Profile Image */}
+            <div className="h-10 w-10 rounded-full overflow-hidden">
+              <img
+                src="images/profilelogo.png"
+                alt="profile"
+                className="h-full w-full object-cover"
+              />
             </div>
+
             <div>
               <p className="font-semibold text-sm">{user?.name}</p>
               <p className="text-xs text-gray-600">{user?.email}</p>
