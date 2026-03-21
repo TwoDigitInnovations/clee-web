@@ -38,33 +38,33 @@ function SidePannel({ open, setOpen }) {
       href: "/",
       title: "Dashboard",
       icon: <MdDashboard size={20} />,
-      access: ["user"],
+      access: ["admin"],
     },
     {
       href: "/Calender",
       title: "Calender",
       icon: <Calendar size={20} />,
-      access: ["user"],
+      access: ["admin"],
     },
 
     {
       href: "/Customers",
       title: "Customers",
       icon: <Users size={20} />,
-      access: ["user"],
+      access: ["admin"],
     },
     {
       href: "/Reports",
       title: "Reports",
       icon: <ChartNoAxesColumn size={20} />,
-      access: ["user"],
+      access: ["admin"],
     },
 
     {
       href: "/Messages",
       title: "Messages",
       icon: <MessageSquareMore size={20} />,
-      access: ["user"],
+      access: ["admin"],
       children: [
         { title: "SMS Inbox", href: "/messages/inbox" },
         { title: "Sent Messages", href: "/messages/sent" },
@@ -76,7 +76,7 @@ function SidePannel({ open, setOpen }) {
       href: "/Sales",
       title: "Sales",
       icon: <BadgeCent size={20} />,
-      access: ["user"],
+      access: ["admin"],
       children: [
         { title: "View Invoices", href: "/messages/inbox" },
         { title: "Create Invoices", href: "/messages/sent" },
@@ -90,7 +90,7 @@ function SidePannel({ open, setOpen }) {
       href: "/setup",
       title: "Setup",
       icon: <Settings size={20} />,
-      access: ["user"],
+      access: ["admin"],
       children: [
         { title: "Business Details", href: "/messages/inbox" },
         { title: "Stock", href: "/messages/sent" },
@@ -103,7 +103,7 @@ function SidePannel({ open, setOpen }) {
       href: "/Sales",
       title: "Account",
       icon: <User size={20} />,
-      access: ["user"],
+      access: ["admin"],
       children: [
         { title: "View Invoices", href: "/messages/inbox" },
         { title: "Create Invoices", href: "/messages/sent" },
@@ -134,7 +134,7 @@ function SidePannel({ open, setOpen }) {
         localStorage.removeItem("userDetail"); // optional (agar alag key use ho rahi hai)
         localStorage.removeItem("token");
 
-        router.push("/login");
+        router.push("/auth/login");
       }
     });
   };
@@ -196,7 +196,7 @@ function SidePannel({ open, setOpen }) {
             </div>
 
             <div>
-              <p className="font-semibold text-sm">{user?.name}</p>
+              <p className="font-semibold text-sm">{user?.fullname}</p>
               <p className="text-xs text-gray-600">{user?.email}</p>
             </div>
           </div>

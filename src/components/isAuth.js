@@ -35,8 +35,8 @@ const isAuth = (Component) => {
 
     useEffect(() => {
       if (auth === false && !publicPages.includes(pathname)) {
-        // localStorage.clear();
-        // router.replace("/login");
+        localStorage.clear();
+        router.replace("/auth/login");
       }
     }, [auth, pathname]);
 

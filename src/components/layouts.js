@@ -9,7 +9,7 @@ const Layout = ({ children }) => {
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
-  const publicPages = ["/login", "/privacyPolicy", "/termsAndConditions"];
+  const publicPages = ["/auth/login", "/auth/ForgotPassword","/auth/Signup","/privacyPolicy", "/termofServices"];
   const isPublicPage = publicPages.includes(router.pathname);
 
   return (
