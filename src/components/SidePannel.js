@@ -143,7 +143,7 @@ function SidePannel({ open, setOpen }) {
     <>
       {open && (
         <div
-          className="fixed inset-0 bg-black/40 z-40 md:hidden"
+          className="fixed inset-0 bg-black/40 z-40 lg:hidden"
           onClick={() => setOpen(false)}
         />
       )}
@@ -184,7 +184,7 @@ function SidePannel({ open, setOpen }) {
         <div className="p-4 border-t border-white/10">
           <div
             className="bg-white cursor-pointer text-black rounded-xl p-3 flex items-center gap-3 mb-3"
-            onClick={() => router.push("/profile")}
+            onClick={() => router.push("/auth/MyProfile")}
           >
             {/* ✅ Profile Image */}
             <div className="h-10 w-10 rounded-full overflow-hidden">

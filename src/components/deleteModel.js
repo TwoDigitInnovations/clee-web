@@ -33,7 +33,7 @@ export const ConfirmModal = ({
             <p className="text-start text-gray-800 mb-6">{message}</p>
 
             {/* Buttons */}
-            <div className="flex justify-between gap-4">
+            <div className="flex justify-center gap-4">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
