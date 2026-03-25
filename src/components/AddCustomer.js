@@ -153,10 +153,35 @@ const getInitialState = () => ({
   photo_preview: null,
 });
 
+const validateCustomerForm = (form) => {
+  const errors = {};
+
+  if (!form.first_name?.trim()) {
+    errors.first_name = "First name is required";
+  }
+
+  if (!form.mobile?.trim()) {
+    errors.mobile = "Mobile number is required";
+  }
+
+  if (!form.email?.trim()) {
+    errors.email = "Email is required";
+  }
+
+  if (form.email && !/\S+@\S+\.\S+/.test(form.email)) {
+    errors.email = "Invalid email format";
+  }
+
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors,
+  };
+};
+
 const AddCustomer = ({
   onClose,
   shouldRefresh,
-  setEditId,
+  setEditId = null,
   loader,
   toaster,
   editId = null,
@@ -259,13 +284,23 @@ const AddCustomer = ({
   };
 
   const handleSubmit = async () => {
+    const { isValid, errors } = validateCustomerForm(formData);
+
+    if (!isValid) {
+      console.log(errors);
+      toaster({
+        type: "error",
+        message: Object.values(errors)[0],
+      });
+      return;
+    }
     const data = { ...formData, role: "user" };
     try {
       loader(true);
       const endpoint = editId
         ? `auth/updateCustomer/${editId}`
         : "auth/createCustomer";
-      const method = editId ? "put" : "post";
+
       const res = await Api("post", endpoint, data, router);
       loader(false);
 
@@ -677,7 +712,10 @@ const AddCustomer = ({
         className="absolute inset-0 bg-black/50"
         onClick={() => {
           onClose();
-          setEditId("");
+          if (shouldRefresh) {
+            setEditId("");
+          }
+
           setFormData(getInitialState());
         }}
       />
@@ -690,7 +728,9 @@ const AddCustomer = ({
             onClick={() => {
               setFormData(getInitialState());
               onClose();
-              setEditId("");
+              if (shouldRefresh) {
+                setEditId("");
+              }
             }}
             className="text-gray-400 hover:text-gray-600 transition"
           >
@@ -723,7 +763,9 @@ const AddCustomer = ({
             onClick={() => {
               setFormData(getInitialState());
               onClose();
-              setEditId("");
+              if (shouldRefresh) {
+                setEditId("");
+              }
             }}
             className="px-4 py-2 text-sm rounded-lg border border-gray-200 hover:bg-gray-50 transition"
           >

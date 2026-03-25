@@ -17,7 +17,7 @@ function MyProfile(props) {
   const fileRef = useRef();
 
   const [profile, setProfile] = useState({
-    fullName: "",
+    fullname: "",
     email: "",
     phone: "",
   });
@@ -37,12 +37,12 @@ function MyProfile(props) {
         if (res?.status && res?.data) {
           const data = res.data;
           setProfile({
-            fullName: data.fullName || "",
+            fullname: data.fullname || "",
             email: data.email || "",
             phone: data.phone || "",
           });
           setForm({
-            fullName: data.fullName || "",
+            fullname: data.fullname || "",
             email: data.email || "",
             phone: data.phone || "",
           });
@@ -61,7 +61,7 @@ function MyProfile(props) {
 
   const validate = (data = form) => {
     const errs = {};
-    if (!data.fullName.trim()) errs.fullName = "Full name is required";
+    if (!data.fullname.trim()) errs.fullname = "Full name is required";
     if (!data.email.trim()) errs.email = "Email is required";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email))
       errs.email = "Enter a valid email";
@@ -96,12 +96,12 @@ function MyProfile(props) {
     props.loader(true);
 
     const payload = new FormData();
-    payload.append("fullName", form.fullName);
+    payload.append("fullname", form.fullname);
     payload.append("email", form.email);
     payload.append("phone", form.phone);
 
     const data = {
-      fullName: form.fullName,
+      fullname: form.fullname,
       email: form.email,
       phone: form.email,
     };
@@ -162,7 +162,7 @@ function MyProfile(props) {
     <>
       <DashboardHeader title="My Profile" />
 
-      <div className="min-h-screen bg-custom-gray p-6 text-slate-800">
+      <div className="min-h-screen bg-custom-gray p-4 md:p-6 text-slate-800">
         <div className="max-w-7xl mx-auto">
           <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
             <div
@@ -199,7 +199,7 @@ function MyProfile(props) {
          
               <div className="mb-6">
                 <h2 className="text-xl font-bold text-slate-800">
-                  {profile.fullName || "Your Name"}
+                  {profile.fullname || "Your Name"}
                 </h2>
                 <p className="text-sm text-slate-400">
                   {profile.email || "your@email.com"}
@@ -257,7 +257,7 @@ function MyProfile(props) {
                   <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
                     Full Name
                   </label>
-                  <div className={inputCls(submitted && errors.fullName)}>
+                  <div className={inputCls(submitted && errors.fullname)}>
                     <MdPerson
                       className="text-lg flex-shrink-0"
                       style={{ color: "#0A4D91" }}
@@ -266,14 +266,14 @@ function MyProfile(props) {
                       type="text"
                       placeholder="Enter your full name"
                       className="bg-transparent outline-none w-full text-sm text-slate-700 placeholder-slate-300"
-                      value={form.fullName}
+                      value={form.fullname}
                       disabled={!editMode}
-                      onChange={(e) => handleChange("fullName", e.target.value)}
+                      onChange={(e) => handleChange("fullname", e.target.value)}
                     />
                   </div>
-                  {submitted && errors.fullName && (
+                  {submitted && errors.fullname && (
                     <p className="text-red-500 text-xs mt-1">
-                      {errors.fullName}
+                      {errors.fullname}
                     </p>
                   )}
                 </div>

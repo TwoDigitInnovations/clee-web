@@ -11,17 +11,10 @@ import {
   Calendar,
   ChartNoAxesColumn,
   MessageSquareMore,
-  ParkingMeter,
   Settings,
-  Settings2,
   User,
-  User2,
   Users,
 } from "lucide-react";
-import { userContext } from "@/pages/_app";
-import { ChevronRight } from "lucide-react";
-import { FiFileText, FiShield, FiBell } from "react-icons/fi";
-import { PiUserList } from "react-icons/pi";
 import Swal from "sweetalert2";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { logoutUser } from "@/redux/slices/userSlice";
@@ -31,7 +24,6 @@ function SidePannel({ open, setOpen }) {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.user.user);
-  const [openMenu, setOpenMenu] = useState(null);
 
   const managementMenu = [
     {
@@ -66,9 +58,10 @@ function SidePannel({ open, setOpen }) {
       icon: <MessageSquareMore size={20} />,
       access: ["admin"],
       children: [
-        { title: "SMS Inbox", href: "/messages/inbox" },
-        { title: "Sent Messages", href: "/messages/sent" },
-        { title: "SMS Campaigns", href: "/messages/draft" },
+        { title: "SMS Inbox", href: "/message/SMSInbox" },
+        { title: "Sent Messages", href: "/message/SentMessages" },
+        { title: "SMS Campaigns", href: "/message/SMSCampaigns" },
+        { title: "Email marketing", href: "/message/EmailMarketing" },
       ],
     },
 
@@ -78,9 +71,9 @@ function SidePannel({ open, setOpen }) {
       icon: <BadgeCent size={20} />,
       access: ["admin"],
       children: [
-        { title: "View Invoices", href: "/messages/inbox" },
-        { title: "Create Invoices", href: "/messages/sent" },
-        { title: "Search Gift Vouchers", href: "/messages/draft" },
+        { title: "View Invoices", href: "/sales/ViewInvoices" },
+        { title: "Create Invoices", href: "/sales/CreateInvoices" },
+        { title: "Search Gift Vouchers", href: "/sales/SearchGiftVouchers" },
       ],
     },
   ];
@@ -157,7 +150,7 @@ function SidePannel({ open, setOpen }) {
         <div className="flex items-center justify-between px-6 py-3 mb-4 bg-[radial-gradient(289.12%_3126.69%_at_49.85%_50.51%,#FFFFFF_0%,#EC5B13_100%)]">
           <div className="flex justify-center gap-14">
             <img
-              className="w-[40px]  "
+              className="w-[40px]"
               src="/images/logo.png"
               onClick={() => router.push("/")}
               alt="Logo"
@@ -172,7 +165,7 @@ function SidePannel({ open, setOpen }) {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4">
+        <div className="flex-1 overflow-y-auto scrollbar-hide px-4">
           <SidebarMenu menu={managementMenu} user={user} />
 
           <p className=" mt-8 uppercase text-gray-400 text-xs mb-3 px-2 tracking-wider">
@@ -189,7 +182,7 @@ function SidePannel({ open, setOpen }) {
             {/* ✅ Profile Image */}
             <div className="h-10 w-10 rounded-full overflow-hidden">
               <img
-                src="images/profilelogo.png"
+                src="/images/profilelogo.png"
                 alt="profile"
                 className="h-full w-full object-cover"
               />

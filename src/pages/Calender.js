@@ -196,7 +196,7 @@ function Calender(props) {
       />
 
       <div className="min-h-screen bg-custom-gray  text-slate-800 flex md:flex-row flex-col items-start justify-start ">
-        <aside className="w-[300px] h-full flex flex-col bg-white border-r border-slate-100 shadow-sm shrink-0">
+        <aside className="w-full md:w-[300px] md:h-[800px] flex flex-col  bg-white border-r border-slate-100 shadow-sm shrink-0">
           <div className="p-4 border-b border-slate-100">
             <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
               <svg
@@ -342,48 +342,76 @@ function Calender(props) {
           </div>
         </aside>
 
-        <main className="flex-1 flex flex-col overflow-hidden">
-          <header className="flex items-center justify-between px-6 py-3 bg-white border-b border-slate-100 shadow-sm shrink-0 gap-4">
-            <button className="flex items-center gap-2 bg-custom-blue text-white text-sm font-semibold px-4 py-2 rounded-xl shadow hover:bg-custom-blue/90 transition-colors">
-              <UserCheck />
-              All Rostered Staff
-              <ChevronDown size={20} />
-            </button>
+        <main className="flex flex-col overflow-hidden">
+          <header className="flex flex-col sm:flex-row sm:items-center justify-between px-4 sm:px-8 py-3 bg-white border-b border-slate-100 shadow-sm gap-3 sm:gap-6">
+           
+            <div className="flex items-center justify-between w-full sm:w-auto gap-2">
+              {/* Staff Button */}
+              <button className="flex items-center gap-2 bg-custom-blue text-white text-xs sm:text-sm font-semibold px-3 py-2 rounded-xl shadow hover:bg-custom-blue/90 transition-colors">
+                <UserCheck size={16} />
+                <span className="hidden md:inline">All Rostered Staff</span>
+                <ChevronDown size={16} />
+              </button>
 
-            {/* Date Navigator */}
-            <div className="flex items-center gap-2">
+              {/* Right Side (mobile) */}
+              <div className="flex items-center gap-2 sm:hidden">
+                <button
+                  onClick={() => setIsOpen(true)}
+                  className="p-2 bg-custom-blue text-white rounded-lg"
+                >
+                  <Plus size={16} />
+                </button>
+
+                <button className="p-2 rounded-lg hover:bg-slate-100 text-slate-500">
+                  <EllipsisVertical size={16} />
+                </button>
+              </div>
+            </div>
+
+            {/* Center Navigation */}
+            <div className="flex items-center justify-between sm:justify-center gap-2 w-full sm:w-auto overflow-x-auto">
               <button
                 onClick={() => navigate(-1)}
-                className="p-2 rounded-lg hover:bg-slate-100 text-slate-600 transition-colors"
+                className="p-2 rounded-lg hover:bg-slate-100 text-slate-600"
               >
-                <ChevronLeft size={18} />
+                <ChevronLeft size={16} />
               </button>
-              <span className="text-sm font-semibold text-slate-800 min-w-max">
+
+              <span className="text-xs sm:text-sm font-semibold text-slate-800 whitespace-nowrap">
                 {formatDate(currentDate, view)}
               </span>
+
               <button
                 onClick={() => navigate(1)}
-                className="p-2 rounded-lg hover:bg-slate-100 text-slate-600 transition-colors"
+                className="p-2 rounded-lg hover:bg-slate-100 text-slate-600"
               >
-                <ChevronRight size={18} />
+                <ChevronRight size={16} />
               </button>
+
               <button
                 onClick={goToday}
-                className={`px-3 py-1.5 text-sm font-semibold rounded-lg border transition-colors ${isToday ? "bg-blue-50 border-blue-200 text-custom-blue" : "border-slate-200 text-slate-600 hover:bg-slate-50"}`}
+                className={`px-2 sm:px-3 py-1 text-xs sm:text-sm font-semibold rounded-lg border ${
+                  isToday
+                    ? "bg-blue-50 border-blue-200 text-custom-blue"
+                    : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                }`}
               >
                 Today
               </button>
             </div>
 
-            <div className="flex items-center gap-2 ml-auto">
+            {/* Right Side Desktop */}
+            <div className="hidden sm:flex items-center gap-2 ml-auto">
+              {/* View Dropdown */}
               <div className="relative">
                 <button
                   onClick={() => setShowViewMenu((v) => !v)}
-                  className="flex items-center gap-1.5 border border-slate-200 text-sm font-semibold text-slate-700 px-3 py-2 rounded-xl hover:bg-slate-50 transition-colors"
+                  className="flex items-center gap-1.5 border border-slate-200 text-sm font-semibold text-slate-700 px-3 py-2 rounded-xl hover:bg-slate-50"
                 >
                   {view}
-                  <ChevronDown size={18} />
+                  <ChevronDown size={16} />
                 </button>
+
                 {showViewMenu && (
                   <div className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-10 overflow-hidden min-w-[120px]">
                     {VIEWS.map((v) => (
@@ -393,7 +421,11 @@ function Calender(props) {
                           setView(v);
                           setShowViewMenu(false);
                         }}
-                        className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-colors ${view === v ? "bg-blue-50 text-custom-blue" : "text-slate-700 hover:bg-slate-50"}`}
+                        className={`w-full text-left px-4 py-2 text-sm ${
+                          view === v
+                            ? "bg-blue-50 text-custom-blue"
+                            : "hover:bg-slate-50"
+                        }`}
                       >
                         {v} view
                       </button>
@@ -401,15 +433,19 @@ function Calender(props) {
                   </div>
                 )}
               </div>
+
+              {/* Add Button */}
               <button
-                className="flex items-center gap-1.5 bg-custom-blue text-white text-sm font-semibold px-4 py-2 rounded-xl shadow hover:bg-custom-blue/90 transition-colors"
+                className="flex items-center gap-1.5 bg-custom-blue text-white text-sm font-semibold px-4 py-2 rounded-xl shadow hover:bg-custom-blue/90"
                 onClick={() => setIsOpen(true)}
               >
-                <Plus size={18} />
+                <Plus size={16} />
                 Add Customer
               </button>
-              <button className="p-2 rounded-xl hover:bg-slate-100 text-slate-500 transition-colors">
-                <EllipsisVertical size={18} />
+
+              {/* More */}
+              <button className="p-2 rounded-xl hover:bg-slate-100 text-slate-500">
+                <EllipsisVertical size={16} />
               </button>
             </div>
           </header>
