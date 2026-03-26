@@ -182,7 +182,7 @@ function MyProfile(props) {
               />
             </div>
 
-            <div className="px-8 pb-6">
+            <div className="md:px-8 px-4 pb-6">
               <div className="relative -mt-14 mb-4 w-fit">
                 <div
                   className="w-24 h-24 rounded-full border-4 border-white shadow-lg overflow-hidden flex items-center justify-center"
@@ -210,14 +210,14 @@ function MyProfile(props) {
               <div className="h-px bg-slate-100 mb-6" />
 
               {/* Section label + edit button */}
-              <div className="flex items-center justify-between mb-5">
+              <div className="flex md:flex-row flex-col gap-2 md:items-center justify-between mb-5">
                 <p className="text-xs font-semibold text-[#0A4D91] uppercase tracking-widest">
                   Personal Information
                 </p>
                 {!editMode ? (
                   <button
                     onClick={() => setEditMode(true)}
-                    className="flex items-center gap-2 text-xs font-semibold text-white px-4 py-2 rounded-lg cursor-pointer transition-all duration-200 shadow-sm"
+                    className="w-fit flex items-center gap-2 text-xs font-semibold text-white px-4 py-2 rounded-lg cursor-pointer transition-all duration-200 shadow-sm"
                     style={{
                       background:
                         "linear-gradient(135deg, #0A4D91 0%, #65ADF5 100%)",

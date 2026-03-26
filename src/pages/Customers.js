@@ -1,6 +1,7 @@
 import AddCustomer from "@/components/AddCustomer";
 import DashboardHeader from "@/components/DashboardHeader";
 import { ConfirmModal } from "@/components/deleteModel";
+import ImportCustomer from "@/components/ImportCustomer";
 import { Api } from "@/services/service";
 import {
   EllipsisVertical,
@@ -20,6 +21,10 @@ const TABS = [
   "Notes",
   "Packages",
   "Credit",
+  "Photos",
+  "Documents",
+  "Gift voucher",
+  "Log",
 ];
 
 function Avatar({ src, name, size = "md" }) {
@@ -68,7 +73,7 @@ function Customers(props) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-
+  const [openCustomer, setOpenCustomer] = useState(false);
   const menuRef = useRef();
 
   useEffect(() => {
@@ -235,12 +240,17 @@ function Customers(props) {
               Add Customer
             </button>
 
-            <button className="border border-slate-200 text-slate-700 text-xs sm:text-sm font-semibold px-3 py-2 sm:px-4 rounded-xl hover:bg-slate-50 transition-colors w-full sm:w-auto">
+            <button className="border border-slate-200 text-slate-700 text-xs sm:text-sm font-semibold px-3 py-2 sm:px-4 rounded-xl hover:bg-slate-50 transition-colors w-full sm:w-auto"
+            onClick={()=> setOpenCustomer(true)}
+            >
               Import Customers
             </button>
 
             {/* Email */}
-            <button className="border border-slate-200 text-slate-700 text-xs sm:text-sm font-semibold px-3 py-2 sm:px-4 rounded-xl hover:bg-slate-50 transition-colors w-full sm:w-auto">
+            <button
+              className="border border-slate-200 text-slate-700 text-xs sm:text-sm font-semibold px-3 py-2 sm:px-4 rounded-xl hover:bg-slate-50 transition-colors w-full sm:w-auto"
+              onClick={() => router.push("/message/EmailMarketing")}
+            >
               Send Marketing Email
             </button>
           </div>
@@ -340,19 +350,18 @@ function Customers(props) {
               </div>
             </div>
 
-            {/* Tabs */}
-            <div className="md:w-full w-[350px] flex overflow-x-auto no-scrollbar border-b border-slate-200">
+            <div className="w-full flex flex-nowrap md:flex-wrap overflow-x-auto md:overflow-visible no-scrollbar border-b border-slate-200">
               {TABS.map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`whitespace-nowrap px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold transition-colors border-b-2 -mb-px ${
+                  className={`whitespace-nowrap px-3 sm:px-4 py-2.5 text-xs sm:text-sm font-semibold transition-colors border-b-[3px] -mb-px ${
                     activeTab === tab
                       ? "border-custom-blue text-custom-blue"
                       : "border-transparent text-slate-500 hover:text-slate-700"
                   }`}
                 >
-                  {tab}
+                  {tab} {tab !== "Summary" && "(0)"}
                 </button>
               ))}
             </div>
@@ -686,6 +695,13 @@ function Customers(props) {
           yesText="Yes, Delete"
           noText="Cancel"
         />
+        {openCustomer && (
+          <ImportCustomer
+            onClose={() => setOpenCustomer(false)}
+            loader={props.loader}
+            toaster={props.toaster}
+          />
+        )}
       </div>
     </>
   );

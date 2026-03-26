@@ -10,7 +10,9 @@ import {
   UserCheck,
   UserRoundPlus,
 } from "lucide-react";
-import React, { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { Pencil, Trash2 } from "lucide-react";
+import ViewAppointmentModal from "@/components/ViewAppointmentModal";
 
 const STAFF = [
   {
@@ -92,6 +94,73 @@ const UPCOMING = [
   },
 ];
 
+const appointmentMock = {
+  clinic: "Chebo Clinic",
+  status: "Confirmed",
+
+  service:
+    "Existing Client Choose on the Day Deposit (Credited to Procedure)(Procedure Performed on Day)",
+
+  staff: "Staff 1",
+  resource: null,
+
+  date: "13 Apr 2026",
+  time: "10:00AM",
+
+  duration: "1 hour",
+  price: 99,
+
+  customer: {
+    name: "EASTOP, KAREN Eastop",
+    phone: "408295781",
+    email: "karen.l.eastop@gmail.com",
+  },
+
+  history: [
+    {
+      id: 1,
+      type: "alert",
+      date: "25 Mar 2026 6:53PM",
+      message:
+        "Customer appointment amendment email successfully sent to karen.l.eastop@gmail.com",
+    },
+    {
+      id: 2,
+      type: "alert",
+      date: "25 Mar 2026 6:52PM",
+      message:
+        "Customer appointment amendment SMS successfully sent to 61408295781",
+    },
+    {
+      id: 3,
+      type: "amended",
+      date: "25 Mar 2026 6:42PM - by Chebo Clinic",
+      message:
+        "Service 1 - appointment date changed from 13 Apr 2026 10:20AM to 13 Apr 2026 10:00AM",
+    },
+    {
+      id: 4,
+      type: "amended",
+      date: "25 Mar 2026 6:42PM - by Chebo Clinic",
+      message: "Reschedule from 14 Apr 2026 10:00AM to 13 Apr 2026 10:20AM",
+    },
+    {
+      id: 5,
+      type: "alert",
+      date: "10 Mar 2026 12:29PM",
+      message:
+        "Customer appointment confirmed email successfully sent to karen.l.eastop@gmail.com",
+    },
+    {
+      id: 6,
+      type: "alert",
+      date: "10 Mar 2026 12:29PM",
+      message:
+        "Merchant appointment confirmed email successfully sent to serina1590@live.com",
+    },
+  ],
+};
+
 const WAITLIST = [
   {
     id: 1,
@@ -148,13 +217,14 @@ function Avatar({ src, name, size = 8 }) {
   );
 }
 
-function BookingBlock({ booking, pixelsPerHour }) {
+function BookingBlock({ booking, pixelsPerHour,setOpen1 }) {
   const top = (booking.startHour - 8) * pixelsPerHour;
   const height = (booking.durationMins / 60) * pixelsPerHour;
   return (
     <div
       className={`absolute left-1 right-1 rounded-lg border-l-4 px-2 py-2 shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-shadow ${booking.color}`}
       style={{ top: top + "px", height: height + "px" }}
+      onClick={()=> setOpen1(true)}
     >
       <p className="text-xs font-semibold leading-tight truncate">
         {booking.service}
@@ -170,6 +240,21 @@ function Calender(props) {
   const [showViewMenu, setShowViewMenu] = useState(false);
   const [open, setOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [openMenuId, setOpenMenuId] = useState(null);
+  const [editid, setEditId] = useState("");
+  const [open1,setOpen1] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setOpenMenuId(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const pixelsPerHour = 72;
 
@@ -296,28 +381,59 @@ function Calender(props) {
                             {w.added} · {w.notes}
                           </p>
                         </div>
-                        <button className="text-slate-400 hover:text-slate-600 p-0.5">
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+
+                        {/* MENU */}
+                        <div className="relative" ref={menuRef}>
+                          <button
+                            onClick={() =>
+                              setOpenMenuId(openMenuId === w.id ? null : w.id)
+                            }
+                            className="text-slate-400 hover:text-slate-600 p-1 rounded-md"
                           >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M12 5v.01M12 12v.01M12 19v.01"
-                            />
-                          </svg>
-                        </button>
+                            <EllipsisVertical size={20} />
+                          </button>
+
+                          {openMenuId === w.id && (
+                            <div className="absolute right-0 mt-2 w-36 bg-white border border-gray-100 rounded-xl shadow-lg z-50">
+                              <button
+                                onClick={() => {
+                                  setOpenMenuId(null);
+                                  setOpen(true);
+                                  setEditId(id);
+                                  // onEdit(w);
+                                }}
+                                className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-gray-50 rounded-t-xl"
+                              >
+                                <Pencil size={16} />
+                                Edit
+                              </button>
+
+                              <button
+                                onClick={() => {
+                                  setOpenMenuId(null);
+                                  // onDelete(w);
+                                }}
+                                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50 rounded-b-xl"
+                              >
+                                <Trash2 size={16} />
+                                Remove
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </div>
+
                       <div className="flex items-center justify-between mt-2">
                         <span
-                          className={`text-xs font-medium px-2.5 py-1 rounded-full ${w.urgent ? "bg-red-100 text-red-700" : "bg-blue-50 text-custom-blue"}`}
+                          className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+                            w.urgent
+                              ? "bg-red-100 text-red-700"
+                              : "bg-blue-50 text-custom-blue"
+                          }`}
                         >
                           {w.service}
                         </span>
+
                         <button className="p-1 text-slate-400 hover:text-blue-600 transition-colors">
                           <svg
                             className="w-4 h-4"
@@ -344,7 +460,6 @@ function Calender(props) {
 
         <main className="flex flex-col overflow-hidden">
           <header className="flex flex-col sm:flex-row sm:items-center justify-between px-4 sm:px-8 py-3 bg-white border-b border-slate-100 shadow-sm gap-3 sm:gap-6">
-           
             <div className="flex items-center justify-between w-full sm:w-auto gap-2">
               {/* Staff Button */}
               <button className="flex items-center gap-2 bg-custom-blue text-white text-xs sm:text-sm font-semibold px-3 py-2 rounded-xl shadow hover:bg-custom-blue/90 transition-colors">
@@ -443,7 +558,6 @@ function Calender(props) {
                 Add Customer
               </button>
 
-              {/* More */}
               <button className="p-2 rounded-xl hover:bg-slate-100 text-slate-500">
                 <EllipsisVertical size={16} />
               </button>
@@ -498,6 +612,7 @@ function Calender(props) {
                           key={b.id}
                           booking={b}
                           pixelsPerHour={pixelsPerHour}
+                          setOpen1={setOpen1}
                         />
                       ),
                     )}
@@ -520,6 +635,13 @@ function Calender(props) {
               loader={props.loader}
               toaster={props.toaster}
               shouldRefresh={false}
+            />
+          )}
+
+          {open1 && (
+            <ViewAppointmentModal
+              data={appointmentMock}
+              onClose={() => setOpen1(false)}
             />
           )}
         </main>

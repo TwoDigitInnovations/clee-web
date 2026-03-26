@@ -85,23 +85,50 @@ function SidePannel({ open, setOpen }) {
       icon: <Settings size={20} />,
       access: ["admin"],
       children: [
-        { title: "Business Details", href: "/messages/inbox" },
-        { title: "Stock", href: "/messages/sent" },
-        { title: "Sales Tools", href: "/messages/draft" },
-        { title: "Notifications", href: "/messages/draft" },
+        {
+          title: "Your Business",
+          href: "/messages/",
+          children: [
+            { title: "Business Details", href: "/Business/BusinessDetails" },
+            { title: "Locations", href: "/Business/Locations" },
+            { title: "Services", href: "/Business/Services" },
+            { title: "Staff", href: "/Business/Staff" },
+            { title: "Resources", href: "/Business/Resources" },
+            { title: "Calender settings", href: "/Business/Calendersettings" },
+            { title: "Online bookings", href: "/Business/Onlinebookings" },
+            { title: "Clee pay", href: "/Business/Cleepay" },
+            { title: "Online payments", href: "/Business/Onlinepayments" },
+            { title: "Waitlist", href: "/Business/Waitlist" },
+            { title: "Integrations", href: "/Business/Integrations" },
+          ],
+        },
+        {
+          title: "Stock",
+          href: "/Stock",
+          children: [
+            { title: "Products", href: "/stock/Products" },
+            { title: "Suppliers", href: "/stock/Suppliers" },
+            { title: "Stock Orders", href: "/stock/StockOrders" },
+          ],
+        },
+        { title: "Sales Tools", href: "/" },
+        { title: "Notifications", href: "/Notifications" },
+        { title: "Consult", href: "/Consult" },
+        { title: "Promote", href: "/Promote" },
+        { title: "Administration", href: "/Administration" },
       ],
     },
 
     {
-      href: "/Sales",
+      href: "/Account",
       title: "Account",
       icon: <User size={20} />,
       access: ["admin"],
-      children: [
-        { title: "View Invoices", href: "/messages/inbox" },
-        { title: "Create Invoices", href: "/messages/sent" },
-        { title: "Search Gift Vouchers", href: "/messages/draft" },
-      ],
+      // children: [
+      //   { title: "View Invoices", href: "/messages/inbox" },
+      //   { title: "Create Invoices", href: "/messages/sent" },
+      //   { title: "Search Gift Vouchers", href: "/messages/draft" },
+      // ],
     },
   ];
 

@@ -18,11 +18,6 @@ const AVATAR_COLORS = [
   "bg-amber-200 text-amber-700",
 ];
 
-function getAvatarColor(name = "") {
-  const idx = name.charCodeAt(0) % AVATAR_COLORS.length;
-  return AVATAR_COLORS[idx];
-}
-
 function SMSTable({
   messages,
   onReply,
@@ -30,6 +25,7 @@ function SMSTable({
   onToggleSelect,
   onToggleAll,
   actiontrue,
+  setOpen
 }) {
   const allSelected =
     messages.length > 0 && selectedIds.length === messages.length;
@@ -62,7 +58,7 @@ function SMSTable({
                 Booking
               </th>
               <th className="px-3 py-3 text-left text-xs font-semibold text-slate-500">
-                {actiontrue ? 'Received' : 'Sent to'}
+                {actiontrue ? "Received" : "Sent to"}
               </th>
               <th className="px-3 py-3 text-left text-xs font-semibold text-slate-500">
                 Message
@@ -97,9 +93,16 @@ function SMSTable({
 
                 <td className="px-3 py-3">{msg.customerName}</td>
 
-                <td className="px-3 py-3">{msg.bookingId ? "View" : "—"}</td>
+                <td
+                  className="px-3 py-3 underline text-custom-blue font-bold"
+                  onClick={() => setOpen(true)}
+                >
+                  {"View"}
+                </td>
 
-                <td className="px-3 py-3 text-xs">{actiontrue ? msg.receivedFrom :  msg.sendto}</td>
+                <td className="px-3 py-3 text-xs">
+                  {actiontrue ? msg.receivedFrom : msg.sendto}
+                </td>
 
                 <td className="px-3 py-3 text-xs max-w-xs line-clamp-2">
                   {msg.message}
@@ -156,7 +159,7 @@ function SMSTable({
 
             {/* Bottom Info */}
             <div className="flex justify-between text-xs text-slate-400">
-              <span>{actiontrue ? msg.receivedFrom :  msg.sendto}</span>
+              <span>{actiontrue ? msg.receivedFrom : msg.sendto}</span>
               <span>{msg.bookingId ? "Booking Available" : "No Booking"}</span>
             </div>
           </div>
