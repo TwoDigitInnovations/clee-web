@@ -25,7 +25,7 @@ export const ConfirmModal = ({
             className="bg-white border border-[#fff]/30 rounded-2xl p-6 w-full max-w-md shadow-[0_0_25px_rgba(224,243,73,0.3)]"
           >
            
-            <h2 className="text-2xl font-semibold mb-3 text-start text-custom-yellow">
+            <h2 className="text-black text-2xl font-semibold mb-3 text-start text-custom-yellow">
               {title}
             </h2>
 

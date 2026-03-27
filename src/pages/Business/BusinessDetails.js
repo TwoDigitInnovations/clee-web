@@ -1,13 +1,38 @@
 import DashboardHeader from "@/components/DashboardHeader";
-import React, { useState, useRef } from "react";
-import { Globe, Phone, User, Tag, Twitter, Instagram, Facebook, Upload, Trash2, X, Pencil } from "lucide-react";
-import { Api } from "@/services/service";// adjust import as needed
+import React, { useState, useRef, useEffect } from "react";
+import {
+  Globe,
+  Phone,
+  User,
+  Tag,
+  Twitter,
+  Instagram,
+  Facebook,
+  Upload,
+  Trash2,
+  X,
+  Pencil,
+} from "lucide-react";
+import { Api } from "@/services/service"; // adjust import as needed
 import InputField from "@/components/UI/InputField";
 import SelectField from "@/components/UI/SelectField";
+import { useRouter } from "next/navigation";
+const COUNTRIES = [
+  "Australia",
+  "India",
+  "United States",
+  "United Kingdom",
+  "Canada",
+  "New Zealand",
+];
 
-const COUNTRIES = ["Australia", "India", "United States", "United Kingdom", "Canada", "New Zealand"];
-
-const CURRENCIES = ["Australian Dollar", "Indian Rupee", "US Dollar", "British Pound", "Canadian Dollar"];
+const CURRENCIES = [
+  "Australian Dollar",
+  "Indian Rupee",
+  "US Dollar",
+  "British Pound",
+  "Canadian Dollar",
+];
 
 const TIMEZONES = [
   "(GMT+11:00) Canberra, Melbourne, Sydney",
@@ -18,7 +43,14 @@ const TIMEZONES = [
 
 const DATE_FORMATS = ["18 Mar 2026", "03/18/2026", "2026-03-18"];
 const TIME_FORMATS = ["6:39PM", "18:39", "6:39 PM"];
-const CATEGORIES = ["Beauty", "Health & Wellness", "Fitness", "Spa", "Salon", "Other"];
+const CATEGORIES = [
+  "Beauty",
+  "Health & Wellness",
+  "Fitness",
+  "Spa",
+  "Salon",
+  "Other",
+];
 
 function LogoModal({ logo, onClose, onUpload, onDelete }) {
   const fileRef = useRef();
@@ -29,14 +61,23 @@ function LogoModal({ logo, onClose, onUpload, onDelete }) {
           <div className="bg-custom-blue rounded p-1">
             <User size={14} className="text-white" />
           </div>
-          <span className="font-semibold text-slate-800 text-sm">Business logo</span>
-          <button onClick={onClose} className="ml-auto text-slate-400 hover:text-slate-600">
+          <span className="font-semibold text-slate-800 text-sm">
+            Business logo
+          </span>
+          <button
+            onClick={onClose}
+            className="ml-auto text-slate-400 hover:text-slate-600"
+          >
             <X size={18} />
           </button>
         </div>
         <div className="border-2 border-dashed border-slate-200 rounded-lg flex items-center justify-center bg-slate-50 h-44 mb-3">
           {logo ? (
-            <img src={logo} alt="logo" className="max-h-36 max-w-36 object-contain" />
+            <img
+              src={logo}
+              alt="logo"
+              className="max-h-36 max-w-36 object-contain"
+            />
           ) : (
             <span className="text-slate-400 text-sm">No logo uploaded</span>
           )}
@@ -57,13 +98,25 @@ function LogoModal({ logo, onClose, onUpload, onDelete }) {
           >
             <Trash2 size={14} /> Delete
           </button>
-          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onUpload} />
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={onUpload}
+          />
         </div>
         <div className="flex justify-end gap-2 border-t pt-4">
-          <button onClick={onClose} className="text-sm px-4 py-2 rounded-lg border text-slate-600 hover:bg-slate-50 transition">
+          <button
+            onClick={onClose}
+            className="text-sm px-4 py-2 rounded-lg border text-slate-600 hover:bg-slate-50 transition"
+          >
             Cancel
           </button>
-          <button onClick={onClose} className="text-sm px-4 py-2 rounded-lg bg-custom-blue text-white hover:bg-blue-700 transition">
+          <button
+            onClick={onClose}
+            className="text-sm px-4 py-2 rounded-lg bg-custom-blue text-white hover:bg-blue-700 transition"
+          >
             Save Changes
           </button>
         </div>
@@ -76,7 +129,11 @@ function SectionLabel({ title, description }) {
   return (
     <div className="w-48 flex-shrink-0">
       <p className="text-sm font-semibold text-slate-800">{title}</p>
-      {description && <p className="text-xs text-slate-500 mt-1 leading-relaxed">{description}</p>}
+      {description && (
+        <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+          {description}
+        </p>
+      )}
     </div>
   );
 }
@@ -127,41 +184,110 @@ function Divider() {
 
 function BusinessDetails({ loader, toaster }) {
   const [formData, setFormData] = useState({
-    businessName: "Chebo Clinic",
+    businessName: "",
     websiteProtocol: "https://",
-    websiteUrl: "www.chaeoclinic.com",
+    websiteUrl: "",
     phoneNumber: "",
-    firstName: "Chebo",
-    lastName: "Clinic",
+    firstName: "",
+    lastName: "",
     businessCategory: "Beauty",
     updateBilling: false,
-    country: "Australia",
-    currency: "Australian Dollar",
-    timezone: "(GMT+11:00) Canberra, Melbourne, Sydney",
-    dateFormat: "18 Mar 2026",
-    timeFormat: "6:39PM",
+    country: "",
+    currency: "",
+    timezone: "",
+    dateFormat: "",
+    timeFormat: "",
     businessDescription: "",
     twitter: "",
-    instagram: "@cheboclinic",
+    instagram: "",
     facebookPage: "",
   });
 
   const [errors, setErrors] = useState({});
   const [logo, setLogo] = useState(null);
+  const router = useRouter();
+  const [editId, setEditId] = useState("");
   const [showLogoModal, setShowLogoModal] = useState(false);
+  console.log(formData);
+
+  useEffect(() => {
+    const fetchCustomer = async () => {
+      try {
+        loader(true);
+        const res = await Api("get", `auth/profile`, "", router);
+        loader(false);
+
+        if (res?.status === true && res?.data) {
+          const user = res.data;
+          setEditId(user._id);
+          const fullName = user.fullname || "";
+          const nameParts = fullName.trim().split(" ");
+
+          setFormData((prev) => ({
+            ...prev,
+
+            firstName: nameParts[0] || "",
+            lastName: nameParts.slice(1).join(" ") || "",
+            phoneNumber: user.phone || "",
+            timezone: user.timezone || "",
+
+            // business fields
+            businessName: user.business?.name || "",
+            BusinessLogo: user.business?.logo || "",
+            businessCategory: user.business?.category || "",
+            businessDescription: user.business?.description || "",
+
+            // website
+            websiteProtocol: user.business?.website?.protocol || "https://",
+            websiteUrl: user.business?.website?.url || "",
+
+            // social
+            twitter: user.business?.socialLinks?.twitter || "",
+            instagram: user.business?.socialLinks?.instagram || "",
+            facebookPage: user.business?.socialLinks?.facebookPage || "",
+
+            // settings
+            updateBilling: user.business?.settings?.updateBilling || false,
+            country: user.business?.settings?.country || "",
+            currency: user.business?.settings?.currency || "",
+            dateFormat: user.business?.settings?.dateFormat || "",
+            timeFormat: user.business?.settings?.timeFormat || "",
+          }));
+        } else {
+          toaster({
+            type: "error",
+            message: res?.message || "Failed to load customer",
+          });
+        }
+      } catch {
+        loader(false);
+        toaster({ type: "error", message: "Server error" });
+      }
+    };
+
+    fetchCustomer();
+  }, []);
 
   const set = (field) => (e) =>
     setFormData((prev) => ({ ...prev, [field]: e.target.value }));
 
   const validate = () => {
     const errs = {};
-    if (!formData.businessName.trim()) errs.businessName = "Business name is required";
+    if (!formData.businessName.trim())
+      errs.businessName = "Business name is required";
     if (!formData.firstName.trim()) errs.firstName = "First name is required";
     if (!formData.lastName.trim()) errs.lastName = "Last name is required";
-    if (!formData.businessCategory) errs.businessCategory = "Please select a category";
-    if (formData.websiteUrl && !/^(www\.)?[\w-]+(\.[\w-]+)+/.test(formData.websiteUrl))
+    if (!formData.businessCategory)
+      errs.businessCategory = "Please select a category";
+    if (
+      formData.websiteUrl &&
+      !/^(www\.)?[\w-]+(\.[\w-]+)+/.test(formData.websiteUrl)
+    )
       errs.websiteUrl = "Invalid website URL";
-    if (formData.phoneNumber && !/^\+?[\d\s\-()]{7,}$/.test(formData.phoneNumber))
+    if (
+      formData.phoneNumber &&
+      !/^\+?[\d\s\-()]{7,}$/.test(formData.phoneNumber)
+    )
       errs.phoneNumber = "Invalid phone number";
     return errs;
   };
@@ -182,20 +308,70 @@ function BusinessDetails({ loader, toaster }) {
     e.preventDefault();
     const errs = validate();
     if (Object.keys(errs).length > 0) {
+      const errorMessages = Object.values(errs).join(", ");
+
+      toaster({
+        type: "error",
+        message: errorMessages, // 👈 yaha sab errors aa jayenge
+      });
+
       setErrors(errs);
-      toaster({ type: "error", message: "Please fix the errors before saving" });
       return;
     }
+
     setErrors({});
     try {
       loader(true);
-      const payload = { ...formData, logo };
-      const res = await Api("post", "business/update", payload);
+      const payload = {
+        fullname: `${formData.firstName} ${formData.lastName}`,
+        phone: formData.phoneNumber,
+        timezone: formData.timezone,
+
+        business: {
+          name: formData.businessName,
+          logo: formData.BusinessLogo,
+
+          category: formData.businessCategory,
+          description: formData.businessDescription,
+
+          website: {
+            protocol: formData.websiteProtocol,
+            url: formData.websiteUrl,
+          },
+
+          socialLinks: {
+            twitter: formData.twitter,
+            instagram: formData.instagram,
+            facebookPage: formData.facebookPage,
+          },
+
+          settings: {
+            updateBilling: formData.updateBilling,
+            country: formData.country,
+            currency: formData.currency,
+            dateFormat: formData.dateFormat,
+            timeFormat: formData.timeFormat,
+          },
+        },
+      };
+
+      const res = await Api(
+        "post",
+        `auth/updateCustomer/${editId}`,
+        payload,
+        router,
+      );
       loader(false);
       if (res?.status === true) {
-        toaster({ type: "success", message: "Business details saved successfully" });
+        toaster({
+          type: "success",
+          message: "Business details saved successfully",
+        });
       } else {
-        toaster({ type: "error", message: res?.message || "Something went wrong" });
+        toaster({
+          type: "error",
+          message: res?.message || "Something went wrong",
+        });
       }
     } catch (err) {
       loader(false);
@@ -209,12 +385,12 @@ function BusinessDetails({ loader, toaster }) {
 
       <div className="min-h-screen bg-[#f0f1f5] text-slate-800 ">
         <form onSubmit={handleSubmit}>
- 
           <div className="bg-white border border-slate-200 overflow-hidden">
-
             {/* Top bar: title + save */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-              <h1 className="text-base font-semibold text-slate-800">Business details</h1>
+              <h1 className="text-base font-semibold text-slate-800">
+                Business details
+              </h1>
               <button
                 type="submit"
                 className="bg-custom-blue text-white text-sm font-medium px-5 py-2 rounded-lg hover:bg-blue-700 transition"
@@ -223,7 +399,6 @@ function BusinessDetails({ loader, toaster }) {
               </button>
             </div>
 
-            
             <div className="px-6 py-6 flex  grid md:grid-cols-3 grid-cols-1">
               <SectionLabel
                 title="Details"
@@ -233,6 +408,7 @@ function BusinessDetails({ loader, toaster }) {
                 {/* Business name */}
                 <InputField
                   label="Business name *"
+                  placeholder="Business name "
                   value={formData.businessName}
                   onChange={set("businessName")}
                   error={errors.businessName}
@@ -240,7 +416,9 @@ function BusinessDetails({ loader, toaster }) {
 
                 {/* Website */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-medium text-slate-600">Business website ?</label>
+                  <label className="text-xs font-medium text-slate-600">
+                    Business website ?
+                  </label>
                   <div className="flex gap-0">
                     <select
                       value={formData.websiteProtocol}
@@ -256,11 +434,15 @@ function BusinessDetails({ loader, toaster }) {
                       onChange={set("websiteUrl")}
                       placeholder="www.example.com"
                       className={`flex-1 border rounded-r-md px-3 py-2 text-sm text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-                        errors.websiteUrl ? "border-red-400" : "border-slate-300"
+                        errors.websiteUrl
+                          ? "border-red-400"
+                          : "border-slate-300"
                       }`}
                     />
                   </div>
-                  {errors.websiteUrl && <p className="text-xs text-red-500">{errors.websiteUrl}</p>}
+                  {errors.websiteUrl && (
+                    <p className="text-xs text-red-500">{errors.websiteUrl}</p>
+                  )}
                 </div>
 
                 {/* Phone */}
@@ -272,7 +454,6 @@ function BusinessDetails({ loader, toaster }) {
                   error={errors.phoneNumber}
                 />
 
-                {/* First / Last name */}
                 <div className="flex gap-3">
                   <InputField
                     label="Your first name"
@@ -290,7 +471,6 @@ function BusinessDetails({ loader, toaster }) {
                   />
                 </div>
 
-                {/* Category */}
                 <SelectField
                   label="Business category"
                   value={formData.businessCategory}
@@ -299,13 +479,15 @@ function BusinessDetails({ loader, toaster }) {
                   error={errors.businessCategory}
                 />
 
-                {/* Update billing checkbox */}
                 <label className="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={formData.updateBilling}
                     onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, updateBilling: e.target.checked }))
+                      setFormData((prev) => ({
+                        ...prev,
+                        updateBilling: e.target.checked,
+                      }))
                     }
                     className="rounded"
                   />
@@ -316,20 +498,20 @@ function BusinessDetails({ loader, toaster }) {
 
             <Divider />
 
-           
             <div className="px-6 py-6 flex grid md:grid-cols-3 grid-cols-1">
               <SectionLabel
                 title="Regional settings"
                 description="Specify region specific settings for your business."
               />
               <div className="col-span-2 flex-1 flex flex-col gap-4 max-w-lg">
-                {/* Clae Pay notice */}
                 <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-start gap-3">
                   <div className="mt-0.5 bg-custom-blue text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold flex-shrink-0">
                     i
                   </div>
                   <div className="text-xs text-blue-700">
-                    <strong>Clae Pay is setup</strong> — Your region and currency determine your eligibility for ClaePay; to change country or currency you'll need to{" "}
+                    <strong>Clee Pay is setup</strong> — Your region and
+                    currency determine your eligibility for ClaePay; to change
+                    country or currency you'll need to{" "}
                     <a href="#" className="underline">
                       deactivate ClaePay
                     </a>
@@ -353,7 +535,6 @@ function BusinessDetails({ loader, toaster }) {
                   />
                 </div>
 
-                {/* Timezone */}
                 <SelectField
                   label="Time zone"
                   value={formData.timezone}
@@ -361,7 +542,6 @@ function BusinessDetails({ loader, toaster }) {
                   options={TIMEZONES}
                 />
 
-                {/* Date + Time format */}
                 <div className="flex gap-3">
                   <SelectField
                     label="Date format"
@@ -381,13 +561,13 @@ function BusinessDetails({ loader, toaster }) {
 
             <Divider />
 
-            
             <div className="px-6 py-6 flex grid md:grid-cols-3 grid-cols-1">
               <SectionLabel
                 title="Business description"
                 description={
                   <>
-                    Enter an optional description of your business for use on your{" "}
+                    Enter an optional description of your business for use on
+                    your{" "}
                     <a href="#" className="text-blue-500 underline text-xs">
                       mini website
                     </a>
@@ -395,7 +575,8 @@ function BusinessDetails({ loader, toaster }) {
                     <br />
                     <br />
                     <span className="text-slate-400">
-                      The use of formatting tags, and HTML for styling in the Business description field is no longer supported by Clae.
+                      The use of formatting tags, and HTML for styling in the
+                      Business description field is no longer supported by Clae.
                     </span>
                   </>
                 }
@@ -421,7 +602,11 @@ function BusinessDetails({ loader, toaster }) {
               <div className="col-span-2 flex-1 max-w-lg flex flex-col items-start gap-3">
                 <div className="w-24 h-24 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden">
                   {logo ? (
-                    <img src={logo} alt="logo" className="w-full h-full object-contain" />
+                    <img
+                      src={logo}
+                      alt="logo"
+                      className="w-full h-full object-contain"
+                    />
                   ) : (
                     <div className="w-16 h-16 bg-blue-900 rounded-full flex items-center justify-center">
                       <div className="w-8 h-8 bg-blue-400 rounded-full opacity-70" />
@@ -440,16 +625,16 @@ function BusinessDetails({ loader, toaster }) {
 
             <Divider />
 
-            
             <div className="grid md:grid-cols-3 grid-cols-1 px-6 py-6 flex gap-8">
               <SectionLabel
                 title="Get social!"
                 description="Enter your social networking accounts and we'll help you promote your business."
               />
               <div className="col-span-2 flex-1 flex flex-col gap-4 max-w-lg">
-              
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-medium text-slate-600">Twitter account</label>
+                  <label className="text-xs font-medium text-slate-600">
+                    Twitter account
+                  </label>
                   <div className="flex items-center border border-slate-300 rounded-md overflow-hidden">
                     <span className="px-3 text-slate-400">
                       <Twitter size={14} />
@@ -466,7 +651,9 @@ function BusinessDetails({ loader, toaster }) {
 
                 {/* Instagram */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-medium text-slate-600">Instagram account</label>
+                  <label className="text-xs font-medium text-slate-600">
+                    Instagram account
+                  </label>
                   <div className="flex items-center border border-slate-300 rounded-md overflow-hidden">
                     <span className="px-3 text-slate-400">
                       <Instagram size={14} />
@@ -483,7 +670,9 @@ function BusinessDetails({ loader, toaster }) {
 
                 {/* Facebook */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-medium text-slate-600">Facebook page</label>
+                  <label className="text-xs font-medium text-slate-600">
+                    Facebook page
+                  </label>
                   <input
                     type="text"
                     value={formData.facebookPage}
@@ -495,7 +684,6 @@ function BusinessDetails({ loader, toaster }) {
               </div>
             </div>
 
-          
             <div className="flex justify-end px-6 py-4 border-t border-slate-200">
               <button
                 type="submit"

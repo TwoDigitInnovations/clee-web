@@ -5,7 +5,7 @@ import { Api } from "@/services/service";
 import { Search, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
 import ContactModal from "@/components/ContactModel";
 import SMSTable from "@/components/SMSTable";
-
+import ViewAppointmentModal from "@/components/ViewAppointmentModal";
 
 const MOCK_MESSAGES = [
   {
@@ -94,7 +94,7 @@ const MOCK_MESSAGES = [
     sendto: "61449968761",
     message: "STOP",
   },
-    {
+  {
     id: 7,
     date: "6 Mar 2026",
     time: "1:05PM",
@@ -106,7 +106,7 @@ const MOCK_MESSAGES = [
     sendto: "61449968761",
     message: "STOP",
   },
-    {
+  {
     id: 7,
     date: "6 Mar 2026",
     time: "1:05PM",
@@ -118,7 +118,7 @@ const MOCK_MESSAGES = [
     sendto: "61449968761",
     message: "STOP",
   },
-    {
+  {
     id: 7,
     date: "6 Mar 2026",
     time: "1:05PM",
@@ -130,7 +130,7 @@ const MOCK_MESSAGES = [
     sendto: "61449968761",
     message: "STOP",
   },
-    {
+  {
     id: 7,
     date: "6 Mar 2026",
     time: "1:05PM",
@@ -142,7 +142,7 @@ const MOCK_MESSAGES = [
     sendto: "61449968761",
     message: "STOP",
   },
-    {
+  {
     id: 7,
     date: "6 Mar 2026",
     time: "1:05PM",
@@ -154,7 +154,7 @@ const MOCK_MESSAGES = [
     sendto: "61449968761",
     message: "STOP",
   },
-    {
+  {
     id: 7,
     date: "6 Mar 2026",
     time: "1:05PM",
@@ -168,6 +168,72 @@ const MOCK_MESSAGES = [
   },
 ];
 
+const appointmentMock = {
+  clinic: "Chebo Clinic",
+  status: "Confirmed",
+
+  service:
+    "Existing Client Choose on the Day Deposit (Credited to Procedure)(Procedure Performed on Day)",
+
+  staff: "Staff 1",
+  resource: null,
+
+  date: "13 Apr 2026",
+  time: "10:00AM",
+
+  duration: "1 hour",
+  price: 99,
+
+  customer: {
+    name: "EASTOP, KAREN Eastop",
+    phone: "408295781",
+    email: "karen.l.eastop@gmail.com",
+  },
+
+  history: [
+    {
+      id: 1,
+      type: "alert",
+      date: "25 Mar 2026 6:53PM",
+      message:
+        "Customer appointment amendment email successfully sent to karen.l.eastop@gmail.com",
+    },
+    {
+      id: 2,
+      type: "alert",
+      date: "25 Mar 2026 6:52PM",
+      message:
+        "Customer appointment amendment SMS successfully sent to 61408295781",
+    },
+    {
+      id: 3,
+      type: "amended",
+      date: "25 Mar 2026 6:42PM - by Chebo Clinic",
+      message:
+        "Service 1 - appointment date changed from 13 Apr 2026 10:20AM to 13 Apr 2026 10:00AM",
+    },
+    {
+      id: 4,
+      type: "amended",
+      date: "25 Mar 2026 6:42PM - by Chebo Clinic",
+      message: "Reschedule from 14 Apr 2026 10:00AM to 13 Apr 2026 10:20AM",
+    },
+    {
+      id: 5,
+      type: "alert",
+      date: "10 Mar 2026 12:29PM",
+      message:
+        "Customer appointment confirmed email successfully sent to karen.l.eastop@gmail.com",
+    },
+    {
+      id: 6,
+      type: "alert",
+      date: "10 Mar 2026 12:29PM",
+      message:
+        "Merchant appointment confirmed email successfully sent to serina1590@live.com",
+    },
+  ],
+};
 const PAGE_SIZE = 10;
 
 function SentMessages(props) {
@@ -178,6 +244,7 @@ function SentMessages(props) {
   const [selectedIds, setSelectedIds] = useState([]);
   const [contactTarget, setContactTarget] = useState(null); // opens modal
   const [currentPage, setCurrentPage] = useState(1);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     getMessages();
@@ -287,6 +354,7 @@ function SentMessages(props) {
           onToggleSelect={handleToggleSelect}
           onToggleAll={handleToggleAll}
           actiontrue={false}
+           setOpen={setOpen}
         />
 
         <div className="flex items-center justify-between mt-4 text-sm text-slate-500">
@@ -329,13 +397,20 @@ function SentMessages(props) {
         </div>
       </div>
 
-
       {contactTarget && (
         <ContactModal
           contact={contactTarget}
           onClose={() => setContactTarget(null)}
           toaster={props?.toaster}
           loader={props?.loader}
+          
+        />
+      )}
+      {open && (
+        <ViewAppointmentModal
+          data={appointmentMock}
+          onClose={() => setOpen(false)}
+         
         />
       )}
     </>
@@ -343,4 +418,3 @@ function SentMessages(props) {
 }
 
 export default SentMessages;
-

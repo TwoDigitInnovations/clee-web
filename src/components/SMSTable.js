@@ -94,7 +94,7 @@ function SMSTable({
                 <td className="px-3 py-3">{msg.customerName}</td>
 
                 <td
-                  className="px-3 py-3 underline text-custom-blue font-bold"
+                  className="px-3 py-3 underline text-custom-blue cursor-pointer font-bold"
                   onClick={() => setOpen(true)}
                 >
                   {"View"}
