@@ -3,6 +3,7 @@ import DashboardHeader from "@/components/DashboardHeader";
 import { useRouter } from "next/router";
 import { Plus, Home, Edit2, Trash2 } from "lucide-react"; // Assuming you use lucide for icons
 import { ConfirmModal } from "@/components/deleteModel";
+import { Api } from "@/services/service";
 
 const dummyLocations = [
   {
@@ -57,10 +58,10 @@ function Locations(props) {
   const fetchLocations = async () => {
     try {
       props.loader(true);
-      const res = await Api("get", `auth/getLocations`, "", router);
+      const res = await Api("get", `location/getAll`, "", router);
       props.loader(false);
       if (res?.status === true) {
-        setLocations(res.data || []);
+        setLocations(res.data.data || []);
       }
     } catch (err) {
       props.loader(false);
@@ -112,7 +113,7 @@ function Locations(props) {
     <>
       <DashboardHeader title="Your Business" />
 
-      <div className="min-h-screen bg-[#f8f9fb] text-slate-800 px-8 py-4">
+      <div className="min-h-screen bg-[#f8f9fb] text-slate-800 md:px-8 px-3 py-4">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-semibold text-[#1e4e8c]">Locations</h2>
           <button
@@ -126,42 +127,84 @@ function Locations(props) {
         <hr className="border-gray-200 mb-4" />
 
         <div className="space-y-4">
-          {locations.map((loc) => (
-            <div
-              key={loc.id}
-              className="flex items-center justify-between bg-white p-5 rounded-lg border border-gray-100 shadow-sm"
-            >
-              <div className="flex items-center gap-4">
-                <div className="bg-[#f0f4f8] p-3 rounded-md">
-                  <Home size={20} className="text-[#0b4d92]" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-[#0b4d92] text-sm">
-                    {loc.name || "Chebo Clinic"}
-                  </h4>
-                  <p className="text-gray-500 text-xs mt-1">
-                    {loc.address ||
-                      "59 Montgomery Street Kogarah, Sydney, NSW, 221"}
-                  </p>
-                </div>
+          {locations.length === 0 ? (
+            <div className="flex flex-col items-center justify-center min-h-[550px] text-center bg-white border border-gray-100 rounded-lg shadow-sm">
+              <div className="bg-gray-100 p-4 rounded-full mb-3">
+                <Home size={40} className="text-gray-400" />
               </div>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={() => router.push(`/locations/edit/${loc.id}`)}
-                  className="bg-[#0b4d92] text-white px-6 py-2 rounded-md text-sm font-semibold flex items-center"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDeleteClick(loc.id)}
-                  className="p-2 border border-gray-200 rounded-md hover:bg-red-50 transition-colors"
-                >
-                  <Trash2 size={18} className="text-red-500" />
-                </button>
-              </div>
+              <h3 className="text-sm font-semibold text-gray-700">
+                No Locations Found
+              </h3>
+              <p className="text-xs text-gray-500 mt-1">
+                You haven’t added any locations yet.
+              </p>
             </div>
-          ))}
+          ) : (
+            locations.map((loc) => (
+              <div
+                key={loc.id}
+                className="flex flex-col sm:flex-row sm:items-center justify-between bg-white p-4 sm:p-5 rounded-lg border border-gray-100 shadow-sm gap-4"
+              >
+                {/* LEFT SIDE */}
+                <div className="flex items-start gap-4">
+                  <div className="bg-[#f0f4f8] p-3 rounded-md">
+                    <Home size={20} className="text-[#0b4d92]" />
+                  </div>
+
+                  <div>
+                    {/* NAME + TYPE */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h4 className="font-bold text-[#0b4d92] text-sm">
+                        {loc.location_name || "Chebo Clinic"}
+                      </h4>
+
+                      {/* TYPE BADGE */}
+                      <span className="text-[10px] px-2 py-1 rounded-full bg-blue-100 text-blue-600 capitalize">
+                        {loc.location_type}
+                      </span>
+                    </div>
+
+                    {/* MOBILE OR ADDRESS */}
+                    {loc.location_type === "mobile" ? (
+                      <p className="text-gray-500 text-xs mt-1">
+                        📞 {loc.telephone || "No phone number"}
+                      </p>
+                    ) : (
+                      <p className="text-gray-500 text-xs mt-1">
+                        {[
+                          loc.address?.apartment,
+                          loc.address?.street,
+                          loc.address?.suburb,
+                          loc.address?.city,
+                          loc.address?.state,
+                          loc.address?.postal_code,
+                        ]
+                          .filter(Boolean) // empty values remove
+                          .join(", ") || "No address available"}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* RIGHT SIDE BUTTONS */}
+                <div className="flex gap-2 justify-end sm:justify-normal">
+                  <button
+                    onClick={() => router.push(`/Business/AddLocation?id=${loc._id}`)}
+                    className="bg-[#0b4d92] text-white px-4 sm:px-6 py-2 rounded-md text-xs sm:text-sm font-semibold"
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                    onClick={() => handleDeleteClick(loc.id)}
+                    className="p-2 border border-gray-200 rounded-md hover:bg-red-50 transition-colors"
+                  >
+                    <Trash2 size={18} className="text-red-500" />
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
