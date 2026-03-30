@@ -202,7 +202,7 @@ export default function AddLocation(props) {
   return (
     <>
       <DashboardHeader title="Your Business" />{" "}
-      <div className="min-h-screen bg-gray-50 font-sans">
+      <div className="min-h-screen bg-custom-gray ">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="text-sm text-gray-500 mb-1">
             <span className="hover:underline cursor-pointer">Locations</span>

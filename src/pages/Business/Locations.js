@@ -186,7 +186,7 @@ function Locations(props) {
                   </div>
                 </div>
 
-                {/* RIGHT SIDE BUTTONS */}
+              
                 <div className="flex gap-2 justify-end sm:justify-normal">
                   <button
                     onClick={() => router.push(`/Business/AddLocation?id=${loc._id}`)}

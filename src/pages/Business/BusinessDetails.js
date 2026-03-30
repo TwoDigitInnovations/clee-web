@@ -383,7 +383,7 @@ function BusinessDetails({ loader, toaster }) {
     <>
       <DashboardHeader title="Your Business" />
 
-      <div className="min-h-screen bg-[#f0f1f5] text-slate-800 ">
+      <div className="min-h-screen bg-custom-gray text-slate-800 ">
         <form onSubmit={handleSubmit}>
           <div className="bg-white border border-slate-200 overflow-hidden">
             {/* Top bar: title + save */}
