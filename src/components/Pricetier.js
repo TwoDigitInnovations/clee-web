@@ -2,12 +2,11 @@ import React, { useState } from "react";
 import { X, Plus, Trash2, GripVertical, Users, Check } from "lucide-react";
 
 const PriceTierModal = ({ isOpen, onClose, onSave, allStaff = [] }) => {
-  // Price tiers list
+ 
   const [tiers, setTiers] = useState([
     { id: 1, name: "Senior Level", assignedStaffIds: [] }
   ]);
   
-  // Staff selection view toggle
   const [showStaffListFor, setShowStaffListFor] = useState(null);
 
   if (!isOpen) return null;
@@ -39,7 +38,6 @@ const PriceTierModal = ({ isOpen, onClose, onSave, allStaff = [] }) => {
     }));
   };
 
-  // Get staff not assigned to OTHER tiers (to avoid duplicates)
   const getAvailableStaff = (currentTierId) => {
     const assignedInOtherTiers = tiers
       .filter(t => t.id !== currentTierId)

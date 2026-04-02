@@ -111,7 +111,7 @@ function SidePannel({ open, setOpen }) {
             { title: "Stock Orders", href: "/stock/StockOrders" },
           ],
         },
-        { title: "Sales Tools", href: "/" },
+        { title: "Sales Tools", href: "/d" },
         { title: "Notifications", href: "/Notifications" },
         { title: "Consult", href: "/Consult" },
         { title: "Promote", href: "/Promote" },

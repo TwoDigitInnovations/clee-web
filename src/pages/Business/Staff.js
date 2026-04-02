@@ -6,39 +6,10 @@ import { ConfirmModal } from "@/components/deleteModel";
 import { Api } from "@/services/service";
 import PriceTierModal from "@/components/Pricetier";
 
-const dummyStaff = [
-  {
-    id: "1",
-    name: "Staff 1",
-    email: "staff1@editorial.com",
-    phone: "N/A",
-    image: "/images/profilelogo.png",
-  },
-  {
-    id: "2",
-    name: "Staff 2",
-    email: "staff2@editorial.com",
-    phone: "N/A",
-    image: "/images/profilelogo.png",
-  },
-  {
-    id: "3",
-    name: "Staff 3",
-    email: "staff3@editorial.com",
-    phone: "N/A",
-    image: "/images/profilelogo.png",
-  },
-  {
-    id: "4",
-    name: "Staff 4",
-    email: "staff4@editorial.com",
-    phone: "N/A",
-    image: "/images/profilelogo.png",
-  },
-];
+
 
 function Staff(props) {
-  const [staffList, setStaffList] = useState(dummyStaff);
+  const [staffList, setStaffList] = useState([]);
   const [id, setId] = useState(null);
   const [open, setOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -79,7 +50,7 @@ function Staff(props) {
 
   const handleDeleteConfirm = () => {
     props.loader(true);
-    Api("delete", `staff/delete/${id}`, "", router).then((res) => {
+    Api("delete", `Staff/delete/${id}`, "", router).then((res) => {
       props.loader(false);
       if (res?.status === true) {
         props.toaster({ type: "success", message: "Staff deleted" });
@@ -94,7 +65,7 @@ function Staff(props) {
       <DashboardHeader title="Your Business" />
 
       <div className="md:px-6 px-4 py-8">
-        {/* TOP HEADER */}
+        
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <div>
             <h1 className="text-2xl font-bold text-[#1e4e8c]">
@@ -120,7 +91,7 @@ function Staff(props) {
           </div>
         </div>
 
-        {/* SEARCH & STATS */}
+     
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
           <div className="relative w-full md:w-80">
             <Search
@@ -145,92 +116,90 @@ function Staff(props) {
           </div>
         </div>
 
-     
         <div className="space-y-4">
           {staffList.map((item) => (
-  <div
-    key={item.id}
-    className="bg-white rounded-xl p-4 flex flex-col gap-4 border border-gray-100 shadow-sm hover:shadow-md transition"
-  >
-    {/* Top Section */}
-    <div className="flex items-center gap-4">
-      <div className="w-12 h-12 rounded-lg bg-gray-100 overflow-hidden flex items-center justify-center shrink-0">
-        {item.image ? (
-          <img
-            src={item.image}
-            alt={item.name}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="text-gray-400 w-full h-full flex items-center justify-center">
-            <UserPlus size={20} />
-          </div>
-        )}
-      </div>
+            <div
+              key={item.id}
+              className="bg-white rounded-xl p-4 flex flex-col gap-4 border border-gray-100 shadow-sm hover:shadow-md transition"
+            >
+              {/* Top Section */}
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-lg bg-gray-100 overflow-hidden flex items-center justify-center shrink-0">
+                  {item.image ? (
+                    <img
+                      src={item.image}
+                      alt={item.fullname}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="text-gray-400 w-full h-full flex items-center justify-center">
+                      <UserPlus size={20} />
+                    </div>
+                  )}
+                </div>
 
-      {/* Info */}
-      <div className="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4 flex-1">
-        <div>
-          <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
-            Name
-          </label>
-          <p className="text-sm font-bold text-slate-700 break-words">
-            {item.name}
-          </p>
-        </div>
+             
+                <div className="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4 flex-1">
+                  <div>
+                    <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
+                      Name
+                    </label>
+                    <p className="text-sm font-bold text-slate-700 break-words">
+                      {item.fullname}
+                    </p>
+                  </div>
 
-        <div>
-          <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
-            Email
-          </label>
-          <p className="text-sm text-slate-600 break-all">
-            {item.email}
-          </p>
-        </div>
+                  <div>
+                    <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
+                      Email
+                    </label>
+                    <p className="text-sm text-slate-600 break-all">
+                      {item.email}
+                    </p>
+                  </div>
 
-        <div>
-          <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
-            Phone
-          </label>
-          <p className="text-sm text-slate-500">
-            {item.phone || "N/A"}
-          </p>
-        </div>
-      </div>
-    </div>
+                  <div>
+                    <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
+                      Phone
+                    </label>
+                    <p className="text-sm text-slate-500">
+                      {item.phone || "N/A"}
+                    </p>
+                  </div>
+                </div>
+              </div>
 
-    {/* Action Buttons */}
-    <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
-      <div className="flex gap-4">
-        <button
-          onClick={() =>
-            router.push(`/Business/AddStaff?id=${item.id}`)
-          }
-          className="text-sm font-semibold text-indigo-600 hover:underline"
-        >
-          Edit
-        </button>
+              {/* Action Buttons */}
+              <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
+                <div className="flex gap-4">
+                  <button
+                    onClick={() =>
+                      router.push(`/Business/AddStaffs?id=${item._id}`)
+                    }
+                    className="text-sm font-semibold text-indigo-600 hover:underline"
+                  >
+                    Edit
+                  </button>
 
-        <button className="text-sm font-semibold text-gray-500 hover:text-gray-800">
-          Archive
-        </button>
-      </div>
+                  <button className="text-sm font-semibold text-gray-500 hover:text-gray-800">
+                    Archive
+                  </button>
+                </div>
 
-      <button
-        onClick={() => {
-          setId(item.id);
-          setOpen(true);
-        }}
-        className="p-2 rounded-md hover:bg-red-50 text-red-400 hover:text-red-600 transition"
-      >
-        <Trash2 size={18} />
-      </button>
-    </div>
-  </div>
-))}
+                <button
+                  onClick={() => {
+                    setId(item._id);
+                    setOpen(true);
+                  }}
+                  className="p-2 rounded-md hover:bg-red-50 text-red-400 hover:text-red-600 transition"
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
+            </div>
+          ))}
 
-
-          {/* DASHED ADD BUTTON */}
+   
           <div
             onClick={() => router.push("/Business/AddStaffs")}
             className="border-2 border-dashed border-[#d1dbe5] rounded-2xl p-10 flex flex-col items-center justify-center cursor-pointer hover:bg-blue-50/30 transition-colors"
