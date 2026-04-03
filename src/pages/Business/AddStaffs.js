@@ -75,7 +75,7 @@ export default function AddStaff(props) {
   const [services, setServices] = useState([]);
   const [servicesLoading, setServicesLoading] = useState(false);
   const [serviceSearch, setServiceSearch] = useState("");
-
+ 
   const router = useRouter();
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
@@ -98,7 +98,10 @@ export default function AddStaff(props) {
       }
     };
     fetchServices();
+   
   }, []);
+
+ 
 
   useEffect(() => {
     if (!id) return;

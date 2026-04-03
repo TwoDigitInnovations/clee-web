@@ -19,14 +19,14 @@ const Layout = ({ children }) => {
       <div className="flex-1 flex flex-col">
         {!isPublicPage && (
           <div className="sticky top-0 z-40">
-            <div className=" items-center justify-between md:hidden flex">
+            <div className=" items-center justify-between lg:hidden flex">
               <Navbar setOpen={setOpen} />
               
             </div>
           </div>
         )}
 
-        <main className={` ${isPublicPage ? "pl-0" : "md:pl-72"}`}>
+        <main className={` ${isPublicPage ? "pl-0" : "lg:pl-72"}`}>
           {children}
         </main>
       </div>

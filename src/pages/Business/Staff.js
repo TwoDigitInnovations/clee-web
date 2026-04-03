@@ -6,10 +6,9 @@ import { ConfirmModal } from "@/components/deleteModel";
 import { Api } from "@/services/service";
 import PriceTierModal from "@/components/Pricetier";
 
-
-
 function Staff(props) {
   const [staffList, setStaffList] = useState([]);
+  const [tiers, setTiers] = useState([{ name: "", assignedStaffIds: [] }]);
   const [id, setId] = useState(null);
   const [open, setOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -29,18 +28,41 @@ function Staff(props) {
     }
   };
 
+  const fetchPriceTiers = async () => {
+    try {
+      props.loader(true);
+      const res = await Api("get", `price-tiers/getAll`, "", router);
+      props.loader(false);
+      if (res?.status === true && res.data.data.length > 0) {
+        const data = res.data.data;
+        setTiers(
+          data.map((item) => ({
+            _id: item._id,
+            name: item.name,
+            assignedStaffIds: item.assignedStaffIds || [],
+          })),
+        );
+      }
+    } catch (err) {
+      props.loader(false);
+      props.toaster({ type: "error", message: "Failed to fetch Price Tiers" });
+    }
+  };
+
   useEffect(() => {
     fetchStaff();
+    fetchPriceTiers();
   }, []);
 
   const handlePriceTierSave = async (data) => {
     try {
       props.loader(true);
-      const res = await Api("post", `PriceTier/save`, data, router);
+      const res = await Api("post", `price-tiers/save`, data, router);
       props.loader(false);
       if (res?.status === true) {
         props.toaster({ type: "success", message: "Price tier saved!" });
         setIsModalOpen(false);
+        setTiers([]);
       }
     } catch (err) {
       props.loader(false);
@@ -65,7 +87,6 @@ function Staff(props) {
       <DashboardHeader title="Your Business" />
 
       <div className="md:px-6 px-4 py-8">
-        
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <div>
             <h1 className="text-2xl font-bold text-[#1e4e8c]">
@@ -77,7 +98,10 @@ function Staff(props) {
           </div>
           <div className="flex gap-3">
             <button
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => {
+                fetchPriceTiers();
+                setIsModalOpen(true);
+              }}
               className="flex items-center gap-2 bg-[#e2e8f0] text-custom-blue px-4 py-2.5 rounded-md text-sm font-semibold"
             >
               <CreditCard size={18} /> Add Price Tiers
@@ -91,7 +115,6 @@ function Staff(props) {
           </div>
         </div>
 
-     
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
           <div className="relative w-full md:w-80">
             <Search
@@ -138,7 +161,6 @@ function Staff(props) {
                   )}
                 </div>
 
-             
                 <div className="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4 flex-1">
                   <div>
                     <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
@@ -199,7 +221,6 @@ function Staff(props) {
             </div>
           ))}
 
-   
           <div
             onClick={() => router.push("/Business/AddStaffs")}
             className="border-2 border-dashed border-[#d1dbe5] rounded-2xl p-10 flex flex-col items-center justify-center cursor-pointer hover:bg-blue-50/30 transition-colors"
@@ -233,6 +254,8 @@ function Staff(props) {
         onClose={() => setIsModalOpen(false)}
         onSave={handlePriceTierSave}
         allStaff={staffList}
+        tiers={tiers}
+        setTiers={setTiers}
       />
     </div>
   );

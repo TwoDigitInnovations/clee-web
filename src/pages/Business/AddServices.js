@@ -3,6 +3,7 @@ import { ChevronDown, Info, Plus, Clock, DollarSign, X } from "lucide-react";
 import DashboardHeader from "@/components/DashboardHeader";
 import { Api } from "@/services/service";
 import { useRouter } from "next/navigation";
+import PriceTierModal from "@/components/Pricetier";
 
 const dummyCategories = [
   { id: "", label: "No category" },
@@ -121,16 +122,18 @@ export default function AddServices({ loader, toaster }) {
   const router = useRouter();
 
   const [categories, setCategories] = useState(dummyCategories);
-  const [staff, setStaff] = useState(dummyStaff);
-
+  const [tiers, setTiers] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState({
     serviceName: "",
     category: "",
     description: "",
     priceType: "Fixed price",
     price: "00.00",
+    unassignedPrice: "",
+    prices: {},
     durationH: "0",
-    durationM: "01:00",
+    durationM: "00:30",
     tax: "GST",
     priceIncludesTax: true,
     serviceColor: "#319795",
@@ -142,6 +145,7 @@ export default function AddServices({ loader, toaster }) {
     paymentPolicy: "default",
     onlinePayment: "default",
   });
+  const [staffList, setStaffList] = useState([]);
 
   const set = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
@@ -149,6 +153,38 @@ export default function AddServices({ loader, toaster }) {
   const setCheck = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.checked }));
 
+  const fetchStaff = async () => {
+    try {
+      loader(true);
+      const res = await Api("get", `Staff/getAll`, "", router);
+      loader(false);
+      if (res?.status === true && res.data.data.length > 0) {
+        setStaffList(res.data.data);
+      }
+    } catch (err) {
+      loader(false);
+      toaster({ type: "error", message: "Failed to fetch Staff" });
+    }
+  };
+
+  const handlePriceTierSave = async (data) => {
+    try {
+      //   loader(true);
+      console.log(data);
+
+      const res = await Api("post", `price-tiers/save`, data, router);
+      loader(false);
+      if (res?.status === true) {
+        toaster({ type: "success", message: "Price tier saved!" });
+        setIsModalOpen(false);
+        setTiers([]);
+        fetchPriceTiers();
+      }
+    } catch (err) {
+      loader(false);
+      toaster({ type: "error", message: "Failed to save price tier" });
+    }
+  };
   useEffect(() => {
     const fetch = async () => {
       try {
@@ -161,6 +197,8 @@ export default function AddServices({ loader, toaster }) {
       } catch {}
     };
     fetch();
+    fetchPriceTiers();
+    fetchStaff();
   }, []);
 
   const handleStaffToggle = (id) => {
@@ -168,9 +206,9 @@ export default function AddServices({ loader, toaster }) {
       const updated = { ...prev.selectedStaff, [id]: !prev.selectedStaff[id] };
       if (id === "all") {
         const val = !prev.selectedStaff["all"];
-        staff.forEach((s) => (updated[s.id] = val));
+        staffList.forEach((s) => (updated[s.id] = val));
       } else {
-        const allChecked = staff
+        const allChecked = staffList
           .filter((s) => s.id !== "all")
           .every((s) => updated[s.id]);
         updated["all"] = allChecked;
@@ -178,7 +216,27 @@ export default function AddServices({ loader, toaster }) {
       return { ...prev, selectedStaff: updated };
     });
   };
-
+  const fetchPriceTiers = async () => {
+    try {
+      loader(true);
+      const res = await Api("get", `price-tiers/getAll`, "", router);
+      loader(false);
+      if (res?.status === true && res.data.data.length > 0) {
+        const data = res.data.data;
+        setTiers(data);
+        // setTiers(
+        //   data.map((item) => ({
+        //     _id: item._id,
+        //     name: item.name,
+        //     assignedStaffIds: item.assignedStaffIds || [],
+        //   })),
+        // );
+      }
+    } catch (err) {
+      loader(false);
+      toaster({ type: "error", message: "Failed to fetch Price Tiers" });
+    }
+  };
   const handleSubmit = async (e) => {
     e?.preventDefault();
     if (!form.serviceName.trim()) {
@@ -190,7 +248,7 @@ export default function AddServices({ loader, toaster }) {
       const res = await Api("post", "services/create", form, router);
       loader(false);
       if (res?.status === true) {
-        _toaster({ type: "success", message: "Service saved successfully!" });
+        toaster({ type: "success", message: "Service saved successfully!" });
       }
     } catch {
       loader(false);
@@ -238,7 +296,6 @@ export default function AddServices({ loader, toaster }) {
         {/* ── Form ── */}
         <div className="max-w-7xl mx-auto py-4 md:py-6 px-4">
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-           
             <SectionRow
               left={{
                 title: "Description",
@@ -296,18 +353,77 @@ export default function AddServices({ loader, toaster }) {
                       options={["Fixed price", "Free", "Variable"]}
                     />
                   </div>
-                  <div className="flex items-center border border-gray-200 rounded-md overflow-hidden w-36">
-                    <span className="px-2.5 py-1.5 text-sm text-gray-500 bg-gray-50 border-r border-gray-200">
-                      $
-                    </span>
-                    <input
-                      type="text"
-                      value={form.price}
-                      onChange={set("price")}
-                      className="flex-1 px-2.5 py-1.5 text-sm text-slate-700 focus:outline-none"
-                    />
-                  </div>
-                  <LinkBtn>Add price tiers</LinkBtn>
+
+                  {tiers.length === 0 && (
+                    <LinkBtn
+                      onClick={() => setIsModalOpen(true)}
+                      className="px-4 py-2 border border-dashed border-gray-300 rounded-lg text-sm font-semibold text-gray-600 hover:border-blue-500 hover:text-blue-600"
+                    >
+                      + Add Price Tier
+                    </LinkBtn>
+                  )}
+
+                  {tiers.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-semibold text-gray-600 mb-1 w-[120px]">
+                          Unassigned
+                        </p>
+                        <div className="flex items-center border border-gray-200 rounded-md overflow-hidden w-36">
+                          <span className="px-2.5 py-1.5 text-sm text-gray-500 bg-gray-50 border-r border-gray-200">
+                            $
+                          </span>
+                          <input
+                            type="text"
+                            value={form.unassignedPrice || ""}
+                            onChange={(e) =>
+                              setForm((prev) => ({
+                                ...prev,
+                                unassignedPrice: e.target.value,
+                              }))
+                            }
+                            className="flex-1 px-2.5 py-1.5 text-sm text-slate-700 focus:outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      {tiers.map((t) => (
+                        <div key={t._id} className="flex items-center gap-2">
+                          <p className="text-sm font-semibold text-gray-700 mb-1 w-[120px]">
+                            {t.name}
+                          </p>
+
+                          <div className="flex items-center border border-gray-200 rounded-md overflow-hidden w-36">
+                            <span className="px-2.5 py-1.5 text-sm text-gray-500 bg-gray-50 border-r border-gray-200">
+                              $
+                            </span>
+                            <input
+                              type="text"
+                              value={form.prices?.[t._id] || ""}
+                              onChange={(e) =>
+                                setForm((prev) => ({
+                                  ...prev,
+                                  prices: {
+                                    ...prev.prices,
+                                    [t._id]: e.target.value,
+                                  },
+                                }))
+                              }
+                              className="flex-1 px-2.5 py-1.5 text-sm text-slate-700 focus:outline-none"
+                            />
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Edit Button */}
+                      <LinkBtn
+                        onClick={() => setIsModalOpen(true)}
+                        className="text-sm font-semibold text-blue-600 hover:underline mt-2"
+                      >
+                        Edit price tiers
+                      </LinkBtn>
+                    </div>
+                  )}
                 </div>
               }
             />
@@ -326,18 +442,12 @@ export default function AddServices({ loader, toaster }) {
                       <span className="px-2.5 py-1.5 text-sm text-gray-500 bg-gray-50 border-r border-gray-200">
                         <Clock size={13} />
                       </span>
-                      <input
-                        type="text"
-                        value={form.durationH}
-                        onChange={set("durationH")}
-                        className="w-8 px-2 py-1.5 text-sm text-slate-700 focus:outline-none text-center"
+                      <Input
+                        value={form.durationM}
+                        onChange={set("durationM")}
+                        className="w-18 text-center"
                       />
                     </div>
-                    <Input
-                      value={form.durationM}
-                      onChange={set("durationM")}
-                      className="w-20 text-center"
-                    />
                   </div>
                   <LinkBtn>Add padding and processing times</LinkBtn>
                 </div>
@@ -420,12 +530,12 @@ export default function AddServices({ loader, toaster }) {
               }}
               right={
                 <div className="flex flex-col gap-1.5">
-                  {staff.map((s) => (
+                  {staffList.map((s, key) => (
                     <Checkbox
-                      key={s.id}
-                      checked={!!form.selectedStaff[s.id]}
-                      onChange={() => handleStaffToggle(s.id)}
-                      label={s.label}
+                      key={key}
+                      checked={!!form.selectedStaff[s._id]}
+                      onChange={() => handleStaffToggle(s._id)}
+                      label={s.fullname}
                     />
                   ))}
                 </div>
@@ -569,6 +679,15 @@ export default function AddServices({ loader, toaster }) {
               Save
             </button>
           </div>
+
+          <PriceTierModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSave={handlePriceTierSave}
+            allStaff={staffList}
+            tiers={tiers}
+            setTiers={setTiers}
+          />
         </div>
       </div>
     </>
