@@ -12,17 +12,21 @@ const SelectField = ({ label, name, value, onChange, options}) => {
       <select
         name={name}
         value={value}
-        
         onChange={onChange}
         className={`w-full text-[14px] px-4 py-2 bg-[#F8FAFC] text-black rounded-lg border border-gray-200 focus:outline-none  cursor-pointer`}
       >
-        {options.map((opt, i) => (
-          <option key={i} value={opt}>
-            {opt}
-          </option>
-        ))}
+        {options.map((opt, i) => {
+          // Support both string and object format
+          const optValue = typeof opt === 'object' ? opt.value : opt;
+          const optLabel = typeof opt === 'object' ? opt.label : opt;
+          
+          return (
+            <option key={i} value={i === 0 ? "" : optValue} disabled={i === 0}>
+              {optLabel}
+            </option>
+          );
+        })}
       </select>
-      {/* {error && <p className="text-red-400 text-sm mt-1">{error}</p>} */}
     </div>
   );
 };
