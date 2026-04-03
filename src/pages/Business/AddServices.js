@@ -2,22 +2,8 @@ import React, { useState, useEffect } from "react";
 import { ChevronDown, Info, Plus, Clock, DollarSign, X } from "lucide-react";
 import DashboardHeader from "@/components/DashboardHeader";
 import { Api } from "@/services/service";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import PriceTierModal from "@/components/Pricetier";
-
-const dummyCategories = [
-  { id: "", label: "No category" },
-  { id: "general", label: "General" },
-  { id: "new_clients", label: "New Clients" },
-  { id: "existing_clients", label: "Existing Clients" },
-  { id: "memberships", label: "Memberships" },
-];
-
-const dummyStaff = [
-  { id: "all", label: "Select all" },
-  { id: "staff1", label: "Staff 1" },
-  { id: "staff2", label: "Staff 2" },
-];
 
 const SERVICE_COLORS = [
   "#e53e3e",
@@ -37,7 +23,7 @@ const COLOR_WHEEL_URL =
 
 function SectionRow({ left, right }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:px-6 px-4 py-5 border-b border-gray-100 last:border-0">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:px-6 px-4 py-5 border-b border-gray-200 last:border-0">
       <div className="col-span-1">
         <p className="text-md font-semibold text-slate-700">{left.title}</p>
         {left.description && (
@@ -121,7 +107,7 @@ function LinkBtn({ children, onClick }) {
 export default function AddServices({ loader, toaster }) {
   const router = useRouter();
 
-  const [categories, setCategories] = useState(dummyCategories);
+  const [categories, setCategories] = useState([]);
   const [tiers, setTiers] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState({
@@ -134,10 +120,13 @@ export default function AddServices({ loader, toaster }) {
     prices: {},
     durationH: "0",
     durationM: "00:30",
-    tax: "GST",
+    isPaddingAndProcessing: false,
+    paddingBeforeTime: "00:00",
+    paddingAfterTime: "00:00",
+    tax: "",
     priceIncludesTax: true,
     serviceColor: "#319795",
-    selectedStaff: { all: true, staff1: true, staff2: true },
+    selectedStaff: { all: true },
     onlineBookings: true,
     vipOnly: false,
     isVideoCall: false,
@@ -146,9 +135,13 @@ export default function AddServices({ loader, toaster }) {
     onlinePayment: "default",
   });
   const [staffList, setStaffList] = useState([]);
+  const searchParams = useSearchParams();
+  const id = searchParams.get("id");
 
-  const set = (field) => (e) =>
-    setForm((prev) => ({ ...prev, [field]: e.target.value }));
+  const set = (field) => (e) => {
+    const value = e.target.value;
+    setForm((prev) => ({ ...prev, [field]: value }));
+  };
 
   const setCheck = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.checked }));
@@ -166,23 +159,91 @@ export default function AddServices({ loader, toaster }) {
       toaster({ type: "error", message: "Failed to fetch Staff" });
     }
   };
+  useEffect(() => {
+    if (!id) return;
 
-  const handlePriceTierSave = async (data) => {
+    const fetchService = async () => {
+      try {
+        loader(true);
+
+        const res = await Api("get", `services/${id}`, "", router);
+
+        loader(false);
+
+        if (res?.status === true) {
+          const data = res.data.data;
+
+          const hours = Math.floor((data.duration || 0) / 60);
+          const minutes = (data.duration || 0) % 60;
+
+          setFormData({
+            serviceName: data.name || "",
+            category: data.category?._id || "",
+            description: data.description || "",
+
+            priceType: data.priceType || "Fixed price",
+            price: data.price?.toString() || "00.00",
+
+            unassignedPrice: "",
+            prices: {},
+
+            // ✅ duration mapping
+            durationH: hours.toString(),
+            durationM: `00:${minutes.toString().padStart(2, "0")}`,
+
+            // ❗ padding logic (agar backend me hai toh map karo)
+            isPaddingAndProcessing: false,
+            paddingBeforeTime: data.paddingBeforeTime || "00:00",
+            paddingAfterTime: data.paddingAfterTime || "00:00",
+
+            tax: data.tax || "",
+            priceIncludesTax: data.priceIncludesTax ?? true,
+
+            serviceColor: data.color || "#319795",
+
+            selectedStaff:
+              data.staff?.length > 0
+                ? data.staff.reduce(
+                    (acc, id) => ({ ...acc, [id]: true, all: false }),
+                    {},
+                  )
+                : { all: true },
+
+            onlineBookings: data.onlineBookings ?? true,
+            vipOnly: data.vipOnly ?? false,
+            isVideoCall: data.isVideoCall ?? false,
+
+            bookingQuestion: data.bookingQuestion || "",
+            paymentPolicy: data.paymentPolicy || "default",
+            onlinePayment: data.onlinePayment || "default",
+          });
+        } else {
+          toaster({
+            type: "error",
+            message: res?.message || "Failed to fetch service",
+          });
+        }
+      } catch (err) {
+        loader(false);
+        toaster({ type: "error", message: "Server error" });
+      }
+    };
+
+    fetchService();
+  }, [id]);
+
+  const fetchPriceTiers = async () => {
     try {
-      //   loader(true);
-      console.log(data);
-
-      const res = await Api("post", `price-tiers/save`, data, router);
+      loader(true);
+      const res = await Api("get", `price-tiers/getAll`, "", router);
       loader(false);
-      if (res?.status === true) {
-        toaster({ type: "success", message: "Price tier saved!" });
-        setIsModalOpen(false);
-        setTiers([]);
-        fetchPriceTiers();
+      if (res?.status === true && res.data.data.length > 0) {
+        const data = res.data.data;
+        setTiers(data);
       }
     } catch (err) {
       loader(false);
-      toaster({ type: "error", message: "Failed to save price tier" });
+      toaster({ type: "error", message: "Failed to fetch Price Tiers" });
     }
   };
   useEffect(() => {
@@ -191,7 +252,7 @@ export default function AddServices({ loader, toaster }) {
         const res = await Api("get", "Category/getAll", "", router);
         if (res?.status === true && res.data?.data?.length > 0) {
           setCategories(
-            res.data.data.map((c) => ({ id: c.id, label: c.name })),
+            res.data.data.map((c) => ({ id: c._id, label: c.name })),
           );
         }
       } catch {}
@@ -216,47 +277,93 @@ export default function AddServices({ loader, toaster }) {
       return { ...prev, selectedStaff: updated };
     });
   };
-  const fetchPriceTiers = async () => {
+
+  const handlePriceTierSave = async (data) => {
     try {
-      loader(true);
-      const res = await Api("get", `price-tiers/getAll`, "", router);
+      //   loader(true);
+      console.log(data);
+
+      const res = await Api("post", `price-tiers/save`, data, router);
       loader(false);
-      if (res?.status === true && res.data.data.length > 0) {
-        const data = res.data.data;
-        setTiers(data);
-        // setTiers(
-        //   data.map((item) => ({
-        //     _id: item._id,
-        //     name: item.name,
-        //     assignedStaffIds: item.assignedStaffIds || [],
-        //   })),
-        // );
+      if (res?.status === true) {
+        toaster({ type: "success", message: "Price tier saved!" });
+        setIsModalOpen(false);
+        setTiers([]);
+        fetchPriceTiers();
       }
     } catch (err) {
       loader(false);
-      toaster({ type: "error", message: "Failed to fetch Price Tiers" });
+      toaster({ type: "error", message: "Failed to save price tier" });
     }
   };
   const handleSubmit = async (e) => {
     e?.preventDefault();
+
     if (!form.serviceName.trim()) {
       toaster({ type: "error", message: "Service name is required" });
       return;
     }
+
     loader(true);
+
     try {
-      const res = await Api("post", "services/create", form, router);
-      loader(false);
-      if (res?.status === true) {
-        toaster({ type: "success", message: "Service saved successfully!" });
+      let res;
+
+      if (id) {
+        res = await Api("put", `services/update/${id}`, form, router);
+      } else {
+        res = await Api("post", "services/create", form, router);
       }
-    } catch {
+
       loader(false);
-      toaster({ type: "error", message: "Failed to save service" });
+
+      if (res?.status === true) {
+        toaster({
+          type: "success",
+          message: id
+            ? "Service updated successfully!"
+            : "Service created successfully!",
+        });
+
+        router.push("/Business/Services");
+      }
+    } catch (error) {
+      loader(false);
+      toaster({
+        type: "error",
+        message: id ? "Failed to update service" : "Failed to create service",
+      });
     }
   };
 
   const descLen = form.description.length;
+
+  const handleTogglePadding = () => {
+    setForm((prev) => ({
+      ...prev,
+      isPaddingAndProcessing: true,
+    }));
+  };
+
+  const handleRemovePadding = () => {
+    setForm((prev) => ({
+      ...prev,
+      isPaddingAndProcessing: false,
+      paddingBeforeTime: "00:00",
+      paddingAfterTime: "00:00",
+    }));
+  };
+
+  const handleTaxChange = (value) => {
+    setForm((prev) => ({
+      ...prev,
+      tax: value,
+      priceIncludesTax:
+        value === "Not Applicable" ? false : form.priceIncludesTax,
+    }));
+  };
+  console.log(form);
+  console.log(categories);
 
   return (
     <>
@@ -280,6 +387,7 @@ export default function AddServices({ loader, toaster }) {
             <button
               type="button"
               className="px-4 py-1.5 text-sm font-medium text-slate-600 border border-gray-200 rounded-md hover:bg-gray-50 transition"
+              onClick={() => router.push("/Business/Services")}
             >
               Cancel
             </button>
@@ -316,7 +424,10 @@ export default function AddServices({ loader, toaster }) {
                       <Label>Category</Label>
                       <Select
                         value={form.category}
-                        onChange={set("category")}
+                        onChange={(e) => {
+                          console.log("VALUE:", e.target.value); // should be id
+                          set("category")(e);
+                        }}
                         options={categories.map((c) => ({
                           value: c.id,
                           label: c.label,
@@ -341,7 +452,6 @@ export default function AddServices({ loader, toaster }) {
               }
             />
 
-            {/* ── Price ── */}
             <SectionRow
               left={{ title: "Price" }}
               right={
@@ -435,42 +545,126 @@ export default function AddServices({ loader, toaster }) {
                   "You can add optional padding time for things like preparation or clean-up.",
               }}
               right={
-                <div className="flex flex-col gap-2">
-                  <Label required>Duration</Label>
-                  <div className="flex items-center gap-2 w-44">
-                    <div className="flex items-center border border-gray-200 rounded-md overflow-hidden">
-                      <span className="px-2.5 py-1.5 text-sm text-gray-500 bg-gray-50 border-r border-gray-200">
+                <div className="flex flex-col gap-3 items-start">
+                  <div>
+                    <Label required>Duration</Label>
+                    <div className="flex items-center border border-gray-200 rounded-md overflow-hidden w-40">
+                      <span className="px-2.5 py-1.5 text-gray-500 bg-gray-50 border-r border-gray-200">
                         <Clock size={13} />
                       </span>
                       <Input
                         value={form.durationM}
-                        onChange={set("durationM")}
-                        className="w-18 text-center"
+                        onChange={(e) =>
+                          setForm((prev) => ({
+                            ...prev,
+                            durationM: e.target.value,
+                          }))
+                        }
+                        className="text-center"
                       />
                     </div>
                   </div>
-                  <LinkBtn>Add padding and processing times</LinkBtn>
+
+                  {!form.isPaddingAndProcessing && (
+                    <LinkBtn
+                      onClick={handleTogglePadding}
+                      className="text-blue-600 text-sm font-medium hover:underline "
+                    >
+                      Add padding and processing times
+                    </LinkBtn>
+                  )}
                 </div>
               }
             />
+
+            {form.isPaddingAndProcessing && (
+              <SectionRow
+                left={{
+                  title: "Padding and processing times",
+
+                  description:
+                    "Padding time will block out additional time in your calendar. Processing time will create a free gap after the service.",
+                }}
+                right={
+                  <div className="flex flex-col gap-3">
+                    <div className="space-y-3">
+                      <button
+                        onClick={handleRemovePadding}
+                        className="text-blue-600 text-sm font-medium hover:underline text-left"
+                      >
+                        Remove padding and processing times
+                      </button>
+
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center border border-gray-200 rounded-md overflow-hidden w-40">
+                          <span className="px-2.5 py-1.5 text-gray-500 bg-gray-50 border-r border-gray-200">
+                            <Clock size={13} />
+                          </span>
+                          <Input
+                            value={form.paddingBeforeTime}
+                            onChange={(e) =>
+                              setForm((prev) => ({
+                                ...prev,
+                                paddingBeforeTime: e.target.value,
+                              }))
+                            }
+                            className="text-center"
+                          />
+                        </div>
+                        <span className="text-sm text-gray-600">
+                          Padding before
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center border border-gray-200 rounded-md overflow-hidden w-40">
+                          <span className="px-2.5 py-1.5 text-gray-500 bg-gray-50 border-r border-gray-200">
+                            <Clock size={13} />
+                          </span>
+                          <Input
+                            value={form.paddingAfterTime}
+                            onChange={(e) =>
+                              setForm((prev) => ({
+                                ...prev,
+                                paddingAfterTime: e.target.value,
+                              }))
+                            }
+                            className="text-center"
+                          />
+                        </div>
+
+                        <select className="text-black border border-gray-200 rounded-md px-2 py-1 text-sm">
+                          <option>Padding after</option>
+                          <option>Processing time</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                }
+              />
+            )}
 
             <SectionRow
               left={{ title: "Tax" }}
               right={
                 <div className="flex flex-col gap-2">
                   <Label>Tax</Label>
+
                   <div className="w-28">
                     <Select
                       value={form.tax}
-                      onChange={set("tax")}
-                      options={["GST", "VAT", "None"]}
+                      onChange={handleTaxChange}
+                      options={["GST", "Not Applicable"]}
                     />
                   </div>
-                  <Checkbox
-                    checked={form.priceIncludesTax}
-                    onChange={setCheck("priceIncludesTax")}
-                    label="Price includes tax"
-                  />
+
+                  {form.tax !== "Not Applicable" && (
+                    <Checkbox
+                      checked={form.priceIncludesTax}
+                      onChange={setCheck("priceIncludesTax")}
+                      label="Price includes tax"
+                    />
+                  )}
                 </div>
               }
             />
@@ -668,6 +862,7 @@ export default function AddServices({ loader, toaster }) {
             <button
               type="button"
               className="px-4 py-2 text-sm font-medium text-slate-600 border border-gray-200 rounded-md bg-white hover:bg-gray-50 transition"
+              onClick={() => router.push("/Business/Services")}
             >
               Cancel
             </button>

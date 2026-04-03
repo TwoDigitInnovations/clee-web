@@ -12,64 +12,7 @@ import {
 import { Api } from "@/services/service";
 import DashboardHeader from "@/components/DashboardHeader";
 import { useRouter } from "next/navigation";
-
-const dummyCategories = [
-  { id: 1, name: "General" },
-  { id: 2, name: "New Clients" },
-  { id: 3, name: "Existing Clients" },
-  { id: 4, name: "Memberships" },
-];
-
-const dummyServices = [
-  {
-    id: 1,
-    categoryId: 1,
-    name: "Existing Client Choose on the Day Deposit Only",
-    duration: "1 hour",
-    price: "$99",
-    isFree: false,
-  },
-  {
-    id: 2,
-    categoryId: 1,
-    name: "Deep Tissue Massage Therapy",
-    duration: "45 mins",
-    price: "$75",
-    isFree: false,
-  },
-  {
-    id: 3,
-    categoryId: 1,
-    name: "Consultation Session",
-    duration: "30 mins",
-    price: "Free",
-    isFree: true,
-  },
-  {
-    id: 4,
-    categoryId: 1,
-    name: "Premium Full Package",
-    duration: "2 hours",
-    price: "$150",
-    isFree: false,
-  },
-  {
-    id: 5,
-    categoryId: 1,
-    name: "Standard Treatment",
-    duration: "45 mins",
-    price: "$85",
-    isFree: false,
-  },
-  {
-    id: 6,
-    categoryId: 1,
-    name: "Express Service",
-    duration: "15 mins",
-    price: "$30",
-    isFree: false,
-  },
-];
+import { ConfirmModal } from "@/components/deleteModel";
 
 function AddCategoryModal({
   isOpen,
@@ -205,11 +148,14 @@ function AddCategoryModal({
 }
 
 export default function Services(props) {
-  const [categories, setCategories] = useState(dummyCategories);
-  const [services, setServices] = useState(dummyServices);
-  const [activeCategory, setActiveCategory] = useState(1);
+  const [categories, setCategories] = useState([]);
+  const [services, setServices] = useState([]);
+  const [activeCategory, setActiveCategory] = useState(
+    categories[0]?._id || null,
+  );
   const [loading, setLoading] = useState(false);
   const [addCategoryOpen, setAddCategoryOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const router = useRouter();
 
   const fetchCategories = async () => {
@@ -224,9 +170,29 @@ export default function Services(props) {
       setLoading(false);
     }
   };
+  console.log("Active Category:", activeCategory);
 
   useEffect(() => {
+    if (categories.length > 0 && !activeCategory) {
+      setActiveCategory(categories[0]._id);
+    }
+  }, [categories]);
+
+  const fetchServices = async () => {
+    try {
+      setLoading(true);
+      const res = await Api("get", "services/getAll", "", null);
+      setLoading(false);
+      if (res?.status === true && res.data?.data?.length > 0) {
+        setServices(res.data.data);
+      }
+    } catch {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
     fetchCategories();
+    fetchServices();
   }, []);
 
   const handleCategorySave = (newCat) => {
@@ -235,14 +201,27 @@ export default function Services(props) {
   };
 
   const handleDeleteService = (id) => {
-    setServices((prev) => prev.filter((s) => s.id !== id));
+    if (!id) return;
+    props.loader(true);
+    Api("delete", `resource/delete/${id}`, "", router)
+      .then((res) => {
+        props.loader(false);
+        if (res?.status === true) {
+          props.toaster({ type: "success", message: "Deleted successfully" });
+          setOpen(false);
+          setServices((prev) => prev.filter((s) => s.id !== id));
+        }
+      })
+      .catch(() => props.loader(false));
   };
 
   const filteredServices = services.filter(
-    (s) => s.categoryId === activeCategory,
+    (s) => s.category?._id?.toString() === activeCategory?.toString(),
   );
+
   const activeLabel =
-    categories.find((c) => c.id === activeCategory)?.name ?? "";
+    categories.find((c) => c._id === activeCategory)?.name ?? "";
+
 
   return (
     <>
@@ -270,7 +249,7 @@ export default function Services(props) {
               className="w-full p-2 text-black border border-gray-300 rounded-lg text-sm outline-none bg-white"
             >
               {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
+                <option key={cat._id} value={cat._id}>
                   {cat.name}
                 </option>
               ))}
@@ -280,10 +259,10 @@ export default function Services(props) {
           <div className="hidden md:flex flex-col gap-1">
             {categories.map((cat) => (
               <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
+                key={cat._id}
+                onClick={() => setActiveCategory(cat._id)}
                 className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  activeCategory === cat.id
+                  activeCategory === cat._id
                     ? "bg-[#1e4e8c] text-white"
                     : "text-gray-600 hover:bg-gray-50"
                 }`}
@@ -291,12 +270,14 @@ export default function Services(props) {
                 <span>{cat.name}</span>
                 <span
                   className={`text-xs font-bold rounded-full px-1.5 py-0.5 ${
-                    activeCategory === cat.id
+                    activeCategory === cat._id
                       ? "bg-white/20 text-white"
                       : "bg-gray-100 text-gray-500"
                   }`}
                 >
-                  2
+                  {services.filter(
+                    (s) => s.category?._id?.toString() === cat._id.toString(),
+                  ).length}
                 </span>
               </button>
             ))}
@@ -345,7 +326,6 @@ export default function Services(props) {
               </span>
             </div>
 
-            
             {filteredServices.length === 0 ? (
               <div className="min-h-[450px] flex flex-col items-center justify-center text-center text-gray-400 text-sm">
                 <Settings size={40} className="mx-auto mb-3 text-gray-300" />
@@ -383,7 +363,9 @@ export default function Services(props) {
                     </div>
 
                     <div className="flex items-center gap-1 opacity-100 group-hover:opacity-90 transition-opacity">
-                      <button className="w-8 h-8 rounded-lg flex items-center justify-center text-[#1e4e8c] hover:bg-blue-50 transition-colors">
+                      <button className="w-8 h-8 rounded-lg flex items-center justify-center text-[#1e4e8c] hover:bg-blue-50 transition-colors"
+                      onClick={()=> router.push(`/Business/AddServices?id=${svc._id}`)}
+                      >
                         <svg
                           viewBox="0 0 24 24"
                           fill="none"
@@ -418,6 +400,16 @@ export default function Services(props) {
         toaster={props.toaster}
         fetchCategories={fetchCategories}
         router={router}
+      />
+
+      <ConfirmModal
+        isOpen={open}
+        setIsOpen={setOpen}
+        title="Delete Service"
+        message={`Are you sure you want to delete this service?`}
+        onConfirm={handleDeleteService}
+        yesText="Yes, Delete"
+        noText="Cancel"
       />
 
       {loading && (
