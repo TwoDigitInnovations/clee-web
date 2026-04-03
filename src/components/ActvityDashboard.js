@@ -1,4 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { useRouter } from "next/router";
+import {
+  fetchPendingBookings,
+  approveBooking,
+  declineBooking,
+} from "@/redux/actions/bookingActions";
 
 const pendingData = [
   {
@@ -308,10 +315,65 @@ const SectionHeader = ({ title, badge, action }) => (
 // ─── Main Dashboard ────────────────────────────────────────────────────────────
 
 export default function ActvityDashboard() {
-  const [pending, setPending] = useState(pendingData);
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const [pending, setPending] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleApprove = (id) => setPending((p) => p.filter((x) => x.id !== id));
-  const handleDecline = (id) => setPending((p) => p.filter((x) => x.id !== id));
+  useEffect(() => {
+    loadPendingBookings();
+  }, []);
+
+  const loadPendingBookings = async () => {
+    try {
+      setLoading(true);
+      const result = await dispatch(fetchPendingBookings(router));
+      if (result.success) {
+        // Transform backend data to match UI format
+        const transformedData = result.data.map((booking) => ({
+          id: booking._id,
+          name: booking.customer?.fullname || "Unknown",
+          date: new Date(booking.date).toLocaleDateString("en-US", {
+            weekday: "short",
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          }),
+          assigned: booking.staff?.fullname || "Unassigned",
+          assignedColor: "#F4A261",
+          service: booking.service || "Service not specified",
+          icon: "calendar",
+        }));
+        setPending(transformedData);
+      }
+      setLoading(false);
+    } catch (err) {
+      console.error("Failed to load pending bookings", err);
+      setLoading(false);
+    }
+  };
+
+  const handleApprove = async (id) => {
+    try {
+      const result = await dispatch(approveBooking(id, router));
+      if (result.success) {
+        setPending((p) => p.filter((x) => x.id !== id));
+      }
+    } catch (err) {
+      console.error("Failed to approve booking", err);
+    }
+  };
+
+  const handleDecline = async (id) => {
+    try {
+      const result = await dispatch(declineBooking(id, router));
+      if (result.success) {
+        setPending((p) => p.filter((x) => x.id !== id));
+      }
+    } catch (err) {
+      console.error("Failed to decline booking", err);
+    }
+  };
 
   return (
 <div className="min-h-screen bg-slate-50 ">
@@ -333,15 +395,22 @@ export default function ActvityDashboard() {
       />
 
       {pending.length === 0 ? (
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm flex flex-col items-center text-center">
-          <div className="text-2xl sm:text-3xl mb-2">✅</div>
-          <p className="text-sm font-bold text-slate-700">
-            All caught up!
-          </p>
-          <p className="text-xs text-slate-400 mt-1">
-            No pending approvals right now.
-          </p>
-        </div>
+        loading ? (
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm flex flex-col items-center text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-custom-blue mb-3"></div>
+            <p className="text-sm text-slate-600">Loading pending bookings...</p>
+          </div>
+        ) : (
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm flex flex-col items-center text-center">
+            <div className="text-2xl sm:text-3xl mb-2">✅</div>
+            <p className="text-sm font-bold text-slate-700">
+              All caught up!
+            </p>
+            <p className="text-xs text-slate-400 mt-1">
+              No pending approvals right now.
+            </p>
+          </div>
+        )
       ) : (
         <div className="space-y-3">
           {pending.map((item) => (

@@ -78,3 +78,42 @@ export const getBookingById = (id, router) => async (dispatch) => {
     throw err;
   }
 };
+
+export const fetchPendingBookings = (router) => async (dispatch) => {
+  try {
+    const res = await Api("get", "booking/getAll?status=Pending", "", router);
+    if (res?.status) {
+      const bookingsData = Array.isArray(res.data)
+        ? res.data
+        : res.data?.data || [];
+      return { success: true, data: bookingsData };
+    }
+    return { success: false, data: [] };
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const approveBooking = (id, router) => async (dispatch) => {
+  try {
+    const res = await Api("put", `booking/approve/${id}`, {}, router);
+    if (res?.status) {
+      return { success: true, message: res.message };
+    }
+    return { success: false, message: res.message };
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const declineBooking = (id, router) => async (dispatch) => {
+  try {
+    const res = await Api("put", `booking/decline/${id}`, {}, router);
+    if (res?.status) {
+      return { success: true, message: res.message };
+    }
+    return { success: false, message: res.message };
+  } catch (err) {
+    throw err;
+  }
+};

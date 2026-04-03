@@ -114,11 +114,11 @@ function Calender(props) {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [editWaitlistId, setEditWaitlistId] = useState(null);
   const [staffList, setStaffList] = useState([]);
-  const menuRef = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
+ 
+      if (!e.target.closest('.waitlist-menu-container')) {
         setOpenMenuId(null);
       }
     };
@@ -360,13 +360,14 @@ function Calender(props) {
                               </p>
                             </div>
 
-                            <div className="relative" ref={menuRef}>
+                            <div className="relative waitlist-menu-container">
                               <button
-                                onClick={() =>
+                                onClick={(e) => {
+                                  e.stopPropagation();
                                   setOpenMenuId(
                                     openMenuId === w._id ? null : w._id
-                                  )
-                                }
+                                  );
+                                }}
                                 className="text-slate-400 hover:text-slate-600 p-1 rounded-md"
                               >
                                 <EllipsisVertical size={20} />
@@ -657,7 +658,7 @@ function Calender(props) {
                 price: selectedBooking.price || 0,
                 customer: {
                   name: selectedBooking.customer?.fullname || "Unknown",
-                  phone: selectedBooking.customer?.phone || "N/A",
+                  phone: selectedBooking.customer?.phone || selectedBooking.customer?.mobile || "N/A",
                   email: selectedBooking.customer?.email || "N/A",
                 },
                 history: [],
@@ -665,6 +666,10 @@ function Calender(props) {
               onClose={() => {
                 setOpen1(false);
                 setSelectedBooking(null);
+              }}
+              onBookAgain={(bookingData) => {
+                setOpen1(false);
+                setIsOpen(true);
               }}
             />
           )}
