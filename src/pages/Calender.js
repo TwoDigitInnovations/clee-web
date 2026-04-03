@@ -13,6 +13,17 @@ import {
 import { useState, useRef, useEffect } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 import ViewAppointmentModal from "@/components/ViewAppointmentModal";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchBookings,
+  fetchUpcomingBookings,
+} from "@/redux/actions/bookingActions";
+import {
+  fetchWaitlist,
+  deleteWaitlist,
+} from "@/redux/actions/waitlistActions";
+import { Api } from "@/services/service";
+import { useRouter } from "next/router";
 
 const STAFF = [
   {
@@ -29,166 +40,7 @@ const STAFF = [
   },
 ];
 
-const INITIAL_BOOKINGS = [
-  {
-    id: 1,
-    staffId: 1,
-    customer: "Jessica Miller",
-    service: "Hair Cut & Styling",
-    startHour: 10,
-    durationMins: 60,
-    color: "bg-amber-100 border-amber-400 text-amber-900",
-  },
-  {
-    id: 2,
-    staffId: 2,
-    customer: "Robert Chen",
-    service: "Color Correction",
-    startHour: 11,
-    durationMins: 60,
-    color: "bg-blue-100 border-blue-400 text-blue-900",
-  },
-  {
-    id: 3,
-    staffId: 1,
-    customer: "Sarah Williams",
-    service: "Full Balayage",
-    startHour: 13,
-    durationMins: 60,
-    color: "bg-emerald-100 border-emerald-400 text-emerald-900",
-  },
-];
-
-const UPCOMING = [
-  {
-    id: 1,
-    name: "Zara Hang",
-    time: "10:00 AM",
-    service: "Haircut",
-    avatar:
-      "https://api.dicebear.com/7.x/micah/svg?seed=zara&backgroundColor=ffd5dc",
-  },
-  {
-    id: 2,
-    name: "Michaela Swamy",
-    time: "11:30 AM",
-    service: "Color & Style",
-    avatar:
-      "https://api.dicebear.com/7.x/micah/svg?seed=michaela&backgroundColor=c0aede",
-  },
-  {
-    id: 3,
-    name: "David Chen",
-    time: "01:00 PM",
-    service: "Beard Trim",
-    avatar:
-      "https://api.dicebear.com/7.x/micah/svg?seed=david&backgroundColor=b6e3f4",
-  },
-  {
-    id: 4,
-    name: "Sarah Jenkins",
-    time: "02:30 PM",
-    service: "Blowout",
-    avatar:
-      "https://api.dicebear.com/7.x/micah/svg?seed=sarahj&backgroundColor=d1f4e0",
-  },
-];
-
-const appointmentMock = {
-  clinic: "Chebo Clinic",
-  status: "Confirmed",
-
-  service:
-    "Existing Client Choose on the Day Deposit (Credited to Procedure)(Procedure Performed on Day)",
-
-  staff: "Staff 1",
-  resource: null,
-
-  date: "13 Apr 2026",
-  time: "10:00AM",
-
-  duration: "1 hour",
-  price: 99,
-
-  customer: {
-    name: "EASTOP, KAREN Eastop",
-    phone: "408295781",
-    email: "karen.l.eastop@gmail.com",
-  },
-
-  history: [
-    {
-      id: 1,
-      type: "alert",
-      date: "25 Mar 2026 6:53PM",
-      message:
-        "Customer appointment amendment email successfully sent to karen.l.eastop@gmail.com",
-    },
-    {
-      id: 2,
-      type: "alert",
-      date: "25 Mar 2026 6:52PM",
-      message:
-        "Customer appointment amendment SMS successfully sent to 61408295781",
-    },
-    {
-      id: 3,
-      type: "amended",
-      date: "25 Mar 2026 6:42PM - by Chebo Clinic",
-      message:
-        "Service 1 - appointment date changed from 13 Apr 2026 10:20AM to 13 Apr 2026 10:00AM",
-    },
-    {
-      id: 4,
-      type: "amended",
-      date: "25 Mar 2026 6:42PM - by Chebo Clinic",
-      message: "Reschedule from 14 Apr 2026 10:00AM to 13 Apr 2026 10:20AM",
-    },
-    {
-      id: 5,
-      type: "alert",
-      date: "10 Mar 2026 12:29PM",
-      message:
-        "Customer appointment confirmed email successfully sent to karen.l.eastop@gmail.com",
-    },
-    {
-      id: 6,
-      type: "alert",
-      date: "10 Mar 2026 12:29PM",
-      message:
-        "Merchant appointment confirmed email successfully sent to serina1590@live.com",
-    },
-  ],
-};
-
-const WAITLIST = [
-  {
-    id: 1,
-    name: "Hannah Broadhurst",
-    added: "6:45am",
-    notes: "No notes",
-    service: "Full Highlights",
-    urgent: false,
-  },
-  {
-    id: 2,
-    name: "Fairuz Bhuiyan",
-    added: "7:15am",
-    notes: "Prefers morning",
-    service: "Women's Cut",
-    urgent: false,
-  },
-  {
-    id: 3,
-    name: "Jacqueline Redfern",
-    added: "8:00am",
-    notes: "Urgent request",
-    service: "Balayage",
-    urgent: true,
-  },
-];
-
-const HOURS = Array.from({ length: 13 }, (_, i) => i + 8); // 8am to 8pm
+const HOURS = Array.from({ length: 13 }, (_, i) => i + 8);
 const VIEWS = ["Day", "Week", "Month"];
 
 function formatDate(date, view) {
@@ -217,32 +69,51 @@ function Avatar({ src, name, size = 8 }) {
   );
 }
 
-function BookingBlock({ booking, pixelsPerHour,setOpen1 }) {
+function BookingBlock({ booking, pixelsPerHour, onBookingClick }) {
   const top = (booking.startHour - 8) * pixelsPerHour;
   const height = (booking.durationMins / 60) * pixelsPerHour;
+  
+  const colorMap = {
+    Confirmed: "bg-amber-100 border-amber-400 text-amber-900",
+    Pending: "bg-blue-100 border-blue-400 text-blue-900",
+    Completed: "bg-emerald-100 border-emerald-400 text-emerald-900",
+    Cancelled: "bg-red-100 border-red-400 text-red-900",
+  };
+  
+  const color = colorMap[booking.status] || "bg-gray-100 border-gray-400 text-gray-900";
+  
   return (
     <div
-      className={`absolute left-1 right-1 rounded-lg border-l-4 px-2 py-2 shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-shadow ${booking.color}`}
+      className={`absolute left-1 right-1 rounded-lg border-l-4 px-2 py-2 shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-shadow ${color}`}
       style={{ top: top + "px", height: height + "px" }}
-      onClick={()=> setOpen1(true)}
+      onClick={() => onBookingClick(booking)}
     >
       <p className="text-xs font-semibold leading-tight truncate">
         {booking.service}
       </p>
-      <p className="text-xs opacity-70 truncate">{booking.customer}</p>
+      <p className="text-xs opacity-70 truncate">
+        {booking.customer?.fullname || "Unknown"}
+      </p>
     </div>
   );
 }
 function Calender(props) {
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const { bookings, upcomingBookings } = useSelector((state) => state.booking);
+  const { waitlist } = useSelector((state) => state.waitlist);
+
   const [tab, setTab] = useState("upcoming");
   const [view, setView] = useState("Day");
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 2, 16));
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [showViewMenu, setShowViewMenu] = useState(false);
   const [open, setOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [openMenuId, setOpenMenuId] = useState(null);
-  const [editid, setEditId] = useState("");
-  const [open1,setOpen1] = useState(false);
+  const [open1, setOpen1] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [editWaitlistId, setEditWaitlistId] = useState(null);
+  const [staffList, setStaffList] = useState([]);
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -256,6 +127,79 @@ function Calender(props) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    loadStaff();
+  }, []);
+
+  useEffect(() => {
+    loadBookings();
+    loadUpcomingBookings();
+    loadWaitlist();
+  }, [currentDate]);
+
+  const loadStaff = async () => {
+    try {
+      const res = await Api("get", "auth/getAllUser?role=staff", "", router);
+      if (res?.status && res.data) {
+        const staffArray = Array.isArray(res.data) ? res.data : res.data.data || [];
+        const staffData = staffArray.map((s) => ({
+          id: s._id,
+          name: s.fullname,
+          avatar: s.image || `https://api.dicebear.com/7.x/micah/svg?seed=${s.fullname}&backgroundColor=b6e3f4`,
+        }));
+        setStaffList(staffData.length > 0 ? staffData : STAFF);
+      } else {
+        setStaffList(STAFF);
+      }
+    } catch (err) {
+      console.error("Failed to fetch staff", err);
+      setStaffList(STAFF);
+    }
+  };
+
+  const loadBookings = async () => {
+    try {
+      props.loader(true);
+      await dispatch(fetchBookings(currentDate, router));
+      props.loader(false);
+    } catch (err) {
+      props.loader(false);
+      props.toaster({ type: "error", message: "Failed to fetch bookings" });
+    }
+  };
+
+  const loadUpcomingBookings = async () => {
+    try {
+      await dispatch(fetchUpcomingBookings(router));
+    } catch (err) {
+      console.error("Failed to fetch upcoming bookings", err);
+    }
+  };
+
+  const loadWaitlist = async () => {
+    try {
+      await dispatch(fetchWaitlist(router));
+    } catch (err) {
+      console.error("Failed to fetch waitlist", err);
+    }
+  };
+
+  const handleDeleteWaitlist = async (id) => {
+    try {
+      props.loader(true);
+      const result = await dispatch(deleteWaitlist(id, router));
+      if (result.success) {
+        props.toaster({ type: "success", message: "Removed from waitlist" });
+        await loadWaitlist();
+      }
+      props.loader(false);
+      setOpenMenuId(null);
+    } catch (err) {
+      props.loader(false);
+      props.toaster({ type: "error", message: "Failed to remove from waitlist" });
+    }
+  };
+
   const pixelsPerHour = 72;
 
   function navigate(dir) {
@@ -267,11 +211,10 @@ function Calender(props) {
   }
 
   function goToday() {
-    setCurrentDate(new Date(2026, 2, 16));
+    setCurrentDate(new Date());
   }
 
-  const isToday =
-    currentDate.toDateString() === new Date(2026, 2, 16).toDateString();
+  const isToday = currentDate.toDateString() === new Date().toDateString();
 
   return (
     <>
@@ -319,35 +262,59 @@ function Calender(props) {
           <div className="flex-1 overflow-y-auto">
             {tab === "upcoming" ? (
               <div className="divide-y divide-slate-50">
-                {UPCOMING.map((u) => (
-                  <div
-                    key={u.id}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 cursor-pointer group transition-colors"
-                  >
-                    <Avatar src={u.avatar} name={u.name} size={10} />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-slate-800 truncate">
-                        {u.name}
-                      </p>
-                      <p className="text-xs text-slate-500">
-                        {u.time} · {u.service}
-                      </p>
-                    </div>
-                    <svg
-                      className="w-4 h-4 text-slate-300 group-hover:text-slate-500 transition-colors shrink-0"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
+                {Array.isArray(upcomingBookings) && upcomingBookings.length > 0 ? (
+                  upcomingBookings.map((u) => {
+                    const hour = u.startHour;
+                    const timeStr =
+                      hour === 12
+                        ? "12:00 PM"
+                        : hour < 12
+                          ? `${hour}:00 AM`
+                          : `${hour - 12}:00 PM`;
+                    
+                    return (
+                      <div
+                        key={u._id}
+                        className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 cursor-pointer group transition-colors"
+                        onClick={() => {
+                          setSelectedBooking(u);
+                          setOpen1(true);
+                        }}
+                      >
+                        <Avatar 
+                          src={u.customer?.image || `https://api.dicebear.com/7.x/micah/svg?seed=${u.customer?.fullname}&backgroundColor=b6e3f4`} 
+                          name={u.customer?.fullname || "Unknown"} 
+                          size={10} 
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-slate-800 truncate">
+                            {u.customer?.fullname || "Unknown"}
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            {timeStr} · {u.service}
+                          </p>
+                        </div>
+                        <svg
+                          className="w-4 h-4 text-slate-300 group-hover:text-slate-500 transition-colors shrink-0"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="px-4 py-8 text-center text-slate-400 text-sm">
+                    No upcoming bookings
                   </div>
-                ))}
+                )}
               </div>
             ) : (
               <div className="p-4 space-y-4">
@@ -367,91 +334,109 @@ function Calender(props) {
                   </button>
                 </div>
                 <div className="space-y-3">
-                  {WAITLIST.map((w) => (
-                    <div
-                      key={w.id}
-                      className="bg-slate-50 rounded-2xl p-3 border border-slate-100 hover:border-slate-200 transition-colors cursor-pointer"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="text-sm font-semibold text-slate-800">
-                            {w.name}
-                          </p>
-                          <p className="text-xs text-slate-500 mt-0.5">
-                            {w.added} · {w.notes}
-                          </p>
-                        </div>
+                  {Array.isArray(waitlist) && waitlist.length > 0 ? (
+                    waitlist.map((w) => {
+                      const addedTime = new Date(w.createdAt).toLocaleTimeString(
+                        "en-US",
+                        {
+                          hour: "numeric",
+                          minute: "2-digit",
+                          hour12: true,
+                        }
+                      );
 
-                        {/* MENU */}
-                        <div className="relative" ref={menuRef}>
-                          <button
-                            onClick={() =>
-                              setOpenMenuId(openMenuId === w.id ? null : w.id)
-                            }
-                            className="text-slate-400 hover:text-slate-600 p-1 rounded-md"
-                          >
-                            <EllipsisVertical size={20} />
-                          </button>
-
-                          {openMenuId === w.id && (
-                            <div className="absolute right-0 mt-2 w-36 bg-white border border-gray-100 rounded-xl shadow-lg z-50">
-                              <button
-                                onClick={() => {
-                                  setOpenMenuId(null);
-                                  setOpen(true);
-                                  setEditId(id);
-                                  // onEdit(w);
-                                }}
-                                className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-gray-50 rounded-t-xl"
-                              >
-                                <Pencil size={16} />
-                                Edit
-                              </button>
-
-                              <button
-                                onClick={() => {
-                                  setOpenMenuId(null);
-                                  // onDelete(w);
-                                }}
-                                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50 rounded-b-xl"
-                              >
-                                <Trash2 size={16} />
-                                Remove
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between mt-2">
-                        <span
-                          className={`text-xs font-medium px-2.5 py-1 rounded-full ${
-                            w.urgent
-                              ? "bg-red-100 text-red-700"
-                              : "bg-blue-50 text-custom-blue"
-                          }`}
+                      return (
+                        <div
+                          key={w._id}
+                          className="bg-slate-50 rounded-2xl p-3 border border-slate-100 hover:border-slate-200 transition-colors cursor-pointer"
                         >
-                          {w.service}
-                        </span>
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <p className="text-sm font-semibold text-slate-800">
+                                {w.customer?.fullname || "Unknown"}
+                              </p>
+                              <p className="text-xs text-slate-500 mt-0.5">
+                                {addedTime} · {w.notes}
+                              </p>
+                            </div>
 
-                        <button className="p-1 text-slate-400 hover:text-blue-600 transition-colors">
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                            />
-                          </svg>
-                        </button>
-                      </div>
+                            <div className="relative" ref={menuRef}>
+                              <button
+                                onClick={() =>
+                                  setOpenMenuId(
+                                    openMenuId === w._id ? null : w._id
+                                  )
+                                }
+                                className="text-slate-400 hover:text-slate-600 p-1 rounded-md"
+                              >
+                                <EllipsisVertical size={20} />
+                              </button>
+
+                              {openMenuId === w._id && (
+                                <div className="absolute right-0 mt-2 w-36 bg-white border border-gray-100 rounded-xl shadow-lg z-50">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setOpenMenuId(null);
+                                      setEditWaitlistId(w._id);
+                                      setOpen(true);
+                                    }}
+                                    className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-gray-50 rounded-t-xl"
+                                  >
+                                    <Pencil size={16} />
+                                    Edit
+                                  </button>
+
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteWaitlist(w._id);
+                                    }}
+                                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50 rounded-b-xl"
+                                  >
+                                    <Trash2 size={16} />
+                                    Remove
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between mt-2">
+                            <span
+                              className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+                                w.urgent
+                                  ? "bg-red-100 text-red-700"
+                                  : "bg-blue-50 text-custom-blue"
+                              }`}
+                            >
+                              {w.service}
+                            </span>
+
+                            <button className="p-1 text-slate-400 hover:text-blue-600 transition-colors">
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="px-4 py-8 text-center text-slate-400 text-sm">
+                      No waitlist entries
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
             )}
@@ -580,8 +565,13 @@ function Calender(props) {
                 ))}
               </div>
 
-              {STAFF.map((staff, idx) => (
-                <div
+              {staffList.map((staff, idx) => {
+                const staffBookings = Array.isArray(bookings) 
+                  ? bookings.filter((b) => b.staff?._id === staff.id)
+                  : [];
+                
+                return (
+                  <div
                   key={staff.id}
                   className="flex-1 min-w-[200px]"
                   style={{
@@ -606,25 +596,32 @@ function Calender(props) {
                         style={{ height: pixelsPerHour + "px" }}
                       />
                     ))}
-                    {INITIAL_BOOKINGS.filter((b) => b.staffId === staff.id).map(
-                      (b) => (
-                        <BookingBlock
-                          key={b.id}
-                          booking={b}
-                          pixelsPerHour={pixelsPerHour}
-                          setOpen1={setOpen1}
-                        />
-                      ),
-                    )}
+                    {staffBookings.map((b) => (
+                      <BookingBlock
+                        key={b._id}
+                        booking={b}
+                        pixelsPerHour={pixelsPerHour}
+                        onBookingClick={(booking) => {
+                          setSelectedBooking(booking);
+                          setOpen1(true);
+                        }}
+                      />
+                    ))}
                   </div>
                 </div>
-              ))}
+              );
+            })}
             </div>
           </div>
 
           {open && (
             <AddWaitlist
-              onClose={() => setOpen(false)}
+              onClose={() => {
+                setOpen(false);
+                setEditWaitlistId(null);
+                loadWaitlist();
+              }}
+              editId={editWaitlistId}
               loader={props.loader}
               toaster={props.toaster}
             />
@@ -638,10 +635,37 @@ function Calender(props) {
             />
           )}
 
-          {open1 && (
+          {open1 && selectedBooking && (
             <ViewAppointmentModal
-              data={appointmentMock}
-              onClose={() => setOpen1(false)}
+              data={{
+                clinic: "Chebo Clinic",
+                status: selectedBooking.status,
+                service: selectedBooking.service,
+                staff: selectedBooking.staff?.fullname || "Unknown",
+                resource: null,
+                date: new Date(selectedBooking.date).toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                }),
+                time: selectedBooking.startHour === 12 
+                  ? "12:00PM" 
+                  : selectedBooking.startHour < 12 
+                    ? `${selectedBooking.startHour}:00AM` 
+                    : `${selectedBooking.startHour - 12}:00PM`,
+                duration: `${selectedBooking.durationMins} mins`,
+                price: selectedBooking.price || 0,
+                customer: {
+                  name: selectedBooking.customer?.fullname || "Unknown",
+                  phone: selectedBooking.customer?.phone || "N/A",
+                  email: selectedBooking.customer?.email || "N/A",
+                },
+                history: [],
+              }}
+              onClose={() => {
+                setOpen1(false);
+                setSelectedBooking(null);
+              }}
             />
           )}
         </main>
