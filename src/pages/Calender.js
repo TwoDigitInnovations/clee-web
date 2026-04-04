@@ -500,9 +500,9 @@ function Calender(props) {
               </button>
             </div>
 
-            {/* Right Side Desktop */}
+       
             <div className="hidden sm:flex items-center gap-2 ml-auto">
-              {/* View Dropdown */}
+              
               <div className="relative">
                 <button
                   onClick={() => setShowViewMenu((v) => !v)}

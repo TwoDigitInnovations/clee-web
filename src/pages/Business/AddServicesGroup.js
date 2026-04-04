@@ -2,64 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ChevronDown, Info, ChevronRight } from "lucide-react";
 import DashboardHeader from "@/components/DashboardHeader";
 import { useRouter } from "next/navigation";
-
-const dummyCategories = [
-  { id: 1, name: "General", count: 6 },
-  { id: 2, name: "New Clients", count: 2 },
-  { id: 3, name: "Existing Clients", count: 2 },
-  { id: 4, name: "Memberships", count: 0 },
-];
-
-const dummyServices = [
-  {
-    id: 1,
-    categoryId: 1,
-    name: "Existing Client Choose on the Day Deposit Only",
-    duration: "1 hour",
-    price: "$99",
-    isFree: false,
-  },
-  {
-    id: 2,
-    categoryId: 1,
-    name: "Deep Tissue Massage Therapy",
-    duration: "45 mins",
-    price: "$75",
-    isFree: false,
-  },
-  {
-    id: 3,
-    categoryId: 1,
-    name: "Consultation Session",
-    duration: "30 mins",
-    price: "Free",
-    isFree: true,
-  },
-  {
-    id: 4,
-    categoryId: 1,
-    name: "Premium Full Package",
-    duration: "2 hours",
-    price: "$150",
-    isFree: false,
-  },
-  {
-    id: 5,
-    categoryId: 1,
-    name: "Standard Treatment",
-    duration: "45 mins",
-    price: "$85",
-    isFree: false,
-  },
-  {
-    id: 6,
-    categoryId: 1,
-    name: "Express Service",
-    duration: "15 mins",
-    price: "$30",
-    isFree: false,
-  },
-];
+import { Api } from "@/services/service";
 
 const AddServicesGroup = (props) => {
   const [formData, setFormData] = useState({
@@ -73,23 +16,42 @@ const AddServicesGroup = (props) => {
     differentPolicyType: "Do not accept online payments",
   });
 
-  const [servicesList, setServicesList] = useState([]);
   const [category, setCategory] = useState([]);
   const [errors, setErrors] = useState({});
   const router = useRouter();
   const [addedServices, setAddedServices] = useState([]);
+  const [services, setServices] = useState([]);
 
+  const fetchServices = async () => {
+    try {
+      props.loader(true);
+      const res = await Api("get", "services/getAll", "", null);
+      props.loader(false);
+      if (res?.status === true && res.data?.data?.length > 0) {
+        setServices(res.data.data);
+      }
+    } catch {
+      props.loader(false);
+      props.toaster("error", "Failed to fetch services");
+    }
+  };
   useEffect(() => {
     fetchCategory();
+    fetchServices();
   }, []);
 
   const fetchCategory = async () => {
     try {
+      props.loader(true);
       const res = await Api("get", "Category/getAll", "", router);
+      props.loader(false);
       if (res?.status === true && res.data?.data?.length > 0) {
-        setCategory(res.data.data.map((c) => ({ id: c.id, label: c.name })));
+        setCategory(res.data.data.map((c) => ({ id: c._id, label: c.name })));
       }
-    } catch {}
+    } catch {
+      props.loader(false);
+      props.toaster("error", "Failed to fetch categories");
+    }
   };
 
   const handleChange = (e) => {
@@ -101,23 +63,10 @@ const AddServicesGroup = (props) => {
   };
 
   const handleSubmit = async () => {
-    const { isValid, errors: errs } = validate(formData);
-
-    if (!isValid) {
-      setErrors(errs);
-      props.toaster("error", Object.values(errs)[0]);
-      return;
-    }
-
-    setErrors({});
-
-    const namedItems = formData.items.map((_, index) =>
-      getItemName(formData.resource_name, index, formData.items),
-    );
+    console.log(formData);
 
     const payload = {
-      resource_name: formData.resource_name,
-      items: namedItems,
+      ...formData,
     };
 
     try {
@@ -125,9 +74,9 @@ const AddServicesGroup = (props) => {
 
       let res;
       if (id) {
-        res = await Api("put", `resource/update/${id}`, payload, router);
+        res = await Api("put", `service-groups/update/${id}`, payload, router);
       } else {
-        res = await Api("post", `resource/create`, payload, router);
+        res = await Api("post", `service-groups/create`, payload, router);
       }
 
       props.loader(false);
@@ -136,11 +85,11 @@ const AddServicesGroup = (props) => {
         props.toaster(
           "success",
           id
-            ? "Resource updated successfully"
-            : "Resource created successfully",
+            ? "Service group updated successfully"
+            : "Service group created successfully",
         );
         if (!id) setFormData(getInitialState());
-        router.push("/Business/Resources");
+        router.push("/Business/Services");
       } else {
         props.toaster("error", res?.message || "Something went wrong");
       }
@@ -151,19 +100,18 @@ const AddServicesGroup = (props) => {
   };
 
   const handleAddService = () => {
-    const selected = servicesList.find(
-      (s) => s.id === formData.selectedService,
-    );
+    const selected = services.find((s) => s._id === formData.selectedService);
 
     if (!selected) return;
+    console.log(selected);
 
     const newService = {
-      id: selected.id,
+      id: selected._id,
       name: selected.name,
       duration: "00:30",
       paddingBefore: "00:00",
       paddingAfter: "00:00",
-      cost: 0,
+      cost: selected.price || 0,
       overridePrice: false,
     };
 
@@ -225,6 +173,7 @@ const AddServicesGroup = (props) => {
                     value={formData.Services_name}
                     onChange={handleChange}
                     type="text"
+                    placeholder="Enter service group name..."
                     className="w-full text-sm p-2 border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 outline-none"
                   />
                 </div>
@@ -242,7 +191,7 @@ const AddServicesGroup = (props) => {
                       <option value="">No category</option>
                       {category.map((cat, idx) => (
                         <option key={idx} value={cat.id}>
-                          {cat.name}
+                          {cat.label}
                         </option>
                       ))}
                     </select>
@@ -298,19 +247,20 @@ const AddServicesGroup = (props) => {
             <div className="md:col-span-2 space-y-4">
               {addedServices.length > 0 ? (
                 <div className="border rounded-lg overflow-hidden">
-                  <div className="grid grid-cols-6 gap-4 bg-gray-50 p-3 text-sm font-semibold text-gray-600">
+                  <div className="grid grid-cols-7 gap-4 bg-gray-50 p-3 text-sm font-semibold text-gray-600">
                     <div>Name</div>
                     <div>Duration</div>
                     <div>Padding before</div>
                     <div>Padding after</div>
                     <div>Cost</div>
+                    <div> Over ride Price </div>
                     <div></div>
                   </div>
 
                   {addedServices.map((item, idx) => (
                     <div
                       key={idx}
-                      className="grid grid-cols-6 gap-4 items-center p-3 border-t"
+                      className="grid grid-cols-7 gap-4 items-center p-3 border-t"
                     >
                       <div className="text-sm text-gray-700">{item.name}</div>
 
@@ -359,6 +309,14 @@ const AddServicesGroup = (props) => {
                         className="border rounded px-2 py-1"
                       />
 
+                       <input
+                        type="checkbox"
+                        
+                        value={item.overridePrice}
+              
+                        className="border rounded px-2 py-1"
+                      />
+
                       <button
                         onClick={() => {
                           setAddedServices((prev) =>
@@ -398,8 +356,8 @@ const AddServicesGroup = (props) => {
                     className="w-full p-2 border border-gray-300 rounded appearance-none outline-none pr-8 bg-white"
                   >
                     <option value="">Select service</option>
-                    {servicesList.map((service, idx) => (
-                      <option key={idx} value={service.id}>
+                    {services.map((service, idx) => (
+                      <option key={idx} value={service._id}>
                         {service.name}
                       </option>
                     ))}

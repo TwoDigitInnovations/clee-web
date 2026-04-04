@@ -150,12 +150,11 @@ function AddCategoryModal({
 export default function Services(props) {
   const [categories, setCategories] = useState([]);
   const [services, setServices] = useState([]);
-  const [activeCategory, setActiveCategory] = useState(
-    categories[0]?._id || null,
-  );
+  const [activeCategory, setActiveCategory] = useState(null);
   const [loading, setLoading] = useState(false);
   const [addCategoryOpen, setAddCategoryOpen] = useState(false);
   const [open, setOpen] = useState(false);
+  const [serviceToDelete, setServiceToDelete] = useState('');
   const router = useRouter();
 
   const fetchCategories = async () => {
@@ -201,15 +200,17 @@ export default function Services(props) {
   };
 
   const handleDeleteService = (id) => {
-    if (!id) return;
+    if (!serviceToDelete) return;
     props.loader(true);
-    Api("delete", `resource/delete/${id}`, "", router)
+     id = serviceToDelete;
+    Api("delete", `services/delete/${id}`, "", router)
       .then((res) => {
         props.loader(false);
         if (res?.status === true) {
           props.toaster({ type: "success", message: "Deleted successfully" });
           setOpen(false);
           setServices((prev) => prev.filter((s) => s.id !== id));
+          fetchServices();
         }
       })
       .catch(() => props.loader(false));
@@ -221,7 +222,6 @@ export default function Services(props) {
 
   const activeLabel =
     categories.find((c) => c._id === activeCategory)?.name ?? "";
-
 
   return (
     <>
@@ -275,9 +275,11 @@ export default function Services(props) {
                       : "bg-gray-100 text-gray-500"
                   }`}
                 >
-                  {services.filter(
-                    (s) => s.category?._id?.toString() === cat._id.toString(),
-                  ).length}
+                  {
+                    services.filter(
+                      (s) => s.category?._id?.toString() === cat._id.toString(),
+                    ).length
+                  }
                 </span>
               </button>
             ))}
@@ -363,8 +365,11 @@ export default function Services(props) {
                     </div>
 
                     <div className="flex items-center gap-1 opacity-100 group-hover:opacity-90 transition-opacity">
-                      <button className="w-8 h-8 rounded-lg flex items-center justify-center text-[#1e4e8c] hover:bg-blue-50 transition-colors"
-                      onClick={()=> router.push(`/Business/AddServices?id=${svc._id}`)}
+                      <button
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-[#1e4e8c] hover:bg-blue-50 transition-colors"
+                        onClick={() =>
+                          router.push(`/Business/AddServices?id=${svc._id}`)
+                        }
                       >
                         <svg
                           viewBox="0 0 24 24"
@@ -378,7 +383,10 @@ export default function Services(props) {
                         </svg>
                       </button>
                       <button
-                        onClick={() => handleDeleteService(svc.id)}
+                        onClick={() => {
+                          setOpen(true);
+                          setServiceToDelete(svc._id);
+                        }}
                         className="w-8 h-8 rounded-lg flex items-center justify-center text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors"
                       >
                         <Trash2 size={14} />

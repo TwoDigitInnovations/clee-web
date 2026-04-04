@@ -379,7 +379,7 @@ export default function AddServices({ loader, toaster }) {
                 Services
               </span>
               <span>›</span>
-              <span className="text-slate-600">Edit Services</span>
+              <span className="text-slate-600">{id ? "Edit Service" : "Add Service"}</span>
             </div>
             <h1 className="text-xl font-bold text-slate-800">Services</h1>
           </div>
