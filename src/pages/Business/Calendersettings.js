@@ -1,52 +1,150 @@
 import DashboardHeader from '@/components/DashboardHeader'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { ChevronDown, Plus, Trash2, LockKeyhole } from 'lucide-react'
+import { useDispatch, useSelector } from 'react-redux'
+import { useRouter } from 'next/router'
+import Swal from 'sweetalert2'
+import {
+  getCalendarSettings,
+  updateCalendarSettings,
+} from '@/redux/actions/calendarSettingsActions'
 
 function Calendersettings() {
-  const [startOfWeek, setStartOfWeek] = useState('Sunday')
-  const [startTime, setStartTime] = useState('9:00')
-  const [timeIncrement, setTimeIncrement] = useState('5 minutes')
-  const [showWeekNumbers, setShowWeekNumbers] = useState(false)
-  const [showCalendarWeekends, setShowCalendarWeekends] = useState(false)
-  const [initialView, setInitialView] = useState('Staff view')
-  const [addCustomerNote, setAddCustomerNote] = useState(false)
-  const [allowGroupBookings, setAllowGroupBookings] = useState(false)
-  const [showAppointments, setShowAppointments] = useState(false)
-  const [addOutlookCalendar, setAddOutlookCalendar] = useState(false)
-  const [emailVerification, setEmailVerification] = useState(false)
-  const [dailySummary, setDailySummary] = useState(false)
-  const [inclusionField, setInclusionField] = useState(false)
-  const [displayPronouns, setDisplayPronouns] = useState(false)
-  const [covidVaccination, setCovidVaccination] = useState(false)
-  const [initialStatus, setInitialStatus] = useState('Confirmed')
-  const [addCompanyName, setAddCompanyName] = useState(false)
-  const [keepPaddingTimes, setKeepPaddingTimes] = useState(false)
-  const [allowDelete, setAllowDelete] = useState(false)
-  const [highContrastMode, setHighContrastMode] = useState(false)
-  const [displayPaddingTimes, setDisplayPaddingTimes] = useState(false)
-  
-  const [cancellationReasons, setCancellationReasons] = useState([
-    'Other',
-    'Wasn\'t due To Business/ Wasn\'t For Discount',
-    'Sickness',
-    'Appointment Made In Error',
-    'Lorem Ipsum on This Will Refund'
-  ])
+  const dispatch = useDispatch()
+  const router = useRouter()
+  const { settings, loading } = useSelector((state) => state.calendarSettings)
 
-  const [appointmentStatuses] = useState([
-    { name: 'Not started', color: 'bg-gray-400', enabled: false },
-    { name: 'Arrived', color: 'bg-purple-500', enabled: false },
-    { name: 'Started', color: 'bg-gray-400', enabled: false },
-    { name: 'Completed', color: 'bg-gray-400', enabled: false },
-    { name: 'Did not show', color: 'bg-red-500', enabled: false }
-  ])
+ 
+  const [formData, setFormData] = useState({
+    displaySettings: {
+      startOfWeek: 'Sunday',
+      calendarStartTime: '9:00',
+      timeIncrement: '5 minutes',
+      highContrastMode: false,
+      displayPaddingTimes: false,
+    },
+    appointmentSettings: {
+      initialStatus: 'Confirmed',
+      addCompanyName: false,
+      keepPaddingTimes: false,
+      allowDelete: false,
+    },
+    inclusionSettings: {
+      capturePronouns: false,
+      displayPronouns: false,
+    },
+    covidVaccinationPolicy: {
+      enabled: false,
+    },
+    dailySummary: {
+      enabled: false,
+    },
+    cancellationReasons: [
+      'Other',
+      "Wasn't due To Business/ Wasn't For Discount",
+      'Sickness',
+      'Appointment Made In Error',
+      'Lorem Ipsum on This Will Refund',
+    ],
+    appointmentStatuses: [
+      { name: 'Not started', color: 'bg-gray-400', enabled: false },
+      { name: 'Arrived', color: 'bg-purple-500', enabled: false },
+      { name: 'Started', color: 'bg-gray-400', enabled: false },
+      { name: 'Completed', color: 'bg-gray-400', enabled: false },
+      { name: 'Did not show', color: 'bg-red-500', enabled: false },
+    ],
+  })
+
+
+  useEffect(() => {
+    dispatch(getCalendarSettings())
+  }, [dispatch])
+
+  
+  useEffect(() => {
+    if (settings) {
+      setFormData({
+        displaySettings: settings.displaySettings || formData.displaySettings,
+        appointmentSettings: settings.appointmentSettings || formData.appointmentSettings,
+        inclusionSettings: settings.inclusionSettings || formData.inclusionSettings,
+        covidVaccinationPolicy: settings.covidVaccinationPolicy || formData.covidVaccinationPolicy,
+        dailySummary: settings.dailySummary || formData.dailySummary,
+        cancellationReasons: settings.cancellationReasons || formData.cancellationReasons,
+        appointmentStatuses: settings.appointmentStatuses || formData.appointmentStatuses,
+      })
+    }
+  }, [settings])
+
+  const handleSave = async () => {
+    try {
+      await dispatch(updateCalendarSettings(formData)).unwrap()
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: 'Calendar settings saved successfully',
+        confirmButtonColor: '#0A4886',
+      })
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: 'Failed to save settings. Please try again.',
+        confirmButtonColor: '#0A4886',
+      })
+    }
+  }
 
   const handleAddReason = () => {
-    setCancellationReasons([...cancellationReasons, ''])
+    setFormData({
+      ...formData,
+      cancellationReasons: [...formData.cancellationReasons, ''],
+    })
   }
 
   const handleRemoveReason = (index) => {
-    setCancellationReasons(cancellationReasons.filter((_, i) => i !== index))
+    const newReasons = formData.cancellationReasons.filter((_, i) => i !== index)
+    setFormData({
+      ...formData,
+      cancellationReasons: newReasons,
+    })
+  }
+
+  const handleReasonChange = (index, value) => {
+    const newReasons = [...formData.cancellationReasons]
+    newReasons[index] = value
+    setFormData({
+      ...formData,
+      cancellationReasons: newReasons,
+    })
+  }
+
+  const handleAddStatus = () => {
+    const newStatus = {
+      name: 'New Status',
+      color: 'bg-blue-500',
+      enabled: false,
+    }
+    setFormData({
+      ...formData,
+      appointmentStatuses: [...formData.appointmentStatuses, newStatus],
+    })
+  }
+
+  const handleRemoveStatus = (index) => {
+    const newStatuses = formData.appointmentStatuses.filter((_, i) => i !== index)
+    setFormData({
+      ...formData,
+      appointmentStatuses: newStatuses,
+    })
+  }
+
+  const handleStatusChange = (index, field, value) => {
+    const newStatuses = [...formData.appointmentStatuses]
+    newStatuses[index][field] = value
+    setFormData({
+      ...formData,
+      appointmentStatuses: newStatuses,
+    })
   }
 
   return (
@@ -59,12 +157,16 @@ function Calendersettings() {
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Calendar</h1>
-            <button className="bg-custom-blue text-white px-4 sm:px-6 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors w-full sm:w-auto">
-              Save
+            <button 
+              onClick={handleSave}
+              disabled={loading}
+              className="bg-custom-blue text-white px-4 sm:px-6 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors w-full sm:w-auto disabled:opacity-50"
+            >
+              {loading ? 'Saving...' : 'Save'}
             </button>
           </div>
 
-          {/* Display settings */}
+       
           <div className="bg-white rounded-lg shadow-sm border-l-4 border-l-[#0A4886] border-r border-t border-b border-slate-200 p-4 sm:p-6">
             <div className="flex items-center gap-2 mb-4">
               <svg className="w-5 h-5 text-[#0A4886]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -80,8 +182,11 @@ function Calendersettings() {
                   <label className="block text-xs sm:text-sm text-slate-600 mb-2">First day of the week</label>
                   <div className="relative">
                     <select 
-                      value={startOfWeek}
-                      onChange={(e) => setStartOfWeek(e.target.value)}
+                      value={formData.displaySettings.startOfWeek}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        displaySettings: { ...formData.displaySettings, startOfWeek: e.target.value }
+                      })}
                       className="w-full bg-slate-100 border-0 rounded-lg px-3 py-2.5 text-sm text-slate-800 appearance-none cursor-pointer focus:ring-2 focus:ring-blue-500 outline-none"
                     >
                       <option>Sunday</option>
@@ -100,13 +205,18 @@ function Calendersettings() {
                   <label className="block text-xs sm:text-sm text-slate-600 mb-2">Calendar start time</label>
                   <div className="relative">
                     <select 
-                      value={startTime}
-                      onChange={(e) => setStartTime(e.target.value)}
+                      value={formData.displaySettings.calendarStartTime}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        displaySettings: { ...formData.displaySettings, calendarStartTime: e.target.value }
+                      })}
                       className="w-full bg-slate-100 border-0 rounded-lg px-3 py-2.5 text-sm text-slate-800 appearance-none cursor-pointer focus:ring-2 focus:ring-blue-500 outline-none"
                     >
                       <option>9:00</option>
                       <option>8:00</option>
                       <option>10:00</option>
+                      <option>11:00</option>
+                      <option>12:00</option>
                     </select>
                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                   </div>
@@ -117,14 +227,18 @@ function Calendersettings() {
                 <label className="block text-xs sm:text-sm text-slate-600 mb-2">Calendar intervals</label>
                 <div className="relative">
                   <select 
-                    value={timeIncrement}
-                    onChange={(e) => setTimeIncrement(e.target.value)}
+                    value={formData.displaySettings.timeIncrement}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      displaySettings: { ...formData.displaySettings, timeIncrement: e.target.value }
+                    })}
                     className="w-full bg-slate-100 border-0 rounded-lg px-3 py-2.5 text-sm text-slate-800 appearance-none cursor-pointer focus:ring-2 focus:ring-blue-500 outline-none"
                   >
                     <option>5 minutes</option>
                     <option>10 minutes</option>
                     <option>15 minutes</option>
                     <option>30 minutes</option>
+                    <option>60 minutes</option>
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                 </div>
@@ -134,8 +248,11 @@ function Calendersettings() {
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input 
                     type="checkbox"
-                    checked={highContrastMode}
-                    onChange={(e) => setHighContrastMode(e.target.checked)}
+                    checked={formData.displaySettings.highContrastMode}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      displaySettings: { ...formData.displaySettings, highContrastMode: e.target.checked }
+                    })}
                     className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                   />
                   <span className="text-xs sm:text-sm text-slate-700">Display the calendar in high contrast mode</span>
@@ -144,8 +261,11 @@ function Calendersettings() {
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input 
                     type="checkbox"
-                    checked={displayPaddingTimes}
-                    onChange={(e) => setDisplayPaddingTimes(e.target.checked)}
+                    checked={formData.displaySettings.displayPaddingTimes}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      displaySettings: { ...formData.displaySettings, displayPaddingTimes: e.target.checked }
+                    })}
                     className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                   />
                   <span className="text-xs sm:text-sm text-slate-700">Display appointment padding times on the calendar</span>
@@ -154,7 +274,7 @@ function Calendersettings() {
             </div>
           </div>
 
-          {/* Appointment settings */}
+        
           <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 sm:p-6">
             <div className="flex items-center gap-2 mb-4">
               <svg className="w-5 h-5 text-[#0A4886]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -168,8 +288,11 @@ function Calendersettings() {
                 <label className="block text-xs sm:text-sm text-slate-600 mb-2">Initial status for new appointments</label>
                 <div className="relative">
                   <select 
-                    value={initialStatus}
-                    onChange={(e) => setInitialStatus(e.target.value)}
+                    value={formData.appointmentSettings.initialStatus}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      appointmentSettings: { ...formData.appointmentSettings, initialStatus: e.target.value }
+                    })}
                     className="w-full bg-slate-100 border-0 rounded-lg px-3 py-2.5 text-sm text-slate-800 appearance-none cursor-pointer focus:ring-2 focus:ring-blue-500 outline-none"
                   >
                     <option>Confirmed</option>
@@ -184,8 +307,11 @@ function Calendersettings() {
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input 
                     type="checkbox"
-                    checked={addCompanyName}
-                    onChange={(e) => setAddCompanyName(e.target.checked)}
+                    checked={formData.appointmentSettings.addCompanyName}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      appointmentSettings: { ...formData.appointmentSettings, addCompanyName: e.target.checked }
+                    })}
                     className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                   />
                   <span className="text-xs sm:text-sm text-slate-700">Add company name field for customers</span>
@@ -194,8 +320,11 @@ function Calendersettings() {
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input 
                     type="checkbox"
-                    checked={keepPaddingTimes}
-                    onChange={(e) => setKeepPaddingTimes(e.target.checked)}
+                    checked={formData.appointmentSettings.keepPaddingTimes}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      appointmentSettings: { ...formData.appointmentSettings, keepPaddingTimes: e.target.checked }
+                    })}
                     className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                   />
                   <span className="text-xs sm:text-sm text-slate-700">Keep padding times between appointments with multiple services</span>
@@ -204,8 +333,11 @@ function Calendersettings() {
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input 
                     type="checkbox"
-                    checked={allowDelete}
-                    onChange={(e) => setAllowDelete(e.target.checked)}
+                    checked={formData.appointmentSettings.allowDelete}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      appointmentSettings: { ...formData.appointmentSettings, allowDelete: e.target.checked }
+                    })}
                     className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                   />
                   <span className="text-xs sm:text-sm text-slate-700">Allow appointments to be deleted</span>
@@ -214,7 +346,7 @@ function Calendersettings() {
             </div>
           </div>
 
-          {/* Inclusion settings */}
+      
           <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 sm:p-6">
             <div className="flex items-center gap-2 mb-4">
               <svg className="w-5 h-5 text-[#0A4886]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -227,8 +359,11 @@ function Calendersettings() {
               <div className="flex items-start gap-2">
                 <input 
                   type="checkbox"
-                  checked={inclusionField}
-                  onChange={(e) => setInclusionField(e.target.checked)}
+                  checked={formData.inclusionSettings.capturePronouns}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    inclusionSettings: { ...formData.inclusionSettings, capturePronouns: e.target.checked }
+                  })}
                   className="w-4 h-4 mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                 />
                 <div>
@@ -240,8 +375,11 @@ function Calendersettings() {
               <label className="flex items-center gap-2 cursor-pointer">
                 <input 
                   type="checkbox"
-                  checked={displayPronouns}
-                  onChange={(e) => setDisplayPronouns(e.target.checked)}
+                  checked={formData.inclusionSettings.displayPronouns}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    inclusionSettings: { ...formData.inclusionSettings, displayPronouns: e.target.checked }
+                  })}
                   className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                 />
                 <span className="text-xs sm:text-sm text-slate-700">Display client pronouns on calendar</span>
@@ -249,7 +387,7 @@ function Calendersettings() {
             </div>
           </div>
 
-          {/* Covid vaccination policy */}
+        
           <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 sm:p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
@@ -261,11 +399,14 @@ function Calendersettings() {
               <label className="relative inline-flex items-center cursor-pointer">
                 <input 
                   type="checkbox" 
-                  checked={covidVaccination}
-                  onChange={(e) => setCovidVaccination(e.target.checked)}
+                  checked={formData.covidVaccinationPolicy.enabled}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    covidVaccinationPolicy: { enabled: e.target.checked }
+                  })}
                   className="sr-only peer"
                 />
-                <div className={`w-11 h-6 rounded-full peer ${covidVaccination ? 'bg-blue-600' : 'bg-gray-300'} peer-focus:ring-2 peer-focus:ring-blue-300 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all ${covidVaccination ? 'after:translate-x-full' : ''}`}></div>
+                <div className={`w-11 h-6 rounded-full peer ${formData.covidVaccinationPolicy.enabled ? 'bg-blue-600' : 'bg-gray-300'} peer-focus:ring-2 peer-focus:ring-blue-300 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all ${formData.covidVaccinationPolicy.enabled ? 'after:translate-x-full' : ''}`}></div>
               </label>
             </div>
 
@@ -277,11 +418,9 @@ function Calendersettings() {
             </div>
           </div>
 
-          {/* Invitation settings - REMOVED as it's not in the image */}
+         
 
-          {/* Email verification policy - REMOVED as it's not in the image */}
-
-          {/* Daily appointment summary */}
+         
           <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 sm:p-6">
             <div className="flex items-center gap-2 mb-4">
               <svg className="w-5 h-5 text-[#0A4886]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -294,8 +433,11 @@ function Calendersettings() {
               <div className="flex items-start gap-2">
                 <input 
                   type="checkbox"
-                  checked={dailySummary}
-                  onChange={(e) => setDailySummary(e.target.checked)}
+                  checked={formData.dailySummary.enabled}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    dailySummary: { enabled: e.target.checked }
+                  })}
                   className="w-4 h-4 mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                 />
                 <div>
@@ -325,16 +467,12 @@ function Calendersettings() {
             </div>
 
             <div className="space-y-2">
-              {cancellationReasons.map((reason, index) => (
+              {formData.cancellationReasons.map((reason, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <input 
                     type="text"
                     value={reason}
-                    onChange={(e) => {
-                      const newReasons = [...cancellationReasons]
-                      newReasons[index] = e.target.value
-                      setCancellationReasons(newReasons)
-                    }}
+                    onChange={(e) => handleReasonChange(index, e.target.value)}
                     className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs sm:text-sm text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none"
                     placeholder="Enter reason"
                   />
@@ -358,21 +496,39 @@ function Calendersettings() {
                 </svg>
                 <h2 className="text-base sm:text-lg font-bold text-[#0A4886]">Appointment Status</h2>
               </div>
-              <button className="w-8 h-8 rounded-full bg-[#0A4886] text-white flex items-center justify-center hover:bg-[#083a6b] transition-colors">
+              <button 
+                onClick={handleAddStatus}
+                className="w-8 h-8 rounded-full bg-[#0A4886] text-white flex items-center justify-center hover:bg-[#083a6b] transition-colors"
+              >
                 <Plus className="w-5 h-5" />
               </button>
             </div>
 
             <div className="space-y-2">
-              {appointmentStatuses.map((status, index) => (
+              {formData.appointmentStatuses.map((status, index) => (
                 <div key={index} className="flex items-center justify-between py-2.5 border-b border-slate-100 last:border-0">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 flex-1">
                     <div className={`w-2 h-2 rounded-full ${status.color}`}></div>
-                    <span className="text-xs sm:text-sm text-slate-700">{status.name}</span>
+                    <input
+                      type="text"
+                      value={status.name}
+                      onChange={(e) => handleStatusChange(index, 'name', e.target.value)}
+                      className="flex-1 bg-transparent text-xs sm:text-sm text-slate-700 border-0 outline-none focus:bg-slate-50 px-2 py-1 rounded"
+                      placeholder="Status name"
+                    />
                   </div>
-                  <button className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors">
-                    <LockKeyhole className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={() => handleRemoveStatus(index)}
+                      className="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors"
+                      title="Delete status"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                    <button className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors">
+                      <LockKeyhole className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -380,8 +536,12 @@ function Calendersettings() {
 
           {/* Save Button */}
           <div className="flex justify-end pb-6">
-            <button className="bg-custom-blue text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors w-full sm:w-auto">
-              Save
+            <button 
+              onClick={handleSave}
+              disabled={loading}
+              className="bg-custom-blue text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors w-full sm:w-auto disabled:opacity-50"
+            >
+              {loading ? 'Saving...' : 'Save'}
             </button>
           </div>
 
