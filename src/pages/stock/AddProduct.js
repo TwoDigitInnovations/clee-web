@@ -434,9 +434,33 @@ function AddProduct() {
                             </button>
                           </div>
                         </div>
+
+                        {/* Alert and Ideal fields */}
+                        <div className="grid grid-cols-2 gap-3 pl-4">
+                          <div>
+                            <label className="block text-xs text-gray-500 mb-1">Alert Level</label>
+                            <input
+                              type="number"
+                              value={location.alert}
+                              onChange={(e) => handleLocationChange(index, "alert", e.target.value)}
+                              placeholder="0"
+                              className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-[#0A4D91] focus:border-transparent outline-none"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs text-gray-500 mb-1">Ideal Level</label>
+                            <input
+                              type="number"
+                              value={location.ideal}
+                              onChange={(e) => handleLocationChange(index, "ideal", e.target.value)}
+                              placeholder="0"
+                              className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-[#0A4D91] focus:border-transparent outline-none"
+                            />
+                          </div>
+                        </div>
                         
                         {index < formData.locations.length - 1 && (
-                          <div className="border-b border-gray-200"></div>
+                          <div className="border-b border-gray-200 mt-3"></div>
                         )}
                       </div>
                     ))}
@@ -564,4 +588,4 @@ function AddProduct() {
   );
 }
 
-export default AddProduct;
+export default AddProduct;
