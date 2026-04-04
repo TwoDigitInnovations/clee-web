@@ -1,23 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { ChevronDown, Info, ChevronRight } from "lucide-react";
 import DashboardHeader from "@/components/DashboardHeader";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Api } from "@/services/service";
 
 const AddServicesGroup = (props) => {
   const [formData, setFormData] = useState({
-    Services_name: "",
+    name: "",
     category: "",
     description: "",
-    canBookOnline: true,
+    allowOnlineBooking: true,
     selectedService: "",
-    items: [],
     paymentPolicy: "default", // 'default' or 'different'
     differentPolicyType: "Do not accept online payments",
   });
+  const searchParams = useSearchParams();
+  const id = searchParams.get("id");
 
   const [category, setCategory] = useState([]);
-  const [errors, setErrors] = useState({});
   const router = useRouter();
   const [addedServices, setAddedServices] = useState([]);
   const [services, setServices] = useState([]);
@@ -63,21 +63,21 @@ const AddServicesGroup = (props) => {
   };
 
   const handleSubmit = async () => {
-    console.log(formData);
-
     const payload = {
       ...formData,
+      services: addedServices,
     };
 
     try {
       props.loader(true);
-
+      console.log(payload);
       let res;
       if (id) {
         res = await Api("put", `service-groups/update/${id}`, payload, router);
       } else {
         res = await Api("post", `service-groups/create`, payload, router);
       }
+      console.log(res);
 
       props.loader(false);
 
@@ -88,14 +88,25 @@ const AddServicesGroup = (props) => {
             ? "Service group updated successfully"
             : "Service group created successfully",
         );
-        if (!id) setFormData(getInitialState());
+        if (!id)
+          setFormData({
+            name: "",
+            category: "",
+            description: "",
+            allowOnlineBooking: true,
+            selectedService: "",
+            paymentPolicy: "default", // 'default' or 'different'
+            differentPolicyType: "Do not accept online payments",
+          });
+        setAddedServices([]);
         router.push("/Business/Services");
       } else {
         props.toaster("error", res?.message || "Something went wrong");
       }
     } catch (err) {
       props.loader(false);
-      props.toaster("error", "Server error");
+      console.log("FINAL ERROR 👉", err);
+      props.toaster("error", err?.message || "Server error");
     }
   };
 
@@ -106,11 +117,11 @@ const AddServicesGroup = (props) => {
     console.log(selected);
 
     const newService = {
-      id: selected._id,
+      service: selected._id,
       name: selected.name,
-      duration: "00:30",
-      paddingBefore: "00:00",
-      paddingAfter: "00:00",
+      duration: selected.duration || "00:30",
+      paddingBefore: selected.paddingBefore || "00:00",
+      paddingAfter: selected.paddingAfter || "00:00",
       cost: selected.price || 0,
       overridePrice: false,
     };
@@ -169,8 +180,8 @@ const AddServicesGroup = (props) => {
                     Service group name *
                   </label>
                   <input
-                    name="Services_name"
-                    value={formData.Services_name}
+                    name="name"
+                    value={formData.name}
                     onChange={handleChange}
                     type="text"
                     placeholder="Enter service group name..."
@@ -223,8 +234,8 @@ const AddServicesGroup = (props) => {
               <label className="flex items-center gap-2 cursor-pointer group">
                 <input
                   type="checkbox"
-                  name="canBookOnline"
-                  checked={formData.canBookOnline}
+                  name="allowOnlineBooking"
+                  checked={formData.allowOnlineBooking}
                   onChange={handleChange}
                   className="w-4 h-4 rounded border-gray-300 text-blue-600"
                 />
@@ -309,11 +320,9 @@ const AddServicesGroup = (props) => {
                         className="border rounded px-2 py-1"
                       />
 
-                       <input
+                      <input
                         type="checkbox"
-                        
                         value={item.overridePrice}
-              
                         className="border rounded px-2 py-1"
                       />
 
