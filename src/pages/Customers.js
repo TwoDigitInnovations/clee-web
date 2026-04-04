@@ -74,6 +74,8 @@ function Customers(props) {
   const [isOpen, setIsOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [openCustomer, setOpenCustomer] = useState(false);
+  const [customerBookings, setCustomerBookings] = useState([]);
+  const [loadingBookings, setLoadingBookings] = useState(false);
   const menuRef = useRef();
 
   useEffect(() => {
@@ -95,6 +97,30 @@ function Customers(props) {
       setSelected(customerData[0]);
     }
   }, [customerData]);
+
+  useEffect(() => {
+    if (selected && activeTab === "Appointments") {
+      loadCustomerBookings();
+    }
+  }, [selected, activeTab]);
+
+  const loadCustomerBookings = async () => {
+    if (!selected?._id) return;
+    
+    try {
+      setLoadingBookings(true);
+      const res = await Api("get", `booking/getAll?customer=${selected._id}`, "", router);
+      setLoadingBookings(false);
+      
+      if (res?.status) {
+        const bookingsData = Array.isArray(res.data) ? res.data : res.data?.data || [];
+        setCustomerBookings(bookingsData);
+      }
+    } catch (err) {
+      setLoadingBookings(false);
+      console.error("Failed to load customer bookings", err);
+    }
+  };
 
   const getCustomer = async () => {
     props?.loader(true);
@@ -361,7 +387,7 @@ function Customers(props) {
                       : "border-transparent text-slate-500 hover:text-slate-700"
                   }`}
                 >
-                  {tab} {tab !== "Summary" && "(0)"}
+                  {tab} {tab === "Appointments" ? `(${customerBookings.length})` : tab !== "Summary" ? "(0)" : ""}
                 </button>
               ))}
             </div>
@@ -653,7 +679,7 @@ function Customers(props) {
               </div>
             )}
 
-            {activeTab !== "Summary" && (
+            {activeTab !== "Summary" && activeTab !== "Appointments" && (
               <div className="flex flex-col items-center justify-center py-20 text-slate-400">
                 <svg
                   className="w-12 h-12 mb-3 text-slate-200"
@@ -669,6 +695,90 @@ function Customers(props) {
                   />
                 </svg>
                 <p className="text-sm">{activeTab} content coming soon</p>
+              </div>
+            )}
+
+            {activeTab === "Appointments" && (
+              <div className="space-y-4">
+                {loadingBookings ? (
+                  <div className="flex flex-col items-center justify-center py-20">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-custom-blue mb-4"></div>
+                    <p className="text-sm text-slate-600">Loading appointments...</p>
+                  </div>
+                ) : customerBookings.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+                    <svg
+                      className="w-12 h-12 mb-3 text-slate-200"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.5}
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                    <p className="text-sm">No appointments found for this customer</p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {customerBookings.map((booking) => (
+                      <div
+                        key={booking._id}
+                        className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                booking.status === 'Confirmed' ? 'bg-green-100 text-green-700' :
+                                booking.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
+                                booking.status === 'Completed' ? 'bg-blue-100 text-blue-700' :
+                                'bg-red-100 text-red-700'
+                              }`}>
+                                {booking.status}
+                              </span>
+                              <span className="text-sm font-semibold text-slate-800">
+                                {new Date(booking.date).toLocaleDateString("en-US", {
+                                  weekday: "short",
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                })}
+                              </span>
+                            </div>
+                            <p className="text-base font-bold text-slate-900 mb-1">
+                              {booking.service}
+                            </p>
+                            <div className="flex items-center gap-4 text-sm text-slate-600">
+                              <span>
+                                Staff: {booking.staff?.fullname || "Unassigned"}
+                              </span>
+                              <span>
+                                Time: {booking.startHour === 12 ? "12:00 PM" : booking.startHour < 12 ? `${booking.startHour}:00 AM` : `${booking.startHour - 12}:00 PM`}
+                              </span>
+                              <span>
+                                Duration: {booking.durationMins} mins
+                              </span>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-lg font-bold text-slate-900">
+                              ${booking.price || 0}
+                            </p>
+                          </div>
+                        </div>
+                        {booking.notes && (
+                          <div className="mt-3 pt-3 border-t border-slate-100">
+                            <p className="text-sm text-slate-600">{booking.notes}</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
