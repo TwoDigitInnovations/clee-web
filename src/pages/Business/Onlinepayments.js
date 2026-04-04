@@ -271,7 +271,7 @@ export default function Onlinepayments() {
               </div>
 
               {/* Legal Compliance */}
-              <div className="bg-amber-500 rounded-2xl p-5 text-white">
+              <div className="bg-[#EC5B13] rounded-2xl p-5 text-white">
                 <div className="flex items-center gap-2 mb-1">
                   <Scale className="w-5 h-5 opacity-80" />
                   <p className="font-bold text-sm">Legal Compliance</p>

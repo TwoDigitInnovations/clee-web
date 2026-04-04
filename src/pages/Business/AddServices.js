@@ -362,8 +362,6 @@ export default function AddServices({ loader, toaster }) {
         value === "Not Applicable" ? false : form.priceIncludesTax,
     }));
   };
-  console.log(form);
-  console.log(categories);
 
   return (
     <>

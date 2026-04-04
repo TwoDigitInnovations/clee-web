@@ -2,7 +2,6 @@
 import DashboardHeader from "@/components/DashboardHeader";
 import { Api } from "@/services/service";
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import {
   CreditCard,
   Plus,
@@ -22,10 +21,8 @@ import {
   Wifi,
   BarChart2,
   BookOpen,
-  Trash2,
-  Settings,
-  RefreshCw,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 function Toggle({ checked, onChange }) {
   return (
@@ -136,6 +133,7 @@ export default function Cleepay(props) {
   const [surchargeMethod, setSurchargeMethod] = useState("fixed");
   const [surchargePercent, setSurchargePercent] = useState("1.5");
   const [locations, setLocations] = useState([]);
+
   const dummyLocations = [
     {
       id: 1,
@@ -560,7 +558,10 @@ export default function Cleepay(props) {
               Configure how customers pay for bookings online, including
               deposits and card capture requirements.
             </p>
-            <button className="flex items-center gap-1.5 text-custom-blue text-sm font-semibold hover:underline">
+            <button
+              className="flex items-center gap-1.5 text-custom-blue text-sm font-semibold hover:underline"
+              onClick={() => router.push("/Business/Onlinepayments")}
+            >
               Online payment settings <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </SCard>
@@ -744,17 +745,28 @@ export default function Cleepay(props) {
               label: "CleePay transaction report",
               icon: BarChart2,
               external: false,
+              link: "/Business/CleePay/Transactionreport",
             },
             {
               label: "CleePay balance summary",
               icon: FileText,
               external: false,
+              link: "/Business/CleePay/Balancesummary",
             },
-            { label: "CleePay help guide", icon: BookOpen, external: true },
+            {
+              label: "CleePay help guide",
+              icon: BookOpen,
+              external: true,
+              link: "https://docs.cleepay.com/getting-started/overview",
+            },
           ].map((item) => (
             <div
               key={item.label}
               className="flex items-center justify-between px-5 py-3.5 border-b border-gray-50 last:border-0 hover:bg-gray-50 cursor-pointer transition group"
+              onClick={() => {
+                if (item.external) window.open(item.link, "_blank");
+                else router.push(item.link);
+              }}
             >
               <div className="flex items-center gap-3">
                 <item.icon className="w-4 h-4 text-slate-400 group-hover:text-custom-blue transition" />

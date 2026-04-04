@@ -200,7 +200,9 @@ export default function Integrations() {
                 </div>
               </div>
             </div>
-            <button className="flex items-center gap-1.5 text-sm font-semibold text-white bg-custom-blue rounded-xl px-4 py-2 hover:opacity-90 transition shrink-0">
+            <button className="flex items-center gap-1.5 text-sm font-semibold text-white bg-custom-blue rounded-xl px-4 py-2 hover:opacity-90 transition shrink-0"
+              onClick={() => router.push("/Business/Cleepay")}
+            >
               <Settings className="w-4 h-4" /> View Settings
             </button>
           </div>
