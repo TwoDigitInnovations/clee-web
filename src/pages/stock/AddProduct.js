@@ -206,8 +206,9 @@ function AddProduct() {
             <h1 className="text-3xl font-bold text-gray-900 mt-1">Products</h1>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6 space-y-8">
-            <div>
+          <div className="space-y-6">
+            {/* Product details section */}
+            <div className="bg-white rounded-xl shadow-sm p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-6">Product details</h2>
               
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -338,8 +339,10 @@ function AddProduct() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div>
+            {/* Supplier information and Stock control sections */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Supplier information */}
+              <div className="bg-white rounded-xl shadow-sm p-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-6">Supplier information</h2>
                 
                 <div className="space-y-4">
@@ -377,7 +380,8 @@ function AddProduct() {
                 </div>
               </div>
 
-              <div>
+              {/* Stock control */}
+              <div className="bg-white rounded-xl shadow-sm p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-bold text-gray-900">Stock control</h2>
                   <label className="flex items-center gap-2 cursor-pointer">
@@ -396,80 +400,56 @@ function AddProduct() {
 
                 {formData.trackStock ? (
                   <div className="space-y-4">
-                    <div className="overflow-x-auto border border-gray-200 rounded-lg">
-                      <table className="w-full">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Location</th>
-                            <th className="px-4 py-3 text-center text-xs font-semibold text-[#0A4D91] uppercase">Track stock</th>
-                            <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Available</th>
-                            <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Alert</th>
-                            <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Ideal</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200">
-                          {formData.locations.map((location, index) => (
-                            <tr key={index} className="hover:bg-gray-50">
-                              <td className="px-4 py-4">
-                                <input
-                                  type="text"
-                                  value={location.name}
-                                  onChange={(e) => handleLocationChange(index, "name", e.target.value)}
-                                  placeholder="Location name"
-                                  className="text-sm font-medium text-gray-900 border-b border-transparent hover:border-gray-300 focus:border-[#0A4D91] outline-none"
-                                />
-                              </td>
-                              <td className="px-4 py-4 text-center">
-                                <div className="flex justify-center">
-                                  <div className="w-8 h-8 bg-[#0A4D91] rounded-full flex items-center justify-center">
-                                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                    </svg>
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="px-4 py-4">
-                                <div className="flex items-center justify-center gap-2">
-                                  <button
-                                    onClick={() => handleQuantityChange(index, 1)}
-                                    className="w-8 h-8 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded transition-colors"
-                                  >
-                                    <Plus className="w-4 h-4 text-gray-700" />
-                                  </button>
-                                  <span className="text-sm font-semibold text-gray-900 min-w-[30px] text-center">
-                                    {location.available}
-                                  </span>
-                                  <button
-                                    onClick={() => handleQuantityChange(index, -1)}
-                                    className="w-8 h-8 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded transition-colors"
-                                  >
-                                    <Minus className="w-4 h-4 text-gray-700" />
-                                  </button>
-                                </div>
-                              </td>
-                              <td className="px-4 py-4">
-                                <input
-                                  type="number"
-                                  value={location.alert}
-                                  onChange={(e) => handleLocationChange(index, "alert", e.target.value)}
-                                  className="w-20 px-2 py-1.5 border border-gray-300 rounded text-center text-sm focus:ring-2 focus:ring-[#0A4D91] focus:border-transparent outline-none"
-                                />
-                              </td>
-                              <td className="px-4 py-4">
-                                <input
-                                  type="number"
-                                  value={location.ideal}
-                                  onChange={(e) => handleLocationChange(index, "ideal", e.target.value)}
-                                  className="w-20 px-2 py-1.5 border border-gray-300 rounded text-center text-sm focus:ring-2 focus:ring-[#0A4D91] focus:border-transparent outline-none"
-                                />
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                    {formData.locations.map((location, index) => (
+                      <div key={index} className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <input
+                              type="text"
+                              value={location.name}
+                              onChange={(e) => handleLocationChange(index, "name", e.target.value)}
+                              placeholder="Location name"
+                              className="text-base font-semibold text-gray-900 border-b border-transparent hover:border-gray-300 focus:border-[#0A4D91] outline-none bg-transparent"
+                            />
+                            <div className="flex items-center gap-1 mt-1">
+                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                              <span className="text-xs text-gray-500">Available</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <button
+                              onClick={() => handleQuantityChange(index, -1)}
+                              className="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+                            >
+                              <Minus className="w-4 h-4 text-gray-700" />
+                            </button>
+                            <span className="text-xl font-bold text-gray-900 min-w-[40px] text-center">
+                              {location.available}
+                            </span>
+                            <button
+                              onClick={() => handleQuantityChange(index, 1)}
+                              className="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+                            >
+                              <Plus className="w-4 h-4 text-gray-700" />
+                            </button>
+                          </div>
+                        </div>
+                        
+                        {index < formData.locations.length - 1 && (
+                          <div className="border-b border-gray-200"></div>
+                        )}
+                      </div>
+                    ))}
 
-                    <p className="text-sm text-gray-600">
+                    <button
+                      onClick={addLocation}
+                      className="text-sm text-[#0A4D91] hover:underline font-medium flex items-center gap-1 mt-4"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Add Location
+                    </button>
+
+                    <p className="text-xs text-gray-500 pt-2">
                       When 'Track stock' is disabled stock will be unlimited.
                     </p>
 
@@ -482,7 +462,7 @@ function AddProduct() {
                           onChange={(e) => handleInputChange("allowOutOfStock", e.target.checked)}
                           className="w-4 h-4 mt-0.5 text-[#0A4D91] border-gray-300 rounded focus:ring-[#0A4D91]"
                         />
-                        <label htmlFor="allowOutOfStock" className="text-sm text-gray-700 flex items-center gap-2">
+                        <label htmlFor="allowOutOfStock" className="text-sm text-gray-700">
                           Allow product to be sold even when out of stock?
                         </label>
                       </div>
@@ -495,18 +475,11 @@ function AddProduct() {
                           onChange={(e) => handleInputChange("sendAlertEmails", e.target.checked)}
                           className="w-4 h-4 mt-0.5 text-[#0A4D91] border-gray-300 rounded focus:ring-[#0A4D91]"
                         />
-                        <label htmlFor="sendAlertEmails" className="text-sm text-gray-700 flex items-center gap-2">
+                        <label htmlFor="sendAlertEmails" className="text-sm text-gray-700">
                           Send emails when available stock reaches the alert limit?
                         </label>
                       </div>
                     </div>
-
-                    <button
-                      onClick={addLocation}
-                      className="text-sm text-[#0A4D91] hover:underline font-medium"
-                    >
-                      + Add Location
-                    </button>
                   </div>
                 ) : (
                   <p className="text-sm text-gray-600">
@@ -516,7 +489,8 @@ function AddProduct() {
               </div>
             </div>
 
-            <div>
+            {/* Photo section */}
+            <div className="bg-white rounded-xl shadow-sm p-6">
               <div className="flex items-center gap-2 mb-4">
                 <svg className="w-5 h-5 text-[#0A4D91]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -560,7 +534,8 @@ function AddProduct() {
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
+            {/* Action buttons */}
+            <div className="flex items-center justify-end gap-3">
               <button
                 onClick={handleCancel}
                 disabled={saving}
@@ -589,4 +564,4 @@ function AddProduct() {
   );
 }
 
-export default AddProduct;
+export default AddProduct;
