@@ -4,6 +4,7 @@ import bookingReducer from "./slices/bookingSlice";
 import waitlistReducer from "./slices/waitlistSlice";
 import staffReducer from "./slices/staffSlice";
 import calendarSettingsReducer from "./slices/calendarSettingsSlice";
+import supplierReducer from "./slices/supplierSlice";
 
 export const store = configureStore({
   reducer: {
@@ -12,5 +13,6 @@ export const store = configureStore({
     waitlist: waitlistReducer,
     staff: staffReducer,
     calendarSettings: calendarSettingsReducer,
+    supplier: supplierReducer,
   },
 });
