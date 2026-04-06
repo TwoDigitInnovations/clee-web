@@ -15,27 +15,37 @@ import {
 
 function Select({ value, onChange, options }) {
   const [open, setOpen] = useState(false);
+
+  // 👇 current selected label find karo
+  const selectedLabel =
+    options.find((o) => o.value === value)?.label || "Select";
+
   return (
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between border border-gray-300 rounded-lg px-3 py-2 bg-white text-sm text-slate-700 focus:outline-none focus:border-custom-blue hover:border-gray-400 transition"
+        className="w-full flex items-center justify-between border border-gray-300 rounded-lg px-3 py-2 bg-white text-sm text-slate-700"
       >
-        <span>{value}</span>
-        <ChevronDown className="w-4 h-4 text-gray-400 shrink-0" />
+        <span>{selectedLabel}</span>
+        <ChevronDown className="w-4 h-4 text-gray-400" />
       </button>
+
       {open && (
         <div className="absolute top-full left-0 w-full bg-white border border-gray-200 rounded-xl shadow-lg z-20 mt-1 overflow-hidden">
           {options.map((o) => (
             <div
-              key={o}
+              key={o.value}
               onClick={() => {
-                onChange(o);
+                onChange(o.value); // ✅ sirf value bhejo
                 setOpen(false);
               }}
-              className={`px-4 py-2.5 text-sm cursor-pointer transition ${value === o ? "bg-custom-blue text-white font-semibold" : "text-slate-700 hover:bg-blue-50"}`}
+              className={`px-4 py-2.5 text-sm cursor-pointer transition ${
+                value === o.value
+                  ? "bg-custom-blue text-white font-semibold"
+                  : "text-slate-700 hover:bg-blue-50"
+              }`}
             >
-              {o}
+              {o.label} {/* ✅ label show karo */}
             </div>
           ))}
         </div>
@@ -101,30 +111,44 @@ function DeleteModal({ open, onClose, onConfirm, name }) {
   );
 }
 
-const TAX_OPTIONS = ["GST", "No Tax", "VAT 10%", "VAT 20%"];
+const TAX_OPTIONS = [
+  {
+    label: "GST",
+    value: "GST",
+  },
+  {
+    label: "Not Applicable",
+    value: "Not Applicable",
+  },
+];
+
 const DISCOUNT_TYPES = [
-  "Generic (specify discount when applying)",
-  "Percentage",
-  "Fixed amount",
+  {
+    label: "Generic (specify discount when applying)",
+    value: "generic",
+  },
+  {
+    label: "Percentage",
+    value: "percentage",
+  },
+  {
+    label: "Fixed amount",
+    value: "fixed",
+  },
 ];
 
 const EMPTY_FORM = {
   name: "",
   tax: "GST",
   discountType: "Generic (specify discount when applying)",
+  value: "",
 };
 
 export default function Discounts(props) {
   const router = useRouter();
 
-  const [discounts, setDiscounts] = useState([
-    {
-      id: 1,
-      name: "Discount",
-      tax: "GST",
-      discountType: "Generic (specify discount when applying)",
-    },
-  ]);
+  const [discounts, setDiscounts] = useState([]);
+
   const [loading, setLoading] = useState(false);
   const [addModal, setAddModal] = useState(false);
   const [editModal, setEditModal] = useState(false);
@@ -134,11 +158,10 @@ export default function Discounts(props) {
   const [deleteId, setDeleteId] = useState(null);
   const [errors, setErrors] = useState({});
 
-  /* fetch */
   const fetchDiscounts = async () => {
     try {
       setLoading(true);
-      const res = await Api("get", "discounts/getAll", "", router);
+      const res = await Api("get", "discounts", "", router);
       setLoading(false);
       if (res?.status === true && res.data?.data?.length > 0)
         setDiscounts(res.data.data);
@@ -161,7 +184,7 @@ export default function Discounts(props) {
   const handleAdd = () => {
     if (!validate()) return;
     props?.loader?.(true);
-    Api("post", "discounts/create", form, router)
+    Api("post", "discounts", form, router)
       .then((res) => {
         props?.loader?.(false);
         if (res?.status === true) {
@@ -169,12 +192,7 @@ export default function Discounts(props) {
             type: "success",
             message: "Discount added successfully",
           });
-          setDiscounts((prev) => [
-            ...prev,
-            { id: res.data?.id || Date.now(), ...form },
-          ]);
-        } else {
-          setDiscounts((prev) => [...prev, { id: Date.now(), ...form }]);
+          fetchDiscounts();
         }
         setAddModal(false);
         setForm(EMPTY_FORM);
@@ -182,15 +200,19 @@ export default function Discounts(props) {
       })
       .catch(() => {
         props?.loader?.(false);
-        setDiscounts((prev) => [...prev, { id: Date.now(), ...form }]);
+
         setAddModal(false);
         setForm(EMPTY_FORM);
       });
   };
 
-
   const openEdit = (d) => {
-    setForm({ name: d.name, tax: d.tax, discountType: d.discountType });
+    setForm({
+      name: d.name,
+      tax: d.tax,
+      discountType: d.discountType,
+      value: d.value,
+    });
     setEditId(d.id);
     setEditModal(true);
     setErrors({});
@@ -199,7 +221,8 @@ export default function Discounts(props) {
   const handleEdit = () => {
     if (!validate()) return;
     props?.loader?.(true);
-    Api("put", `discounts/update/${editId}`, form, router)
+    const id = editId;
+    Api("put", `discounts/${id}`, form, router)
       .then((res) => {
         props?.loader?.(false);
         if (res?.status === true)
@@ -207,23 +230,17 @@ export default function Discounts(props) {
             type: "success",
             message: "Discount updated successfully",
           });
-        setDiscounts((prev) =>
-          prev.map((d) => (d.id === editId ? { ...d, ...form } : d)),
-        );
+        fetchDiscounts();
         setEditModal(false);
         setForm(EMPTY_FORM);
         setErrors({});
       })
       .catch(() => {
         props?.loader?.(false);
-        setDiscounts((prev) =>
-          prev.map((d) => (d.id === editId ? { ...d, ...form } : d)),
-        );
         setEditModal(false);
         setForm(EMPTY_FORM);
       });
   };
-
 
   const openDelete = (id) => {
     setDeleteId(id);
@@ -232,7 +249,8 @@ export default function Discounts(props) {
 
   const handleDelete = () => {
     props?.loader?.(true);
-    Api("delete", `discounts/delete/${deleteId}`, "", router)
+    const id = deleteId;
+    Api("delete", `discounts/${id}`, "", router)
       .then((res) => {
         props?.loader?.(false);
         if (res?.status === true)
@@ -240,23 +258,21 @@ export default function Discounts(props) {
             type: "success",
             message: "Deleted successfully",
           });
-        setDiscounts((prev) => prev.filter((d) => d.id !== deleteId));
+        fetchDiscounts();
         setDeleteModal(false);
         setDeleteId(null);
       })
       .catch(() => {
         props?.loader?.(false);
-        setDiscounts((prev) => prev.filter((d) => d.id !== deleteId));
+        fetchDiscounts();
         setDeleteModal(false);
       });
   };
 
   const deleteName = discounts.find((d) => d.id === deleteId)?.name || "";
 
-
   const FormBody = (
     <div className="space-y-5 mt-5">
-      {/* Name */}
       <div>
         <label className="text-sm font-semibold text-slate-700 mb-1.5 block">
           Name<span className="text-red-500">*</span>
@@ -275,7 +291,6 @@ export default function Discounts(props) {
         )}
       </div>
 
-      {/* Tax */}
       <div>
         <label className="text-sm font-semibold text-slate-700 mb-1.5 block">
           Tax
@@ -294,7 +309,6 @@ export default function Discounts(props) {
         </div>
       </div>
 
-      {/* Discount Type */}
       <div>
         <label className="text-sm font-semibold text-slate-700 mb-1.5 block">
           Discount type
@@ -305,14 +319,51 @@ export default function Discounts(props) {
           options={DISCOUNT_TYPES}
         />
       </div>
+      {(form.discountType === "percentage" ||
+        form.discountType === "fixed") && (
+        <div>
+          <label className="text-sm font-semibold text-slate-700 mb-1.5 block">
+            Discount Value
+          </label>
+          <div className="flex items-center justify-center rounded-lg border border-gray-300 ">
+            {form.discountType !== "Percentage" && (
+              <div className="px-4 py-2  bg-gray-200 flex justify-center items-center">
+                <span className="text-md text-slate-400 mr-1">$</span>
+              </div>
+            )}
+
+            <input
+              value={form.value}
+              onChange={(e) =>
+                setForm((p) => ({ ...p, value: e.target.value }))
+              }
+              className={`w-full   px-4 py-2 text-sm text-slate-700 focus:outline-none focus:border-custom-blue transition bg-gray-50 placeholder:text-gray-400`}
+            />
+
+            {form.discountType === "Percentage" && (
+              <div className="px-4 py-2  bg-gray-200 flex justify-center items-center">
+                <span className="text-md text-slate-400 mr-1">%</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
+  const formatDiscount = (d) => {
+    if (d.discountType === "percentage") {
+      return `${d.value || 0}%`;
+    }
+    if (d.discountType === "fixed") {
+      return `$${d.value || 0}`;
+    }
+    return "Custom";
+  };
 
   return (
     <>
       <DashboardHeader title="Sales Tools" />
 
-      {/* Add Modal */}
       <Modal
         open={addModal}
         onClose={() => {
@@ -343,7 +394,6 @@ export default function Discounts(props) {
         </div>
       </Modal>
 
-   
       <Modal
         open={editModal}
         onClose={() => {
@@ -374,15 +424,12 @@ export default function Discounts(props) {
         </div>
       </Modal>
 
-    
       <DeleteModal
         open={deleteModal}
         onClose={() => setDeleteModal(false)}
         onConfirm={handleDelete}
         name={deleteName}
       />
-
-
 
       {/* ── Page ── */}
       <div className="min-h-screen bg-[#f0f1f5] text-slate-800 px-4 md:px-6 py-6">
@@ -401,7 +448,6 @@ export default function Discounts(props) {
           </button>
         </div>
 
-        {/* Card */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           {/* Sub-header */}
           <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100 bg-gray-50">
@@ -411,13 +457,12 @@ export default function Discounts(props) {
             </p>
           </div>
 
-          {/* List */}
           {loading ? (
             <div className="flex items-center justify-center py-16">
               <span className="w-6 h-6 border-2 border-custom-blue/30 border-t-custom-blue rounded-full animate-spin" />
             </div>
           ) : discounts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="flex flex-col items-center justify-center min-h-[550px] text-center">
               <FileText className="w-10 h-10 text-gray-300 mb-3" />
               <p className="text-sm text-slate-400">
                 No discounts yet. Create one to get started.
@@ -441,6 +486,23 @@ export default function Discounts(props) {
                       <p className="text-xs text-slate-400 mt-0.5">
                         {d.discountType}
                       </p>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        {d.discountType === "percentage" && (
+                          <span className="text-green-600 font-medium">
+                            {d.value}% OFF
+                          </span>
+                        )}
+                        {d.discountType === "fixed" && (
+                          <span className="text-blue-600 font-medium">
+                            ₹{d.value} OFF
+                          </span>
+                        )}
+                        {d.discountType === "generic" && (
+                          <span className="text-gray-500 italic">
+                            Custom Discount
+                          </span>
+                        )}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -451,7 +513,7 @@ export default function Discounts(props) {
                       Edit
                     </button>
                     <button
-                      onClick={() => openDelete(d.id)}
+                      onClick={() => openDelete(d._id)}
                       className="w-8 h-8 flex items-center justify-center border border-red-100 text-red-400 hover:bg-red-50 rounded-lg transition"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -460,7 +522,6 @@ export default function Discounts(props) {
                 </div>
               ))}
 
-           
               <div className="flex flex-col items-center min-h-[450px] justify-center border-t border-dashed border-gray-100">
                 <FileText className="w-8 h-8 text-gray-200 mb-2" />
                 <p className="text-xs text-slate-400">
