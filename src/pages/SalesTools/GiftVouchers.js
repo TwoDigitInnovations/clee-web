@@ -13,6 +13,7 @@ import {
 import DashboardHeader from "@/components/DashboardHeader";
 import { useRouter } from "next/navigation";
 import { Api } from "@/services/service";
+import { ConfirmModal } from "@/components/deleteModel";
 
 function Checkbox({ checked, onChange, label }) {
   return (
@@ -151,10 +152,12 @@ function GiftVouchers(props) {
   const [cbFullPayment, setCbFullPayment] = useState(false);
   const [cbShowBiz, setCbShowBiz] = useState(true);
   const [cbShowLogo, setCbShowLogo] = useState(true);
+  const [open, setOpen] = useState(false);
   const [cbShowLinks, setCbShowLinks] = useState(true);
   const [cbCustomCodes, setCbCustomCodes] = useState(false);
   const [termsTemplate, setTermsTemplate] = useState("Default");
   const [termsValue, setTermsValue] = useState("");
+  const [id, setId] = useState(null);
   const [defaultTerms, setDefaultTerms] = useState(
     "This voucher is valid until the expiry date specified and cannot be redeemed or replaced after this date. Chebo Clinic is not responsible for lost / stolen vouchers, and is not responsible for replacing a voucher that has been lost / stolen. This voucher is non-refundable and cannot be exchanged for cash. This voucher is not valid with any other offer and / or special at Chebo Clinic. This voucher must be used by one person. You can use this voucher in-between multiple visits or in one sitting. Please note this voucher can't be used for online purchases, it can only be redeemed instore. .",
   );
@@ -182,6 +185,23 @@ function GiftVouchers(props) {
     }
   };
 
+  const handleDeleteConfirm = () => {
+    try {
+      props.loader(true);
+      Api("delete", `gift-vouchers/delete/${id}`, "", router).then((res) => {
+        props.loader(false);
+        if (res?.status === true) {
+          props.toaster({ type: "success", message: "Gift voucher deleted" });
+          fetchGiftVoucher();
+          setOpen(false);
+        }
+      });
+    } catch {
+      props.loader(false);
+      props.toaster("error", "Server error");
+    }
+  };
+
   return (
     <>
       <DashboardHeader title="Sales Tools" />
@@ -192,8 +212,9 @@ function GiftVouchers(props) {
             Gift vouchers
           </h1>
           <div className="flex gap-2">
-            <button className="bg-custom-blue text-white rounded-md px-4 py-2 text-[13px] font-semibold hover:bg-opacity-90 transition-all flex items-center gap-2"
-            onClick={()=> router.push("/SalesTools/SearchVouchers")}
+            <button
+              className="bg-custom-blue text-white rounded-md px-4 py-2 text-[13px] font-semibold hover:bg-opacity-90 transition-all flex items-center gap-2"
+              onClick={() => router.push("/SalesTools/SearchVouchers")}
             >
               <Search size={14} /> Search Voucher code
             </button>
@@ -451,8 +472,7 @@ function GiftVouchers(props) {
                         {v?.sku_handle}
                       </td>
                       <td className="px-3 py-3 text-gray-900 font-bold">
-                         
-                        {v?.amount? v?.amount : "N/A"}
+                        {v?.amount ? v?.amount : "N/A"}
                       </td>
                       <td className="px-3 py-3">
                         <div className="flex gap-1.5">
@@ -462,7 +482,13 @@ function GiftVouchers(props) {
                           <button className="w-7 h-7 rounded border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-100">
                             <LinkIcon size={14} />
                           </button>
-                          <button className="w-7 h-7 rounded border border-gray-200 flex items-center justify-center text-red-500 bg-red-50 hover:bg-red-100">
+                          <button
+                            className="w-7 h-7 rounded border border-gray-200 flex items-center justify-center text-red-500 bg-red-50 hover:bg-red-100"
+                            onClick={() => {
+                              setId(v?._id);
+                              setOpen(true);
+                            }}
+                          >
                             <Trash2 size={14} />
                           </button>
                         </div>
@@ -543,6 +569,15 @@ function GiftVouchers(props) {
             </button>
           </div>
         </div>
+        <ConfirmModal
+          isOpen={open}
+          setIsOpen={setOpen}
+          title="Delete Staff"
+          message="Are you sure you want to delete this staff member?"
+          onConfirm={handleDeleteConfirm}
+          yesText="Yes, Delete"
+          noText="Cancel"
+        />
       </div>
     </>
   );

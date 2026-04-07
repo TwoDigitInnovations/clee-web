@@ -2,30 +2,7 @@ import React, { useState, useEffect } from "react";
 import DashboardHeader from "@/components/DashboardHeader";
 import { Search, Ticket, ChevronUp, ChevronDown, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-const dummyData = [
-  {
-    id: "1",
-    code: "0168A6",
-    issued: "Fri, 9 May 2025",
-    expires: "Never",
-    from: "Kim Thai",
-    to: "Linda Su",
-    initialValue: "$1000.00",
-    balance: "$301.00",
-    status: "Active",
-  },
-  {
-    id: "2",
-    code: "01E3E6",
-    issued: "Fri, 20 Dec 2024",
-    expires: "Never",
-    from: "Abbey Steadman",
-    to: "Elese",
-    initialValue: "$100.00",
-    balance: "$0.00",
-    status: "Redeemed",
-  },
-];
+import { Api } from "@/services/service";
 
 function SearchVoucher(props) {
   const [promocodes, setPromocodes] = useState([]);
@@ -35,23 +12,32 @@ function SearchVoucher(props) {
   const fetchPromocode = async () => {
     try {
       props.loader(true);
-      const res = await Api("get", "promo-codes", "", router); // Uncomment this for real API
-      //   const res = { status: false }; // Simulating API fail to use dummy data
+
+      const res = await Api(
+        "get",
+        `gift-vouchers/getAll?key=${searchTerm}`,
+        "",
+        router,
+      );
+
+      if (res?.status === true) {
+        setPromocodes(res.data.data || []);
+      } else {
+        setPromocodes([]);
+      }
 
       props.loader(false);
-      if (res?.status === true) {
-        setPromocodes(res.data.data.promoCodes || []);
-      } else {
-        setPromocodes(dummyData);
-      }
     } catch {
       props.loader(false);
-      setPromocodes(dummyData);
     }
   };
 
   useEffect(() => {
-    fetchPromocode();
+    const delay = setTimeout(() => {
+      fetchPromocode();
+    }, 500);
+
+    return () => clearTimeout(delay);
   }, [searchTerm]);
 
   return (
@@ -59,7 +45,6 @@ function SearchVoucher(props) {
       <DashboardHeader title="Sales Tools" />
 
       <div className="md:p-6 p-4 max-w-7xl mx-auto space-y-6">
-        {/* Breadcrumb & Search Bar Section */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 text-sm text-slate-500">
             <span
@@ -79,13 +64,13 @@ function SearchVoucher(props) {
               placeholder="Search by gift voucher # or customer name"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white border text-sm border-slate-200 rounded-xl py-2 md:py-3 md:pl-12 pl-8 pr-4 shadow-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all text-slate-700"
+              className="w-full bg-white border text-sm border-slate-200 rounded-xl py-2 md:py-3 md:pl-12 pl-10 pr-4 shadow-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all text-slate-700"
             />
           </div>
         </div>
 
         {/* Data Display Logic */}
-        {searchTerm === "" || promocodes.length === 0 ? (
+        {promocodes.length === 0 ? (
           /* Empty State (Screenshot 2) */
           <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
             <div className="bg-white p-10 rounded-3xl shadow-sm border border-slate-100">
@@ -120,14 +105,9 @@ function SearchVoucher(props) {
                         <ChevronDown className="w-4 h-4 text-slate-400" />
                       </div>
                     </th>
-                    <th className="px-6 py-4 text-slate-700 font-bold">
-                      <div className="flex items-center gap-1 cursor-pointer">
+                    <th className="px-6 py-4 text-slate-700 font-bold text-center">
+                      <div className="flex items-center justify-center gap-1 cursor-pointer">
                         From <ChevronDown className="w-4 h-4 text-slate-400" />
-                      </div>
-                    </th>
-                    <th className="px-6 py-4 text-slate-700 font-bold">
-                      <div className="flex items-center gap-1 cursor-pointer">
-                        To <ChevronDown className="w-4 h-4 text-slate-400" />
                       </div>
                     </th>
                     <th className="px-6 py-4 text-slate-700 font-bold text-center">
@@ -151,37 +131,64 @@ function SearchVoucher(props) {
                   </tr>
                 </thead>
                 <tbody>
-                  {promocodes.map((item, index) => (
-                    <tr
-                      key={index}
-                      className="border-b py-3 border-slate-50 hover:bg-slate-50 transition-colors group text-sm"
-                    >
-                      <td className="px-6 py-3 text-custom-blue font-medium">
-                        {item.code}
-                      </td>
-                      <td className="px-6  text-slate-600">{item.issued}</td>
-                      <td className="px-6  text-slate-600">{item.expires}</td>
-                      <td className="px-6  text-slate-600">{item.from}</td>
-                      <td className="px-6  text-slate-600">{item.to}</td>
-                      <td className="px-6  text-slate-600 text-center">
-                        {item.initialValue}
-                      </td>
-                      <td className="px-6  text-slate-600 text-center font-medium">
-                        {item.balance}
-                      </td>
-                      <td className="px-6 ">
-                        <span
-                          className={`px-2 py-1 rounded text-[11px] font-bold uppercase ${
-                            item.status === "Active"
-                              ? "bg-green-700 text-white"
-                              : "bg-slate-600 text-white"
-                          }`}
-                        >
-                          {item.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
+                  {promocodes.map((item, index) => {
+                    // ✅ Expiry Calculate
+                    let expiryDate = "";
+                    if (item.expiry_type === "after") {
+                      const date = new Date(item.createdAt);
+
+                      if (item.expiry_unit === "Months") {
+                        date.setMonth(date.getMonth() + item.expiry_value);
+                      } else if (item.expiry_unit === "Days") {
+                        date.setDate(date.getDate() + item.expiry_value);
+                      } else if (item.expiry_unit === "Years") {
+                        date.setFullYear(
+                          date.getFullYear() + item.expiry_value,
+                        );
+                      }
+
+                      expiryDate = date.toLocaleDateString();
+                    } else {
+                      expiryDate = "Never";
+                    }
+
+                    return (
+                      <tr
+                        key={index}
+                        className="border-b border-slate-50 hover:bg-slate-50 text-sm"
+                      >
+                        <td className="px-6 py-3 text-custom-blue font-medium">
+                          {item.sku_handle}
+                        </td>
+
+                        <td className="px-6 text-slate-600">
+                          {new Date(item.createdAt).toLocaleDateString()}
+                        </td>
+
+                        <td className="px-6 text-slate-600">{expiryDate}</td>
+
+                        <td className="px-6 text-slate-600">
+                          {item?.user?.fullname}
+                        </td>
+
+                        <td className="px-6 text-slate-600">{item?.amount}</td>
+
+                        <td className="px-6 text-slate-600">{item?.price}</td>
+
+                        <td className="px-6">
+                          <span
+                            className={`px-2 py-1 rounded text-[11px] font-bold uppercase ${
+                              item.status
+                                ? "bg-green-700 text-white"
+                                : "bg-slate-600 text-white"
+                            }`}
+                          >
+                            {item.status ? "Active" : "Inactive"}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

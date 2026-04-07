@@ -12,6 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { ApiFormData } from "@/services/service";
+import { useRouter } from "next/navigation";
 
 // ─── Add Tax Modal ────────────────────────────────────────────────────────────
 function AddTaxModal({ onClose, onAdd }) {
@@ -21,7 +22,12 @@ function AddTaxModal({ onClose, onAdd }) {
 
   const handleAdd = () => {
     if (!taxName.trim()) return setError("Tax name is required.");
-    if (!taxRate || isNaN(taxRate) || Number(taxRate) < 0 || Number(taxRate) > 100)
+    if (
+      !taxRate ||
+      isNaN(taxRate) ||
+      Number(taxRate) < 0 ||
+      Number(taxRate) > 100
+    )
       return setError("Enter a valid rate between 0 and 100.");
     setError("");
     onAdd({ name: taxName.trim(), rate: taxRate, usage: "0 items" });
@@ -33,7 +39,10 @@ function AddTaxModal({ onClose, onAdd }) {
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
         <div className="flex justify-between items-center mb-5">
           <h2 className="text-base font-bold text-custom-blue">Add New Tax</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+          >
             <X size={18} />
           </button>
         </div>
@@ -47,7 +56,10 @@ function AddTaxModal({ onClose, onAdd }) {
               type="text"
               placeholder="e.g. GST, VAT, HST"
               value={taxName}
-              onChange={(e) => { setTaxName(e.target.value); setError(""); }}
+              onChange={(e) => {
+                setTaxName(e.target.value);
+                setError("");
+              }}
               className="w-full bg-gray-100 border-none text-black rounded p-3 text-sm outline-none focus:ring-2 focus:ring-custom-blue/30"
             />
           </div>
@@ -62,10 +74,15 @@ function AddTaxModal({ onClose, onAdd }) {
                 value={taxRate}
                 min="0"
                 max="100"
-                onChange={(e) => { setTaxRate(e.target.value); setError(""); }}
+                onChange={(e) => {
+                  setTaxRate(e.target.value);
+                  setError("");
+                }}
                 className="w-full bg-gray-100 border-none text-black rounded p-3 pr-10 text-sm outline-none focus:ring-2 focus:ring-custom-blue/30"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-500">%</span>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-500">
+                %
+              </span>
             </div>
           </div>
           {error && <p className="text-red-500 text-xs">{error}</p>}
@@ -106,8 +123,13 @@ function AddPaymentModal({ onClose, onAdd }) {
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
         <div className="flex justify-between items-center mb-5">
-          <h2 className="text-base font-bold text-custom-blue">Add Payment Type</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <h2 className="text-base font-bold text-custom-blue">
+            Add Payment Type
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+          >
             <X size={18} />
           </button>
         </div>
@@ -120,7 +142,10 @@ function AddPaymentModal({ onClose, onAdd }) {
             type="text"
             placeholder="e.g. Bank Transfer, Cheque"
             value={paymentName}
-            onChange={(e) => { setPaymentName(e.target.value); setError(""); }}
+            onChange={(e) => {
+              setPaymentName(e.target.value);
+              setError("");
+            }}
             className="w-full bg-gray-100 border-none text-black rounded p-3 text-sm outline-none focus:ring-2 focus:ring-custom-blue/30"
           />
           {error && <p className="text-red-500 text-xs mt-1.5">{error}</p>}
@@ -147,7 +172,7 @@ function AddPaymentModal({ onClose, onAdd }) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 function Salessettings(props) {
-  const { loader, toaster, router } = props;
+  const { loader, toaster } = props;
 
   const [formData, setFormData] = useState({
     paymentTerms: "Immediately",
@@ -162,16 +187,14 @@ function Salessettings(props) {
     location: "Chebo Clinic",
     printFormat: "PDF (Standard)",
     merchantId: "",
-    apiKey: "••••••••••••••••",
+    apiKey: "",
   });
-
-  // Taxes state
+ const router = useRouter();
   const [taxes, setTaxes] = useState([
     { id: 1, name: "GST", rate: "10", usage: "250 items" },
   ]);
   const [showAddTax, setShowAddTax] = useState(false);
 
-  // Payment types state
   const systemPayments = [
     "TimelyPay - Terminal",
     "TimelyPay - Tap to Pay",
@@ -221,12 +244,17 @@ function Salessettings(props) {
     <div className="bg-[#f8f9fa] min-h-screen pb-20">
       <DashboardHeader title="Sales Tools" />
 
-   
       {showAddTax && (
-        <AddTaxModal onClose={() => setShowAddTax(false)} onAdd={handleAddTax} />
+        <AddTaxModal
+          onClose={() => setShowAddTax(false)}
+          onAdd={handleAddTax}
+        />
       )}
       {showAddPayment && (
-        <AddPaymentModal onClose={() => setShowAddPayment(false)} onAdd={handleAddPayment} />
+        <AddPaymentModal
+          onClose={() => setShowAddPayment(false)}
+          onAdd={handleAddPayment}
+        />
       )}
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-4">
@@ -251,32 +279,46 @@ function Salessettings(props) {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-[12px] font-bold text-gray-500 uppercase mb-2">Payment Terms</label>
+              <label className="block text-[12px] font-bold text-gray-500 uppercase mb-2">
+                Payment Terms
+              </label>
               <select
                 value={formData.paymentTerms}
-                onChange={(e) => setFormData({ ...formData, paymentTerms: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, paymentTerms: e.target.value })
+                }
                 className="w-full bg-gray-100 text-black border-none rounded p-3 text-sm outline-none"
               >
                 <option>Immediately</option>
-                <option>Net 7</option>
-                <option>Net 15</option>
-                <option>Net 30</option>
+                <option>Within 7 Days</option>
+                <option>Within 14 Days</option>
+                <option>Within 21 Days</option>
+                <option>Within 30 Days</option>
+                <option> 20th of the following Month</option>
               </select>
             </div>
             <div>
-              <label className="block text-[12px] font-bold text-gray-500 uppercase mb-2">Invoice Title</label>
+              <label className="block text-[12px] font-bold text-gray-500 uppercase mb-2">
+                Invoice Title
+              </label>
               <input
                 type="text"
                 value={formData.invoiceTitle}
-                onChange={(e) => setFormData({ ...formData, invoiceTitle: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, invoiceTitle: e.target.value })
+                }
                 className="w-full bg-gray-100 text-black border-none rounded p-3 text-sm outline-none"
               />
             </div>
             <div>
-              <label className="block text-[12px] font-bold text-gray-500 uppercase mb-2">Business Registration Type</label>
+              <label className="block text-[12px] font-bold text-gray-500 uppercase mb-2">
+                Business Registration Type
+              </label>
               <select
                 value={formData.businessRegType}
-                onChange={(e) => setFormData({ ...formData, businessRegType: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, businessRegType: e.target.value })
+                }
                 className="w-full bg-gray-100 text-black border-none rounded p-3 text-sm outline-none"
               >
                 <option>ACN</option>
@@ -285,38 +327,63 @@ function Salessettings(props) {
               </select>
             </div>
             <div>
-              <label className="block text-[12px] font-bold text-gray-500 uppercase mb-2">Business Registration Number</label>
+              <label className="block text-[12px] font-bold text-gray-500 uppercase mb-2">
+                Business Registration Number
+              </label>
               <input
                 type="text"
                 value={formData.businessRegNumber}
-                onChange={(e) => setFormData({ ...formData, businessRegNumber: e.target.value })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    businessRegNumber: e.target.value,
+                  })
+                }
                 className="w-full bg-gray-100 text-black border-none rounded p-3 text-sm outline-none"
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-[12px] font-bold text-gray-500 uppercase mb-2">Payment Instructions/Notes</label>
+              <label className="block text-[12px] font-bold text-gray-500 uppercase mb-2">
+                Payment Instructions/Notes
+              </label>
               <textarea
                 placeholder="Enter bank details or special terms..."
                 value={formData.paymentInstructions}
-                onChange={(e) => setFormData({ ...formData, paymentInstructions: e.target.value })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    paymentInstructions: e.target.value,
+                  })
+                }
                 className="w-full bg-gray-100 border-none text-black rounded p-3 text-sm outline-none h-24 resize-none"
               />
             </div>
             <div>
-              <label className="block text-[12px] font-bold text-gray-500 uppercase mb-2">Next Invoice Number</label>
+              <label className="block text-[12px] font-bold text-gray-500 uppercase mb-2">
+                Next Invoice Number
+              </label>
               <input
                 type="text"
                 value={formData.nextInvoiceNumber}
-                onChange={(e) => setFormData({ ...formData, nextInvoiceNumber: e.target.value })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    nextInvoiceNumber: e.target.value,
+                  })
+                }
                 className="w-full bg-gray-100 border-none text-black rounded p-3 text-sm outline-none"
               />
             </div>
             <div>
-              <label className="block text-[12px] font-bold text-gray-500 uppercase mb-2">Next Refund Number</label>
+              <label className="block text-[12px] font-bold text-gray-500 uppercase mb-2">
+                Next Refund Number
+              </label>
               <input
                 type="text"
                 value={formData.nextRefundNumber}
-                onChange={(e) => setFormData({ ...formData, nextRefundNumber: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, nextRefundNumber: e.target.value })
+                }
                 className="w-full bg-gray-100 border-none text-black rounded p-3 text-sm outline-none"
               />
             </div>
@@ -325,26 +392,48 @@ function Salessettings(props) {
           <div className="mt-8 space-y-4 border-t pt-6">
             <div className="flex justify-between items-center">
               <div>
-                <p className="text-xs font-bold text-gray-800">Hide business name, address, and logo</p>
-                <p className="text-[12px] text-gray-400">Useful if you use pre-printed letterheads</p>
+                <p className="text-xs font-bold text-gray-800">
+                  Hide business name, address, and logo
+                </p>
+                <p className="text-[12px] text-gray-400">
+                  Useful if you use pre-printed letterheads
+                </p>
               </div>
               <div
-                onClick={() => setFormData({ ...formData, hideBusinessDetails: !formData.hideBusinessDetails })}
+                onClick={() =>
+                  setFormData({
+                    ...formData,
+                    hideBusinessDetails: !formData.hideBusinessDetails,
+                  })
+                }
                 className={`w-10 h-5 rounded-full relative cursor-pointer transition-colors ${formData.hideBusinessDetails ? "bg-custom-blue" : "bg-gray-200"}`}
               >
-                <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${formData.hideBusinessDetails ? "right-1" : "left-1"}`} />
+                <div
+                  className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${formData.hideBusinessDetails ? "right-1" : "left-1"}`}
+                />
               </div>
             </div>
             <div className="flex justify-between items-center">
               <div>
-                <p className="text-xs font-bold text-gray-800">Hide payment history on invoices</p>
-                <p className="text-[12px] text-gray-400">Shows only the balance due</p>
+                <p className="text-xs font-bold text-gray-800">
+                  Hide payment history on invoices
+                </p>
+                <p className="text-[12px] text-gray-400">
+                  Shows only the balance due
+                </p>
               </div>
               <div
-                onClick={() => setFormData({ ...formData, hidePaymentHistory: !formData.hidePaymentHistory })}
+                onClick={() =>
+                  setFormData({
+                    ...formData,
+                    hidePaymentHistory: !formData.hidePaymentHistory,
+                  })
+                }
                 className={`w-10 h-5 rounded-full relative cursor-pointer transition-colors ${formData.hidePaymentHistory ? "bg-custom-blue" : "bg-gray-200"}`}
               >
-                <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${formData.hidePaymentHistory ? "right-1" : "left-1"}`} />
+                <div
+                  className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${formData.hidePaymentHistory ? "right-1" : "left-1"}`}
+                />
               </div>
             </div>
           </div>
@@ -358,13 +447,17 @@ function Salessettings(props) {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-[12px] font-bold text-custom-blue/90 uppercase mb-2">Location</label>
+              <label className="block text-[12px] font-bold text-custom-blue/90 uppercase mb-2">
+                Location
+              </label>
               <select className="w-full bg-gray-100 text-black border-none rounded p-3 text-sm outline-none">
                 <option>Chebo Clinic</option>
               </select>
             </div>
             <div>
-              <label className="block text-[12px] font-bold text-custom-blue/90 uppercase mb-2">Print Format</label>
+              <label className="block text-[12px] font-bold text-custom-blue/90 uppercase mb-2">
+                Print Format
+              </label>
               <select className="w-full bg-gray-100 text-black border-none rounded p-3 text-sm outline-none">
                 <option>PDF (Standard)</option>
                 <option>Thermal (80mm)</option>
@@ -388,19 +481,28 @@ function Salessettings(props) {
             </div>
 
             {taxes.length === 0 && (
-              <p className="text-center text-sm text-gray-400 py-4">No taxes added yet.</p>
+              <p className="text-center text-sm text-gray-400 py-4">
+                No taxes added yet.
+              </p>
             )}
 
             {taxes.map((tax) => (
-              <div key={tax.id} className="flex items-center gap-4 bg-gray-50 p-4 rounded-lg mb-2">
-                <div className="flex-1 font-bold text-sm text-gray-700">{tax.name}</div>
+              <div
+                key={tax.id}
+                className="flex items-center gap-4 bg-gray-50 p-4 rounded-lg mb-2"
+              >
+                <div className="flex-1 font-bold text-sm text-gray-700">
+                  {tax.name}
+                </div>
                 <div className="flex items-center gap-2">
                   <input
                     type="text"
                     value={tax.rate}
                     onChange={(e) =>
                       setTaxes((prev) =>
-                        prev.map((t) => t.id === tax.id ? { ...t, rate: e.target.value } : t)
+                        prev.map((t) =>
+                          t.id === tax.id ? { ...t, rate: e.target.value } : t,
+                        ),
                       )
                     }
                     className="w-12 text-center bg-white text-black border border-gray-200 rounded p-1 text-sm font-bold"
@@ -413,7 +515,10 @@ function Salessettings(props) {
                   </span>
                 </div>
                 <button onClick={() => handleDeleteTax(tax.id)}>
-                  <Trash2 size={16} className="text-gray-400 hover:text-red-500 cursor-pointer" />
+                  <Trash2
+                    size={16}
+                    className="text-gray-400 hover:text-red-500 cursor-pointer"
+                  />
                 </button>
               </div>
             ))}
@@ -431,24 +536,32 @@ function Salessettings(props) {
         <div className="bg-white rounded-xl shadow-sm border-l-4 border-l-custom-blue/90 p-6 mb-8">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <h3 className="font-bold text-gray-800 text-sm">Global Tax Override</h3>
+              <h3 className="font-bold text-gray-800 text-sm">
+                Global Tax Override
+              </h3>
               <p className="text-[11px] text-gray-500 mt-1">
-                Override all of your services, classes, discounts, products and packages with one tax rate:
+                Override all of your services, classes, discounts, products and
+                packages with one tax rate:
               </p>
             </div>
             <div className="flex gap-2">
               <select className="bg-gray-100 text-xs text-black font-bold p-2 rounded outline-none border-none">
                 {taxes.map((t) => (
-                  <option key={t.id}>{t.name} ({t.rate}%)</option>
+                  <option key={t.id}>
+                    {t.name} ({t.rate}%)
+                  </option>
                 ))}
               </select>
-              <button className="bg-custom-blue text-white text-xs px-4 py-2 rounded font-bold">Apply</button>
+              <button className="bg-custom-blue text-white text-xs px-4 py-2 rounded font-bold">
+                Apply
+              </button>
             </div>
           </div>
           <div className="bg-blue-50 p-3 rounded flex items-center gap-3">
             <Info size={16} className="text-custom-blue/90 shrink-0" />
             <p className="text-[12px] text-custom-blue/90">
-              Applying a global tax override will permanently update all current item rates. This action cannot be easily undone.
+              Applying a global tax override will permanently update all current
+              item rates. This action cannot be easily undone.
             </p>
           </div>
         </div>
@@ -472,10 +585,15 @@ function Salessettings(props) {
 
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 divide-y overflow-hidden">
             {systemPayments.map((type) => (
-              <div key={type} className="flex justify-between items-center p-4 hover:bg-gray-50">
+              <div
+                key={type}
+                className="flex justify-between items-center p-4 hover:bg-gray-50"
+              >
                 <div className="flex items-center gap-4 text-gray-400">
                   <GripVertical size={16} />
-                  <span className="text-sm font-medium text-gray-700">{type}</span>
+                  <span className="text-sm font-medium text-gray-700">
+                    {type}
+                  </span>
                 </div>
                 <span className="text-[9px] font-black text-gray-400 border border-gray-200 px-1 rounded uppercase tracking-widest">
                   System
@@ -483,25 +601,37 @@ function Salessettings(props) {
               </div>
             ))}
             {customPayments.map((type) => (
-              <div key={type} className="flex justify-between items-center p-4 hover:bg-gray-50">
+              <div
+                key={type}
+                className="flex justify-between items-center p-4 hover:bg-gray-50"
+              >
                 <div className="flex items-center gap-4 text-gray-400">
                   <GripVertical size={16} />
-                  <span className="text-sm font-medium text-gray-700">{type}</span>
+                  <span className="text-sm font-medium text-gray-700">
+                    {type}
+                  </span>
                 </div>
                 <button onClick={() => handleDeletePayment(type)}>
-                  <Trash2 size={16} className="text-gray-300 hover:text-red-500 cursor-pointer" />
+                  <Trash2
+                    size={16}
+                    className="text-gray-300 hover:text-red-500 cursor-pointer"
+                  />
                 </button>
               </div>
             ))}
             {customPayments.length === 0 && (
-              <div className="p-4 text-center text-sm text-gray-400">No custom payment types added.</div>
+              <div className="p-4 text-center text-sm text-gray-400">
+                No custom payment types added.
+              </div>
             )}
           </div>
         </div>
 
         {/* 6. Laybuy Integration */}
         <div className="mb-20">
-          <h2 className="text-lg font-bold text-gray-800">Laybuy integration</h2>
+          <h2 className="text-lg font-bold text-gray-800">
+            Laybuy integration
+          </h2>
           <p className="text-[11px] text-blue-500 mb-4">
             Connect your Laybuy account to accept buy now, pay later payments.
           </p>
@@ -509,37 +639,52 @@ function Salessettings(props) {
             <div className="bg-[#eef2ff] p-4 rounded-lg flex items-start gap-4 mb-8">
               <Info size={18} className="text-custom-blue/90 mt-1 shrink-0" />
               <div>
-                <p className="text-xs font-bold text-gray-800 mb-1">Setting up Laybuy</p>
+                <p className="text-xs font-bold text-gray-800 mb-1">
+                  Setting up Laybuy
+                </p>
                 <p className="text-[11px] text-gray-500 leading-relaxed">
-                  To integrate Laybuy, you'll need your Merchant ID and API Key from the Laybuy Merchant Dashboard.
-                  Ensure your currency settings in Laybuy match your salon's currency.
+                  To integrate Laybuy, you'll need your Merchant ID and API Key
+                  from the Laybuy Merchant Dashboard. Ensure your currency
+                  settings in Laybuy match your salon's currency.
                 </p>
               </div>
             </div>
             <div className="mb-8">
-              <p className="text-[12px] font-bold text-gray-500 uppercase mb-3">Locations using Laybuy</p>
+              <p className="text-[12px] font-bold text-gray-500 uppercase mb-3">
+                Locations using Laybuy
+              </p>
               <div className="inline-flex items-center gap-2 bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-full">
                 <CheckCircle2 size={14} className="text-custom-blue/90" />
-                <span className="text-xs font-bold text-gray-700">Chebo Clinic</span>
+                <span className="text-xs font-bold text-gray-700">
+                  Chebo Clinic
+                </span>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               <div>
-                <label className="block text-[12px] font-bold text-gray-500 uppercase mb-2">Merchant ID</label>
+                <label className="block text-[12px] font-bold text-gray-500 uppercase mb-2">
+                  Merchant ID
+                </label>
                 <input
                   type="text"
                   placeholder="Enter your Laybuy Merchant ID"
                   value={formData.merchantId}
-                  onChange={(e) => setFormData({ ...formData, merchantId: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, merchantId: e.target.value })
+                  }
                   className="w-full bg-gray-100 border-none text-black rounded p-3 text-sm outline-none"
                 />
               </div>
               <div>
-                <label className="block text-[12px] font-bold text-gray-500 uppercase mb-2">API Key</label>
+                <label className="block text-[12px] font-bold text-gray-500 uppercase mb-2">
+                  API Key
+                </label>
                 <input
                   type="password"
                   value={formData.apiKey}
-                  onChange={(e) => setFormData({ ...formData, apiKey: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, apiKey: e.target.value })
+                  }
                   className="w-full bg-gray-100 border-none text-black rounded p-3 text-sm outline-none tracking-widest"
                 />
               </div>

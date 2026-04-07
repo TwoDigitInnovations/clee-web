@@ -161,6 +161,7 @@ function Packages(props) {
                       >
                         <td className="px-6 py-5">
                           <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center text-gray-300">
+                            <img src={pkg.photo} alt={pkg.name} />{" "}
                             <ImageIcon size={20} />
                           </div>
                         </td>
@@ -178,7 +179,7 @@ function Packages(props) {
                         </td>
                         <td className="px-6 py-5">
                           <span className="bg-[#eef2ff] text-[#4f46e5] text-[11px] font-semibold px-3 py-1 rounded-full border border-[#dbeafe]">
-                            {pkg.services}
+                            {pkg?.specific_services.length}
                           </span>
                         </td>
                         <td className="px-6 py-5">
@@ -188,7 +189,14 @@ function Packages(props) {
                         </td>
                         <td className="px-6 py-5">
                           <div className="flex justify-end items-center gap-3">
-                            <button className="text-custom-blue text-xs font-bold border border-gray-200 px-3 py-1.5 rounded hover:bg-gray-50">
+                            <button
+                              className="text-custom-blue text-xs font-bold border border-gray-200 px-3 py-1.5 rounded hover:bg-gray-50"
+                              onClick={() =>
+                                router.push(
+                                  `/SalesTools/AddPackages?id=${pkg._id}`,
+                                )
+                              }
+                            >
                               Edit
                             </button>
                             <button className="bg-[#dbeafe] text-[#1e3a8a] text-[11px] font-bold px-4 py-1.5 rounded hover:bg-blue-200">

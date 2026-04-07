@@ -56,7 +56,7 @@ const FORMULA_PRESETS = [
     targetSpend: "$2,300",
     badge: null,
     perks: ["Tier 1 Rewards", "Standard Benefits"],
-    selectedPerk: "Tier 1 Rewards",
+    selectedPerk: "Tier 1 Rewards, Averate of 3 visit",
   },
   {
     id: "moderate",
@@ -89,17 +89,12 @@ const SERVICE_OPTIONS = [
   { id: "none", label: "No Services", icon: <Ban size={18} /> },
 ];
 
-// ── main component ─────────────────────────────────────────────────────────────
-export default function Rewards({ loader, toaster, router }) {
-  // master toggle
+function Rewards({ loader, toaster, router }) {
   const [rewardsActive, setRewardsActive] = useState(false);
-
-  // formula section
   const [selectedPreset, setSelectedPreset] = useState("moderate");
   const [spendValue, setSpendValue] = useState("100");
   const [rewardValue, setRewardValue] = useState("10");
-
-  // advanced settings
+  const [CreateOwnFormula, setCreateOwnFormula] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [productEarning, setProductEarning] = useState("all");
   const [serviceEarning, setServiceEarning] = useState("selected");
@@ -108,7 +103,6 @@ export default function Rewards({ loader, toaster, router }) {
   const [applyExisting, setApplyExisting] = useState(false);
   const [showToCustomers, setShowToCustomers] = useState(true);
 
-  // ── save handler ──────────────────────────────────────────────────────────────
   const handleSave = async () => {
     try {
       loader?.(true);
@@ -142,13 +136,11 @@ export default function Rewards({ loader, toaster, router }) {
       <DashboardHeader title="Sales Tools" />
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
-     
         <h1 className="text-2xl font-bold text-custom-blue mb-1">Rewards</h1>
         <p className="text-sm text-gray-500 mb-6">
           Design and manage your luxury loyalty program tiers.
         </p>
 
-      
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm px-5 py-4 flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-custom-blue/10 flex items-center justify-center">
@@ -178,12 +170,9 @@ export default function Rewards({ loader, toaster, router }) {
           </div>
         </div>
 
-        {/* ── Everything below is hidden when toggle is OFF ── */}
         {rewardsActive && (
           <>
-            {/* ── Stats row ── */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              {/* Avg spend */}
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
                 <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">
                   Average Customer Spend
@@ -214,13 +203,19 @@ export default function Rewards({ loader, toaster, router }) {
               </div>
             </div>
 
-            {/* ── Formula setup ── */}
             <div className="mb-6">
               <div className="flex items-center gap-3 mb-4">
                 <h2 className="text-base font-bold text-custom-blue">
-                  FormulP setup
+                  Formula setup
                 </h2>
                 <div className="flex-1 h-px bg-gray-200" />
+                <button
+                  onClick={() => setCreateOwnFormula(true)}
+                  className="bg-custom-blue px-3 py-2 rounded-lg text-white text-sm"
+                >
+                  {" "}
+                  Create your Own Formula{" "}
+                </button>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -280,43 +275,43 @@ export default function Rewards({ loader, toaster, router }) {
               </div>
             </div>
 
-            {/* ── Custom formula ── */}
-            <div className="mb-6">
-              <div className="flex items-center gap-3 mb-4">
-                <h2 className="text-base font-bold text-custom-blue">
-                  Custom formula
-                </h2>
-                <div className="flex-1 h-px bg-gray-200" />
-              </div>
-
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 text-center">
-                <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-5">
-                  Create Your Own Formula
-                </p>
-                <div className="flex items-center justify-center gap-3 flex-wrap text-sm text-gray-700 font-medium">
-                  <span>Spend $</span>
-                  <input
-                    type="number"
-                    value={spendValue}
-                    onChange={(e) => setSpendValue(e.target.value)}
-                    className="w-20 text-center bg-gray-100 border-none rounded-lg p-2 text-sm font-bold text-gray-800 outline-none focus:ring-2 focus:ring-custom-blue/30"
-                  />
-                  <span>and receive a $</span>
-                  <input
-                    type="number"
-                    value={rewardValue}
-                    onChange={(e) => setRewardValue(e.target.value)}
-                    className="w-20 text-center bg-gray-100 border-none rounded-lg p-2 text-sm font-bold text-gray-800 outline-none focus:ring-2 focus:ring-custom-blue/30"
-                  />
-                  <span>reward.</span>
+            {CreateOwnFormula && (
+              <div className="mb-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <h2 className="text-base font-bold text-custom-blue">
+                    Custom formula
+                  </h2>
+                  <div className="flex-1 h-px bg-gray-200" />
                 </div>
-                <button className="mt-5 bg-custom-blue text-white text-sm font-bold px-8 py-2 rounded-lg hover:bg-custom-blue/90 transition-all">
-                  Select
-                </button>
-              </div>
-            </div>
 
-            {/* ── Advanced Settings ── */}
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 text-center">
+                  <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-5">
+                    Create Your Own Formula
+                  </p>
+                  <div className="flex items-center justify-center gap-3 flex-wrap text-sm text-gray-700 font-medium">
+                    <span>Spend $</span>
+                    <input
+                      type="number"
+                      value={spendValue}
+                      onChange={(e) => setSpendValue(e.target.value)}
+                      className="w-20 text-center bg-gray-100 border-none rounded-lg p-2 text-sm font-bold text-gray-800 outline-none focus:ring-2 focus:ring-custom-blue/30"
+                    />
+                    <span>and receive a $</span>
+                    <input
+                      type="number"
+                      value={rewardValue}
+                      onChange={(e) => setRewardValue(e.target.value)}
+                      className="w-20 text-center bg-gray-100 border-none rounded-lg p-2 text-sm font-bold text-gray-800 outline-none focus:ring-2 focus:ring-custom-blue/30"
+                    />
+                    <span>reward.</span>
+                  </div>
+                  <button className="mt-5 bg-custom-blue text-white text-sm font-bold px-8 py-2 rounded-lg hover:bg-custom-blue/90 transition-all">
+                    Select
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm mb-6 overflow-hidden">
               <button
                 onClick={() => setShowAdvanced((v) => !v)}
@@ -353,7 +348,7 @@ export default function Rewards({ loader, toaster, router }) {
                       </div>
 
                       {/* Products */}
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-2">
+                      <p className="text-[12px] font-semibold text-gray-400 mb-2">
                         Products Earning Points
                       </p>
                       <div className="flex gap-3 mb-5">
@@ -361,7 +356,7 @@ export default function Rewards({ loader, toaster, router }) {
                           <button
                             key={opt.id}
                             onClick={() => setProductEarning(opt.id)}
-                            className={`flex flex-col items-center gap-1.5 px-4 py-3 rounded-xl border-2 text-[11px] font-bold transition-all whitespace-pre-line text-center ${
+                            className={`flex flex-col  items-center justify-center gap-1.5 w-44 h-28 rounded-xl border-2 text-[12px] font-bold transition-all whitespace-pre-line text-center ${
                               productEarning === opt.id
                                 ? "border-custom-blue bg-custom-blue/5 text-custom-blue"
                                 : "border-gray-200 text-gray-500 hover:border-gray-300"
@@ -378,7 +373,7 @@ export default function Rewards({ loader, toaster, router }) {
                       </div>
 
                       {/* Services */}
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-2">
+                      <p className="text-[12px] font-semibold text-gray-400  mb-2">
                         Services Earning Points
                       </p>
                       <div className="flex gap-3">
@@ -386,7 +381,7 @@ export default function Rewards({ loader, toaster, router }) {
                           <button
                             key={opt.id}
                             onClick={() => setServiceEarning(opt.id)}
-                            className={`flex flex-col items-center gap-1.5 px-4 py-3 rounded-xl border-2 text-[11px] font-bold transition-all text-center ${
+                            className={`flex flex-col items-center justify-center gap-1.5 w-44 h-28 rounded-xl border-2 text-[12px] font-bold transition-all text-center ${
                               serviceEarning === opt.id
                                 ? "border-custom-blue bg-custom-blue/5 text-custom-blue"
                                 : "border-gray-200 text-gray-500 hover:border-gray-300"
@@ -405,24 +400,24 @@ export default function Rewards({ loader, toaster, router }) {
 
                     {/* Info cards */}
                     <div className="md:col-span-2 space-y-3">
-                      <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+                      <div className="bg-blue-50 border border-blue-100 rounded-xl p-6 space-y-1">
                         <div className="flex items-center gap-2 mb-1">
                           <Info size={13} className="text-custom-blue" />
                           <p className="text-xs font-bold text-custom-blue">
                             Vouchers & Store Credit
                           </p>
                         </div>
-                        <p className="text-[11px] text-gray-500 leading-relaxed">
-                          Gift vouchers and store credit are set to automatically
-                          collect points for customers when they are applied to a
-                          sale transaction.
+                        <p className="text-[11px] text-gray-500 leading-relaxed  w-[80%]">
+                          Gift vouchers and store credit are set to
+                          automatically collect points for customers when they
+                          are applied to a sale transaction.
                         </p>
                       </div>
-                      <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-                        <p className="text-xs font-bold text-gray-700 mb-1">
+                      <div className="bg-gray-50 border border-gray-200 rounded-xl  p-6 space-y-1">
+                        <p className="text-sm font-bold text-gray-700 mb-1">
                           Pro Tip
                         </p>
-                        <p className="text-[11px] text-gray-500 leading-relaxed">
+                        <p className="text-[12px] text-gray-500 leading-relaxed w-[80%]">
                           Restricting points to specific premium services can
                           drive higher-value appointment bookings during
                           off-peak hours.
@@ -550,7 +545,6 @@ export default function Rewards({ loader, toaster, router }) {
               )}
             </div>
 
-            {/* ── Footer buttons ── */}
             <div className="flex justify-end gap-3">
               <button className="px-6 py-2.5 rounded-lg border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-all">
                 Cancel
@@ -568,3 +562,5 @@ export default function Rewards({ loader, toaster, router }) {
     </div>
   );
 }
+
+export default Rewards;
