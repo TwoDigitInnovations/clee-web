@@ -4,12 +4,14 @@ import { useRouter } from "next/router";
 import { ChevronRight } from "lucide-react";
 
 // 🔁 Recursive Component
-const MenuItem = ({ item, router, level = 0 }) => {
+const MenuItem = ({ item, router, level = 0,  }) => {
   const [open, setOpen] = useState(false);
 
   const isActive = router.pathname === item.href;
 
   // ✅ Auto open if any child is active
+  console.log(open);
+  
   useEffect(() => {
     if (
       item.children?.some(
@@ -72,14 +74,14 @@ const MenuItem = ({ item, router, level = 0 }) => {
   );
 };
 
-export default function SidebarMenu({ menu, user }) {
+export default function SidebarMenu({ menu, user,setOpen, open }) {
   const router = useRouter();
 
   return (
     <div>
       {menu.map((item, i) =>
         item.access.includes(user?.role) ? (
-          <MenuItem key={i} item={item} router={router} />
+          <MenuItem key={i} item={item} router={router} setOpen={setOpen} open={open} />
         ) : null
       )}
     </div>

@@ -204,12 +204,12 @@ function SidePannel({ open, setOpen }) {
         </div>
 
         <div className="flex-1 overflow-y-auto scrollbar-hide px-4">
-          <SidebarMenu menu={managementMenu} user={user} />
+          <SidebarMenu menu={managementMenu} user={user} setOpen={setOpen} open={open}/>
 
           <p className=" mt-8 uppercase text-gray-400 text-xs mb-3 px-2 tracking-wider">
             System
           </p>
-          <SidebarMenu menu={SystemMenu} user={user} />
+          <SidebarMenu menu={SystemMenu} user={user} setOpen={setOpen} open={open}/>
         </div>
 
         <div className="p-4 border-t border-white/10">

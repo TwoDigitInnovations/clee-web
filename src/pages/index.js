@@ -276,9 +276,9 @@ export default function Dashboard() {
         subtitle="Welcome back, here's your salon's status today."
       />
 
-      <div className="min-h-screen bg-custom-gray p-6 text-slate-800 ">
+      <div className="md:w-full w-[400px] min-h-screen bg-custom-gray p-3 md:p-6 text-slate-800 ">
         <div className="flex md:flex-row flex-col md:items-center gap-3 justify-between mb-6">
-          <div className="flex bg-white rounded-xl gap-0 shadow-sm">
+          <div className="flex bg-white rounded-xl gap-0 shadow-sm flex-wrap">
             {TABS.map((tab) => (
               <button
                 key={tab}

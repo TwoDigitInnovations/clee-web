@@ -16,7 +16,7 @@ const Layout = ({ children }) => {
     <div className="flex min-h-screen bg-white">
       {!isPublicPage && <SidePannel open={open} setOpen={setOpen} />}
 
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col md:w-full w-[400px]">
         {!isPublicPage && (
           <div className="sticky top-0 z-40">
             <div className=" items-center justify-between lg:hidden flex">

@@ -30,10 +30,11 @@ function getInitialState() {
     price_includes_tax: false,
     selected_template: "signature_atelier",
     custom_amount_online: true,
-    expiry_type: "after", // "never" | "after"
+    expiry_type: "after",
     expiry_value: 12,
     expiry_unit: "Months",
     terms_template: "default",
+    termsValue: "",
   };
 }
 
@@ -49,9 +50,9 @@ export default function AddGiftVouchers(props) {
   const [formData, setFormData] = useState(getInitialState());
   const [errors, setErrors] = useState({});
   const [services, setServices] = useState([]);
-  const [selectedServiceId, setSelectedServiceId] = useState("");
-  const [editModal, setEditModal] = useState(null);
-  const fileRef = useRef(null);
+
+  const [selectedTemplate, setSelectedTemplate] = useState("signature");
+  const [expiryType, setExpiryType] = useState("after");
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -74,14 +75,13 @@ export default function AddGiftVouchers(props) {
     const fetchGiftVoucher = async () => {
       try {
         props.loader(true);
-        const res = await Api("get", `GiftVouchers/${id}`, "", router);
+        const res = await Api("get", `gift-vouchers/${id}`, "", router);
         props.loader(false);
         if (res?.status === true) {
           const d = res.data.data;
           setFormData({
-            GiftVoucher_name: d.GiftVoucher_name || "",
-
-            status: d.status ?? true,
+            ...getInitialState(),
+            ...d,
           });
         } else {
           props.toaster("error", res?.message || "Failed to fetch GiftVoucher");
@@ -98,23 +98,21 @@ export default function AddGiftVouchers(props) {
     setFormData((prev) => ({ ...prev, [field]: value }));
 
   const handleSubmit = async () => {
-    const { isValid, errors: errs } = validate(formData);
-    if (!isValid) {
-      setErrors(errs);
-      props.toaster("error", Object.values(errs)[0]);
-      return;
-    }
-    setErrors({});
-
-    if (formData.photo) fd.append("photo", formData.photo);
+    // const { isValid, errors: errs } = validate(formData);
+    // if (!isValid) {
+    //   setErrors(errs);
+    //   props.toaster("error", Object.values(errs)[0]);
+    //   return;
+    // }
+    // setErrors({});
 
     try {
       props.loader(true);
       let res;
       if (id) {
-        res = await Api("put", `GiftVouchers/${id}`, fd, router);
+        res = await Api("put", `gift-vouchers/update/${id}`, formData, router);
       } else {
-        res = await Api("post", "GiftVouchers", fd, router);
+        res = await Api("post", "gift-vouchers/create", formData, router);
       }
       props.loader(false);
 
@@ -136,68 +134,24 @@ export default function AddGiftVouchers(props) {
     }
   };
 
-  const [selectedTemplate, setSelectedTemplate] = useState("signature");
-  const [expiryType, setExpiryType] = useState("after");
-
   const templates = [
     {
       id: "modern",
       name: "Modern Minimalist",
       desc: "Clean aesthetics for any occasion",
-      previewClass: "bg-gradient-to-br from-[#f9f5f0] to-[#e8ddd0]",
-      mock: (
-        <div className="w-[90%] flex flex-col p-2">
-          <div className="flex justify-between items-center">
-            <span className="text-[7px] font-bold text-[#7a5c3a] tracking-wider">
-              GV
-            </span>
-            <div className="flex-1 pl-2 space-y-1">
-              <div className="h-1 bg-[#c8b49a] rounded-full w-[70%]" />
-              <div className="h-[3px] bg-[#ddd0c2] rounded-full w-[50%]" />
-            </div>
-          </div>
-          <div className="mt-2 flex gap-1">
-            <div className="h-[3px] bg-[#c8b49a] rounded-full w-7" />
-            <div className="h-[3px] bg-[#c8b49a] rounded-full w-4" />
-          </div>
-        </div>
-      ),
+      image: "/images/template-1.png",
     },
     {
       id: "signature",
       name: "Signature Atelier",
       desc: "Our premium branded experience",
-      previewClass: "bg-[#1a1a2e]",
-      mock: (
-        <div className="w-[85%] flex flex-col gap-1 p-2">
-          <div className="text-[8px] text-[#d4a843] font-bold tracking-[1.5px]">
-            GIFT VOUCHER
-          </div>
-          <div className="text-[6px] text-gray-400 tracking-wider uppercase">
-            Signature Atelier
-          </div>
-          <div className="self-end mt-1 w-5 h-5 rounded-full border border-[#d4a843] flex items-center justify-center">
-            <Check size={10} className="text-[#d4a843]" />
-          </div>
-        </div>
-      ),
+      image: "/images/template-2.png",
     },
     {
       id: "seasonal",
       name: "Seasonal Botanicals",
       desc: "Elegant floral patterns",
-      previewClass: "bg-gradient-to-br from-[#f0ebe3] to-[#d9c9b5]",
-      mock: (
-        <div className="w-[85%] flex flex-col gap-1 p-2">
-          <div className="flex gap-0.5">
-            <div className="w-1.5 h-1.5 rounded-full bg-[#b8a898]" />
-            <div className="w-1.5 h-1.5 rounded-full bg-[#d4c4b8]" />
-            <div className="w-1.5 h-1.5 rounded-full bg-[#e8ddd5]" />
-          </div>
-          <div className="h-[3px] bg-[#c9bdb3] rounded-full w-[65%]" />
-          <div className="h-[3px] bg-[#ddd5cf] rounded-full w-[40%] mt-1" />
-        </div>
-      ),
+      image: "/images/template-3.png",
     },
   ];
 
@@ -205,7 +159,6 @@ export default function AddGiftVouchers(props) {
     <>
       <DashboardHeader title="Sales Tools" />
       <div className="min-h-screen bg-custom-gray text-slate-900">
-      
         <div className=" px-5 py-3 flex items-center justify-between ">
           <div>
             <div className="text-[11px] text-gray-500 flex items-center gap-1">
@@ -228,7 +181,6 @@ export default function AddGiftVouchers(props) {
         </div>
 
         <div className="max-w-7xl mx-auto p-4 pb-16 space-y-4">
-          
           <section className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
             <div className="flex items-center gap-2 mb-4">
               <Gift size={18} className="text-gray-500" />
@@ -246,6 +198,8 @@ export default function AddGiftVouchers(props) {
                   <input
                     type="number"
                     placeholder="0.00"
+                    value={formData.amount}
+                    onChange={(e) => set("amount", e.target.value)}
                     className="w-full pl-6 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:border-custom-blue focus:ring-2 focus:ring-custom-blue/10 outline-none"
                   />
                 </div>
@@ -258,6 +212,8 @@ export default function AddGiftVouchers(props) {
                   type="text"
                   placeholder="e.g. Birthday Special"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:border-custom-blue outline-none"
+                  value={formData.GiftVoucher_name}
+                  onChange={(e) => set("GiftVoucher_name", e.target.value)}
                 />
               </div>
             </div>
@@ -269,6 +225,8 @@ export default function AddGiftVouchers(props) {
                 type="text"
                 placeholder="GV-2024-XXX"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:border-custom-blue outline-none"
+                value={formData.sku_handle}
+                onChange={(e) => set("sku_handle", e.target.value)}
               />
             </div>
           </section>
@@ -288,23 +246,21 @@ export default function AddGiftVouchers(props) {
               {templates.map((tpl) => (
                 <div
                   key={tpl.id}
-                  onClick={() => setSelectedTemplate(tpl.id)}
+                  onClick={() => {
+                    set("selected_template", tpl.id);
+                    setSelectedTemplate(tpl.id);
+                  }}
                   className={`cursor-pointer group border-2 rounded-lg overflow-hidden transition-all ${
                     selectedTemplate === tpl.id
                       ? "border-custom-blue"
                       : "border-gray-100 hover:border-gray-200"
                   }`}
                 >
-                  <div
-                    className={`h-16 flex items-center justify-center relative overflow-hidden ${tpl.previewClass}`}
-                  >
-                    {selectedTemplate === tpl.id && (
-                      <div className="absolute top-1.5 right-1.5 bg-custom-blue text-white text-[9px] px-2 py-0.5 rounded-full font-bold">
-                        ACTIVE
-                      </div>
-                    )}
-                    {tpl.mock}
-                  </div>
+                  <img
+                    src={tpl.image}
+                    alt={tpl.label}
+                    className="w-full h-32 rounded-lg object-cover"
+                  />
                   <div className="p-1.5 text-center">
                     <div
                       className={`text-[11px] font-bold leading-tight ${selectedTemplate === tpl.id ? "text-blue-700" : "text-gray-700"}`}
@@ -320,7 +276,6 @@ export default function AddGiftVouchers(props) {
             </div>
           </section>
 
-          {/* Rules Card */}
           <section className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
             <div className="flex items-center gap-2 mb-4">
               <CheckCircle2 size={18} className="text-gray-500" />
@@ -328,7 +283,13 @@ export default function AddGiftVouchers(props) {
             </div>
             <div className="flex gap-3 p-3 bg-gray-50 rounded-lg mb-3">
               <div className="w-4 h-4 bg-custom-blue rounded flex items-center justify-center mt-0.5 shrink-0">
-                <Check size={12} className="text-white" />
+                <input
+                  type="checkbox"
+                  onClick={() =>
+                    set("custom_amount_online", !formData.custom_amount_online)
+                  }
+                  className=""
+                />
               </div>
               <div>
                 <div className="text-sm font-semibold">
@@ -361,7 +322,10 @@ export default function AddGiftVouchers(props) {
             <div className="flex gap-6 mb-4">
               <label
                 className="flex items-center gap-2 cursor-pointer group"
-                onClick={() => setExpiryType("never")}
+                onClick={() => {
+                  set("expiry_type", "never");
+                  setExpiryType("never");
+                }}
               >
                 <div
                   className={`w-4 h-4 rounded-full border flex items-center justify-center ${expiryType === "never" ? "border-custom-blue" : "border-gray-300"}`}
@@ -374,7 +338,9 @@ export default function AddGiftVouchers(props) {
               </label>
               <label
                 className="flex items-center gap-2 cursor-pointer"
-                onClick={() => setExpiryType("after")}
+                onClick={() => {
+                  set("expiry_type", "after");
+                }}
               >
                 <div
                   className={`w-4 h-4 rounded-full border flex items-center justify-center ${expiryType === "after" ? "border-custom-blue" : "border-gray-300"}`}
@@ -388,9 +354,15 @@ export default function AddGiftVouchers(props) {
                   <input
                     type="number"
                     defaultValue={12}
+                    value={formData.expiry_value}
+                    onChange={(e) => set("expiry_value", e.target.value)}
                     className="w-14 text-center py-1 border border-gray-300 rounded text-sm focus:border-custom-blue outline-none"
                   />
-                  <select className="bg-white border border-gray-300 rounded px-2 py-1 text-sm focus:border-custom-blue outline-none">
+                  <select
+                    className="bg-white border border-gray-300 rounded px-2 py-1 text-sm focus:border-custom-blue outline-none"
+                    value={formData.expiry_unit}
+                    onChange={(e) => set("expiry_unit", e.target.value)}
+                  >
                     <option>Months</option>
                     <option>Years</option>
                     <option>Days</option>
@@ -420,11 +392,25 @@ export default function AddGiftVouchers(props) {
               <label className="text-[11px] font-bold text-gray-500 uppercase">
                 Select Template
               </label>
-              <select className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:border-custom-blue outline-none bg-white">
-                <option>Default Terms</option>
-                <option>Custom Terms</option>
+              <select
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:border-custom-blue outline-none bg-white"
+                value={formData.terms_template}
+                onChange={(e) => set("terms_template", e.target.value)}
+              >
+                <option>Default </option>
+                <option>None </option>
+                <option>Custom </option>
               </select>
             </div>
+            {formData.terms_template === "Custom" && (
+              <textarea
+                value={formData.termsValue}
+                rows={3}
+                placeholder=""
+                onChange={(e) => set("termsValue", e.target.value)}
+                className=" mt-8 w-full appearance-none border border-gray-300 rounded pl-3 pr-8 py-2 text-[13px] text-gray-900 bg-white cursor-pointer focus:border-custom-blue outline-none"
+              />
+            )}
           </section>
 
           {/* Footer Actions */}
@@ -432,7 +418,9 @@ export default function AddGiftVouchers(props) {
             <button className="px-4 py-1.5 border border-gray-300 rounded-md text-sm font-medium hover:bg-gray-50 transition-colors">
               Cancel
             </button>
-            <button className="px-5 py-1.5 bg-custom-blue text-white rounded-md text-sm font-medium hover:bg-[#132a4e] transition-colors shadow-lg shadow-blue-900/10">
+            <button className="px-5 py-1.5 bg-custom-blue text-white rounded-md text-sm font-medium hover:bg-[#132a4e] transition-colors shadow-lg shadow-blue-900/10"
+            onClick={handleSubmit}
+            >
               Save Change
             </button>
           </div>
