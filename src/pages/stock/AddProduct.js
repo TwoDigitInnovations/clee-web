@@ -3,11 +3,16 @@ import React, { useState, useEffect } from "react";
 import { Upload, Plus, Minus, ChevronDown } from "lucide-react";
 import { useRouter } from "next/router";
 import { ApiFormData, Api } from "@/services/service";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchSuppliers } from "@/redux/actions/supplierActions";
 import Swal from "sweetalert2";
 
 function AddProduct() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const { type, id } = router.query;
+  
+  const { suppliers } = useSelector((state) => state.supplier);
   
   const [formData, setFormData] = useState({
     productName: "",
@@ -32,6 +37,10 @@ function AddProduct() {
   const [imagePreview, setImagePreview] = useState(null);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    dispatch(fetchSuppliers(router));
+  }, []);
 
   useEffect(() => {
     if (id) {
@@ -356,10 +365,12 @@ function AddProduct() {
                         onChange={(e) => handleInputChange("primarySupplier", e.target.value)}
                         className="w-full px-4 py-2.5 bg-[#E1E3E4] border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#0A4D91] focus:border-transparent outline-none appearance-none cursor-pointer"
                       >
-                        <option value="">Select a supplier...</option>
-                        <option>Botanica Labs Inc.</option>
-                        <option>Elite Beauty Co.</option>
-                        <option>DermaPro Solutions</option>
+                        <option value="">None</option>
+                        {suppliers.map((supplier) => (
+                          <option key={supplier._id} value={supplier.businessName}>
+                            {supplier.businessName}
+                          </option>
+                        ))}
                       </select>
                       <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                     </div>
