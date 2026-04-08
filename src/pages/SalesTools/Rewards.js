@@ -1,6 +1,6 @@
 "use client";
 import DashboardHeader from "@/components/DashboardHeader";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Api } from "@/services/service";
 import {
   Star,
@@ -13,6 +13,7 @@ import {
   Ban,
   Check,
 } from "lucide-react";
+import ProductPointsModal from "@/components/ProductPointsModal";
 
 // ── helpers ────────────────────────────────────────────────────────────────────
 function Toggle({ checked, onChange }) {
@@ -90,18 +91,35 @@ const SERVICE_OPTIONS = [
 ];
 
 function Rewards({ loader, toaster, router }) {
-  const [rewardsActive, setRewardsActive] = useState(false);
+  const [formdata, setformdata] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState("moderate");
   const [spendValue, setSpendValue] = useState("100");
   const [rewardValue, setRewardValue] = useState("10");
   const [CreateOwnFormula, setCreateOwnFormula] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [productEarning, setProductEarning] = useState("all");
-  const [serviceEarning, setServiceEarning] = useState("selected");
+  const [serviceEarning, setServiceEarning] = useState("all");
   const [neverExpire, setNeverExpire] = useState(true);
   const [expiryYears, setExpiryYears] = useState("1");
   const [applyExisting, setApplyExisting] = useState(false);
   const [showToCustomers, setShowToCustomers] = useState(true);
+  const [services, setServices] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [allProducts, setAllProducts] = useState([]);
+  const handleSubmit = async () => {};
+
+  const [formData, setFormData] = useState({
+    rewardsActive: false,
+    selectedPreset: "moderate",
+    spendValue: "100",
+    rewardValue: "10",
+    productEarning: "all",
+    serviceEarning: "all",
+    neverExpire: true,
+    expiryYears: "1",
+    applyExisting: false,
+    showToCustomers: true,
+  });
 
   const handleSave = async () => {
     try {
@@ -111,14 +129,14 @@ function Rewards({ loader, toaster, router }) {
         selectedPreset,
         customSpend: spendValue,
         customReward: rewardValue,
-        productEarning,
-        serviceEarning,
+        products: productEarning,
+        services: serviceEarning,
         neverExpire,
         expiryYears,
         applyExisting,
         showToCustomers,
       };
-      const res = await Api("post", "rewards-settings", payload, router);
+      const res = await Api("post", "rewards/create", payload, router);
       loader?.(false);
       if (res?.status === true) {
         toaster?.("success", "Rewards settings saved successfully");
@@ -131,6 +149,40 @@ function Rewards({ loader, toaster, router }) {
     }
   };
 
+  const fetchServices = async () => {
+    try {
+      loader(true);
+      const res = await Api("get", "services/getAll", "", null);
+      loader(false);
+      if (res?.status === true) {
+        setServices(res.data.data);
+      }
+    } catch {
+      loader(false);
+    }
+  };
+
+  const fetchProducts = async () => {
+    try {
+      loader(true);
+
+      const res = await Api("GET", `products`, {}, router);
+      loader(false);
+      if (res?.status === true) {
+        setAllProducts(res.data.data || []);
+      }
+    } catch {
+      loader(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchServices();
+    fetchProducts();
+  }, []);
+
+  console.log(allProducts);
+
   return (
     <div className="bg-[#f8f9fa] min-h-screen pb-24">
       <DashboardHeader title="Sales Tools" />
@@ -141,7 +193,7 @@ function Rewards({ loader, toaster, router }) {
           Design and manage your luxury loyalty program tiers.
         </p>
 
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm px-5 py-4 flex items-center justify-between mb-6">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm px-5 py-4 flex flex-col md:flex-row md:items-center justify-between mb-6 gap-2 ">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-custom-blue/10 flex items-center justify-center">
               <Star size={18} className="text-custom-blue" />
@@ -158,19 +210,24 @@ function Rewards({ loader, toaster, router }) {
           <div className="flex items-center gap-3">
             <span
               className={`text-xs font-bold tracking-widest uppercase ${
-                rewardsActive ? "text-custom-blue" : "text-gray-400"
+                formdata.rewardsActive ? "text-custom-blue" : "text-gray-400"
               }`}
             >
-              {rewardsActive ? "ACTIVE" : "INACTIVE"}
+              {formdata.rewardsActive ? "ACTIVE" : "INACTIVE"}
             </span>
             <Toggle
-              checked={rewardsActive}
-              onChange={() => setRewardsActive((v) => !v)}
+              checked={formdata.rewardsActive}
+              onChange={() =>
+                setformdata((prev) => ({
+                  ...prev,
+                  rewardsActive: !prev.rewardsActive,
+                }))
+              }
             />
           </div>
         </div>
 
-        {rewardsActive && (
+        {formdata.rewardsActive && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
@@ -222,9 +279,14 @@ function Rewards({ loader, toaster, router }) {
                 {FORMULA_PRESETS.map((preset) => (
                   <div
                     key={preset.id}
-                    onClick={() => setSelectedPreset(preset.id)}
+                    onClick={() =>
+                      setformdata((prev) => ({
+                        ...prev,
+                        selectedPreset: !prev.selectedPreset,
+                      }))
+                    }
                     className={`relative bg-white rounded-xl border-2 cursor-pointer p-4 transition-all ${
-                      selectedPreset === preset.id
+                      formData.selectedPreset === preset.id
                         ? "border-custom-blue shadow-md"
                         : "border-gray-200 hover:border-gray-300"
                     }`}
@@ -355,7 +417,13 @@ function Rewards({ loader, toaster, router }) {
                         {PRODUCT_OPTIONS.map((opt) => (
                           <button
                             key={opt.id}
-                            onClick={() => setProductEarning(opt.id)}
+                            onClick={() => {
+                              if (opt.id === "selected") {
+                                setOpen(true);
+                              }
+
+                              setProductEarning(opt.id);
+                            }}
                             className={`flex flex-col  items-center justify-center gap-1.5 w-44 h-28 rounded-xl border-2 text-[12px] font-bold transition-all whitespace-pre-line text-center ${
                               productEarning === opt.id
                                 ? "border-custom-blue bg-custom-blue/5 text-custom-blue"
@@ -493,7 +561,6 @@ function Rewards({ loader, toaster, router }) {
                         </div>
                       </div>
 
-                      {/* Row 2 - Apply to existing */}
                       <div className="grid grid-cols-3 items-center px-4 py-4 border-b border-gray-100">
                         <div>
                           <p className="text-xs font-bold text-gray-700">
@@ -559,6 +626,12 @@ function Rewards({ loader, toaster, router }) {
           </>
         )}
       </div>
+      <ProductPointsModal
+        open={open}
+        onClose={() => setOpen(false)}
+        data={allProducts}
+        onSave={handleSubmit}
+      />
     </div>
   );
 }
