@@ -14,6 +14,8 @@ import {
   Check,
 } from "lucide-react";
 import ProductPointsModal from "@/components/ProductPointsModal";
+import ServicesPointsModal from "@/components/ServicesPointsModal";
+import { useRouter } from "next/navigation";
 
 // ── helpers ────────────────────────────────────────────────────────────────────
 function Toggle({ checked, onChange }) {
@@ -90,24 +92,25 @@ const SERVICE_OPTIONS = [
   { id: "none", label: "No Services", icon: <Ban size={18} /> },
 ];
 
-function Rewards({ loader, toaster, router }) {
-  
-  const [selectedPreset, setSelectedPreset] = useState("moderate");
-  const [spendValue, setSpendValue] = useState("100");
-  const [rewardValue, setRewardValue] = useState("10");
+function Rewards({ loader, toaster }) {
   const [CreateOwnFormula, setCreateOwnFormula] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [productEarning, setProductEarning] = useState("all");
   const [serviceEarning, setServiceEarning] = useState("all");
-  const [neverExpire, setNeverExpire] = useState(true);
-  const [expiryYears, setExpiryYears] = useState("1");
-  const [applyExisting, setApplyExisting] = useState(false);
-  const [showToCustomers, setShowToCustomers] = useState(true);
   const [services, setServices] = useState([]);
   const [open, setOpen] = useState(false);
+  const [open1, setOpen1] = useState(false);
   const [allProducts, setAllProducts] = useState([]);
-
-  const handleSubmit = async () => {};
+  const [productItems, setProductsItems] = useState([]);
+  const [servicesItems, setServicesItems] = useState([]);
+  const [editData, setEditData] = useState({});
+  const router = useRouter();
+  const handleSubmit = async (items) => {
+    setProductsItems(items);
+  };
+  const handleSubmit1 = async (items) => {
+    setServicesItems(items);
+  };
 
   const [formData, setFormData] = useState({
     rewardsActive: false,
@@ -122,25 +125,69 @@ function Rewards({ loader, toaster, router }) {
     showToCustomers: true,
   });
 
+  useEffect(() => {
+    if (editData) return;
+    if (productEarning === "all") {
+      const updated = allProducts.map((item) => ({
+        ...item,
+        included: true,
+      }));
+      setProductsItems(updated);
+    }
+  }, [allProducts, productEarning]);
+
+  useEffect(() => {
+    if (editData) return;
+    if (serviceEarning === "all") {
+      const updated = services.map((item) => ({
+        ...item,
+        included: true,
+      }));
+
+      setServicesItems(updated);
+    }
+  }, [services, serviceEarning]);
+
+  useEffect(() => {
+    if (editData) {
+      setFormData({
+        rewardsActive: editData.rewardsActive,
+        selectedPreset: editData.selectedPreset,
+        customSpend: editData.spendValue,
+        customReward: editData.rewardValue,
+        neverExpire: editData.neverExpire,
+        expiryYears: editData.expiryYears,
+        applyExisting: editData.applyExisting,
+        showToCustomers: editData.showToCustomers,
+      });
+
+    }
+  });
+
   const handleSave = async () => {
     try {
       loader?.(true);
       const payload = {
-        rewardsActive,
-        selectedPreset,
-        customSpend: spendValue,
-        customReward: rewardValue,
-        products: productEarning,
-        services: serviceEarning,
-        neverExpire,
-        expiryYears,
-        applyExisting,
-        showToCustomers,
+        rewardsActive: formData.rewardsActive,
+        selectedPreset: formData.selectedPreset,
+        customSpend: formData.spendValue,
+        customReward: formData.rewardValue,
+        products: productItems,
+        services: servicesItems,
+        neverExpire: formData.neverExpire,
+        expiryYears: formData.expiryYears,
+        applyExisting: formData.applyExisting,
+        showToCustomers: formData.showToCustomers,
       };
-      const res = await Api("post", "rewards/create", payload, router);
+      console.log(payload);
+
+      const res = await Api("post", "rewards/Save", payload, router);
       loader?.(false);
       if (res?.status === true) {
-        toaster?.("success", "Rewards settings saved successfully");
+        toaster?.({
+          type: "success",
+          message: "Rewards settings saved successfully",
+        });
       } else {
         toaster?.("error", res?.message || "Something went wrong");
       }
@@ -156,7 +203,20 @@ function Rewards({ loader, toaster, router }) {
       const res = await Api("get", "services/getAll", "", null);
       loader(false);
       if (res?.status === true) {
-        setServices(res.data.data);
+        setServices(res.data.data || []);
+      }
+    } catch {
+      loader(false);
+    }
+  };
+
+  const fetchRewards = async () => {
+    try {
+      loader(true);
+      const res = await Api("get", "rewards/getAll", "", null);
+      loader(false);
+      if (res?.status === true) {
+        setEditData(res.data.data[0] || []);
       }
     } catch {
       loader(false);
@@ -179,6 +239,7 @@ function Rewards({ loader, toaster, router }) {
   useEffect(() => {
     fetchServices();
     fetchProducts();
+    fetchRewards();
   }, []);
 
   console.log(allProducts);
@@ -280,7 +341,7 @@ function Rewards({ loader, toaster, router }) {
                   <div
                     key={preset.id}
                     onClick={() =>
-                      setformData((prev) => ({
+                      setFormData((prev) => ({
                         ...prev,
                         selectedPreset: !prev.selectedPreset,
                       }))
@@ -354,15 +415,25 @@ function Rewards({ loader, toaster, router }) {
                     <span>Spend $</span>
                     <input
                       type="number"
-                      value={spendValue}
-                      onChange={(e) => setSpendValue(e.target.value)}
+                      value={formData.spendValue}
+                      onChange={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          spendValue: !prev.spendValue,
+                        }))
+                      }
                       className="w-20 text-center bg-gray-100 border-none rounded-lg p-2 text-sm font-bold text-gray-800 outline-none focus:ring-2 focus:ring-custom-blue/30"
                     />
                     <span>and receive a $</span>
                     <input
                       type="number"
-                      value={rewardValue}
-                      onChange={(e) => setRewardValue(e.target.value)}
+                      value={formData.rewardValue}
+                      onChange={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          spendValue: !prev.rewardValue,
+                        }))
+                      }
                       className="w-20 text-center bg-gray-100 border-none rounded-lg p-2 text-sm font-bold text-gray-800 outline-none focus:ring-2 focus:ring-custom-blue/30"
                     />
                     <span>reward.</span>
@@ -448,7 +519,12 @@ function Rewards({ loader, toaster, router }) {
                         {SERVICE_OPTIONS.map((opt) => (
                           <button
                             key={opt.id}
-                            onClick={() => setServiceEarning(opt.id)}
+                            onClick={() => {
+                              setServiceEarning(opt.id);
+                              if (opt.id === "selected") {
+                                setOpen1(true);
+                              }
+                            }}
                             className={`flex flex-col items-center justify-center gap-1.5 w-44 h-28 rounded-xl border-2 text-[12px] font-bold transition-all text-center ${
                               serviceEarning === opt.id
                                 ? "border-custom-blue bg-custom-blue/5 text-custom-blue"
@@ -507,13 +583,23 @@ function Rewards({ loader, toaster, router }) {
 
                     <div className="flex gap-6 mb-6">
                       <Radio
-                        checked={neverExpire}
-                        onChange={() => setNeverExpire(true)}
+                        checked={formData?.neverExpire}
+                        onChange={() =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            neverExpire: !prev.neverExpire,
+                          }))
+                        }
                         label="Never expire"
                       />
                       <Radio
-                        checked={!neverExpire}
-                        onChange={() => setNeverExpire(false)}
+                        checked={!formData.neverExpire}
+                        onChange={() =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            neverExpire: !prev.neverExpire,
+                          }))
+                        }
                         label="Expire after a specific time"
                       />
                     </div>
@@ -540,14 +626,19 @@ function Rewards({ loader, toaster, router }) {
                         <div className="flex items-center gap-2">
                           <input
                             type="number"
-                            value={expiryYears}
+                            value={formData.expiryYears}
                             min="1"
-                            onChange={(e) => setExpiryYears(e.target.value)}
-                            disabled={neverExpire}
+                            onChange={() =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                expiryYears: !prev.expiryYears,
+                              }))
+                            }
+                            disabled={formData.neverExpire}
                             className="w-12 text-center bg-gray-100 border border-gray-200 rounded p-1.5 text-sm font-bold text-gray-800 outline-none disabled:opacity-40"
                           />
                           <select
-                            disabled={neverExpire}
+                            disabled={formData.neverExpire}
                             className="bg-gray-100 border-none rounded p-1.5 text-xs font-bold text-gray-700 outline-none disabled:opacity-40"
                           >
                             <option>Years</option>
@@ -573,8 +664,13 @@ function Rewards({ loader, toaster, router }) {
                         </div>
                         <div>
                           <Toggle
-                            checked={applyExisting}
-                            onChange={() => setApplyExisting((v) => !v)}
+                            checked={formData.applyExisting}
+                            onChange={() =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                applyExisting: !prev.applyExisting,
+                              }))
+                            }
                           />
                         </div>
                         <div>
@@ -584,7 +680,6 @@ function Rewards({ loader, toaster, router }) {
                         </div>
                       </div>
 
-                      {/* Row 3 - Show rewards */}
                       <div className="grid grid-cols-3 items-center px-4 py-4">
                         <div>
                           <p className="text-xs font-bold text-gray-700">
@@ -596,8 +691,13 @@ function Rewards({ loader, toaster, router }) {
                         </div>
                         <div>
                           <Toggle
-                            checked={showToCustomers}
-                            onChange={() => setShowToCustomers((v) => !v)}
+                            checked={formData.showToCustomers}
+                            onChange={() =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                showToCustomers: !prev.showToCustomers,
+                              }))
+                            }
                           />
                         </div>
                         <div>
@@ -631,6 +731,17 @@ function Rewards({ loader, toaster, router }) {
         onClose={() => setOpen(false)}
         data={allProducts}
         onSave={handleSubmit}
+        items={productItems}
+        setItems={setProductsItems}
+      />
+
+      <ServicesPointsModal
+        open={open1}
+        onClose={() => setOpen1(false)}
+        data={services}
+        onSave={handleSubmit1}
+        items={servicesItems}
+        setItems={setServicesItems}
       />
     </div>
   );

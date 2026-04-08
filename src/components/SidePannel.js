@@ -134,13 +134,33 @@ function SidePannel({ open, setOpen }) {
           title: "Notifications",
           href: "/notification",
           children: [
-            { title: "Customer messages", href: "/notification/CustomerMessage" },
-            { title: "Staff notifications", href: "/notification/StaffNotification" },
+            {
+              title: "Customer messages",
+              href: "/notification/CustomerMessage",
+            },
+            {
+              title: "Staff notifications",
+              href: "/notification/StaffNotification",
+            },
             { title: "Email settings", href: "/notification/EmailSettings" },
             { title: "SMS settings", href: "/notification/SMSSettings" },
           ],
         },
-        { title: "Consult", href: "/Consult" },
+        {
+          title: "Consult",
+          href: "/Consult",
+          children: [
+            {
+              title: "Library",
+              href: "/consult/Library",
+            },
+            {
+              title: "Automation Rules",
+              href: "/consult/AutomationRules",
+            },
+
+          ],
+        },
         { title: "Promote", href: "/Promote" },
         { title: "Administration", href: "/Administration" },
       ],
@@ -220,12 +240,22 @@ function SidePannel({ open, setOpen }) {
         </div>
 
         <div className="flex-1 overflow-y-auto scrollbar-hide px-4">
-          <SidebarMenu menu={managementMenu} user={user} setOpen={setOpen} open={open}/>
+          <SidebarMenu
+            menu={managementMenu}
+            user={user}
+            setOpen={setOpen}
+            open={open}
+          />
 
           <p className=" mt-8 uppercase text-gray-400 text-xs mb-3 px-2 tracking-wider">
             System
           </p>
-          <SidebarMenu menu={SystemMenu} user={user} setOpen={setOpen} open={open}/>
+          <SidebarMenu
+            menu={SystemMenu}
+            user={user}
+            setOpen={setOpen}
+            open={open}
+          />
         </div>
 
         <div className="p-4 border-t border-white/10">

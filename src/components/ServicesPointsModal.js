@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { X, Search, CheckCircle2, Circle } from "lucide-react";
 
-function ProductPointsModal({
+function ServicesPointsModal({
   items,
   setItems,
   open,
@@ -15,7 +15,7 @@ function ProductPointsModal({
     if (open) {
       const updated = data.map((item) => ({
         ...item,
-        included: true,
+        included: true, 
       }));
 
       setItems(updated);
@@ -34,7 +34,7 @@ function ProductPointsModal({
   }, [items]);
 
   const filteredItems = items.filter((item) =>
-    item.productName?.toLowerCase().includes(searchQuery.toLowerCase()),
+    item.name?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const toggleItem = (id) => {
@@ -65,10 +65,10 @@ function ProductPointsModal({
         <div className="px-6 py-4 border-b flex justify-between items-center bg-white sticky top-0">
           <div>
             <h2 className="text-xl font-bold text-slate-800">
-              Products Collecting Points
+              Servicess Collecting Points
             </h2>
             <p className="text-sm text-slate-500">
-              Manage which products are eligible for reward points
+              Manage which Servicess are eligible for reward points
             </p>
           </div>
           <button
@@ -102,7 +102,7 @@ function ProductPointsModal({
               />
               <input
                 type="text"
-                placeholder="Search products..."
+                placeholder="Search Servicess..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
@@ -120,7 +120,7 @@ function ProductPointsModal({
                 onChange={handleSelectAll}
               />
               <span className="text-sm font-semibold text-slate-700 group-hover:text-custom-blue">
-                Select All Products
+                Select All Servicess
               </span>
             </label>
             {!stats.allSelected && (
@@ -157,13 +157,11 @@ function ProductPointsModal({
                   ) : (
                     <Circle className="text-slate-300" size={20} />
                   )}
-                  <div>
-                    <img src={item.photo} className="w-12 h-12 object-cover" />
-                  </div>
+
                   <span
                     className={`text-sm font-medium ${item.included ? "text-blue-900" : "text-slate-700"}`}
                   >
-                    {item.productName}
+                    {item.name}
                   </span>
                 </div>
 
@@ -181,7 +179,7 @@ function ProductPointsModal({
           ) : (
             <div className="text-center py-10">
               <p className="text-slate-400 text-sm">
-                No products found matching your search.
+                No Servicess found matching your search.
               </p>
             </div>
           )}
@@ -210,4 +208,4 @@ function ProductPointsModal({
   );
 }
 
-export default ProductPointsModal;
+export default ServicesPointsModal;
