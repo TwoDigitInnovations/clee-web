@@ -4,7 +4,7 @@ import { ShoppingCart, Store, X, MoreVertical, Edit2, Trash2, ChevronDown } from
 import { useRouter } from "next/router";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchSuppliers } from "@/redux/actions/supplierActions";
-import { fetchStockOrders, deleteStockOrder } from "@/redux/actions/stockOrderActions";
+import { fetchStockOrders, updateStockOrder } from "@/redux/actions/stockOrderActions";
 import Swal from "sweetalert2";
 
 function StockOrders() {
@@ -30,25 +30,25 @@ function StockOrders() {
     }
   };
 
-  const handleDeleteOrder = async (orderId) => {
+  const handleCancelOrder = async (orderId) => {
     const result = await Swal.fire({
-      title: 'Are you sure?',
-      text: "You won't be able to revert this!",
+      title: 'Cancel Order?',
+      text: "This will mark the order as cancelled",
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#dc2626',
       cancelButtonColor: '#6b7280',
-      confirmButtonText: 'Yes, delete it!'
+      confirmButtonText: 'Yes, cancel it!'
     });
 
     if (result.isConfirmed) {
       try {
-        const deleteResult = await dispatch(deleteStockOrder(orderId, router));
-        if (deleteResult.success) {
+        const updateResult = await dispatch(updateStockOrder(orderId, { status: 'cancelled' }, router));
+        if (updateResult.success) {
           Swal.fire({
             icon: 'success',
-            title: 'Deleted!',
-            text: 'Order has been deleted.',
+            title: 'Cancelled!',
+            text: 'Order has been cancelled.',
             confirmButtonColor: '#0A4D91',
           });
           dispatch(fetchStockOrders(router));
@@ -57,7 +57,7 @@ function StockOrders() {
         Swal.fire({
           icon: 'error',
           title: 'Error!',
-          text: 'Failed to delete order',
+          text: 'Failed to cancel order',
           confirmButtonColor: '#0A4D91',
         });
       }
@@ -245,13 +245,13 @@ function StockOrders() {
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      handleDeleteOrder(order._id);
+                                      handleCancelOrder(order._id);
                                       setShowActionMenu(null);
                                     }}
                                     className="w-full text-left px-4 py-3 hover:bg-red-50 text-sm font-medium text-red-600 flex items-center gap-2 rounded-b-lg"
                                   >
                                     <Trash2 className="w-4 h-4" />
-                                    Delete Order
+                                    Cancel Order
                                   </button>
                                 </div>
                               )}
