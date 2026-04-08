@@ -1,7 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { Api } from '@/services/service';
 
-// Get calendar settings
+
 export const getCalendarSettings = createAsyncThunk(
   'calendarSettings/get',
   async (_, { rejectWithValue }) => {
@@ -14,7 +14,7 @@ export const getCalendarSettings = createAsyncThunk(
   }
 );
 
-// Update calendar settings
+
 export const updateCalendarSettings = createAsyncThunk(
   'calendarSettings/update',
   async (settings, { rejectWithValue }) => {
@@ -27,7 +27,7 @@ export const updateCalendarSettings = createAsyncThunk(
   }
 );
 
-// Add cancellation reason
+
 export const addCancellationReason = createAsyncThunk(
   'calendarSettings/addCancellationReason',
   async (reason, { rejectWithValue }) => {
@@ -40,7 +40,7 @@ export const addCancellationReason = createAsyncThunk(
   }
 );
 
-// Remove cancellation reason
+
 export const removeCancellationReason = createAsyncThunk(
   'calendarSettings/removeCancellationReason',
   async (reason, { rejectWithValue }) => {
@@ -53,7 +53,7 @@ export const removeCancellationReason = createAsyncThunk(
   }
 );
 
-// Add appointment status
+
 export const addAppointmentStatus = createAsyncThunk(
   'calendarSettings/addAppointmentStatus',
   async (status, { rejectWithValue }) => {

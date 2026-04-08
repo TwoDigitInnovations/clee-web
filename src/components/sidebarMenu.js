@@ -9,7 +9,7 @@ const MenuItem = ({ item, router, level = 0,  }) => {
 
   const isActive = router.pathname === item.href;
 
-  // ✅ Auto open if any child is active
+  
   console.log(open);
   
   useEffect(() => {

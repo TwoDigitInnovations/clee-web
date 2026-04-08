@@ -128,3 +128,21 @@ export const fetchProductsBySupplier = (supplierId, router) => async (dispatch) 
     throw err;
   }
 };
+
+
+export const receiveStockOrder = (id, router) => async (dispatch) => {
+  try {
+    dispatch(setLoading(true));
+    const res = await Api('POST', `stock-orders/${id}/receive`, {}, router);
+    if (res?.status) {
+      dispatch(setSuccess(true));
+      return { success: true, data: res.data, message: res.message };
+    }
+    dispatch(setLoading(false));
+    return { success: false, message: res.message };
+  } catch (err) {
+    dispatch(setLoading(false));
+    dispatch(setError(err.message || 'Failed to receive stock'));
+    throw err;
+  }
+};

@@ -12,6 +12,7 @@ import {
   ChartNoAxesColumn,
   MessageSquareMore,
   Settings,
+  ShoppingCart,
   User,
   Users,
 } from "lucide-react";
@@ -43,6 +44,12 @@ function SidePannel({ open, setOpen }) {
       href: "/Customers",
       title: "Customers",
       icon: <Users size={20} />,
+      access: ["admin"],
+    },
+    {
+      href: "/createsales",
+      title: "Create Sale",
+      icon: <ShoppingCart size={20} />,
       access: ["admin"],
     },
     {
@@ -123,7 +130,16 @@ function SidePannel({ open, setOpen }) {
             { title: "Sales settings", href: "/SalesTools/Salessettings" },
           ],
         },
-        { title: "Notifications", href: "/Notifications" },
+        {
+          title: "Notifications",
+          href: "/notification",
+          children: [
+            { title: "Customer messages", href: "/notification/CustomerMessage" },
+            { title: "Staff notifications", href: "/notification/StaffNotification" },
+            { title: "Email settings", href: "/notification/EmailSettings" },
+            { title: "SMS settings", href: "/notification/SMSSettings" },
+          ],
+        },
         { title: "Consult", href: "/Consult" },
         { title: "Promote", href: "/Promote" },
         { title: "Administration", href: "/Administration" },
