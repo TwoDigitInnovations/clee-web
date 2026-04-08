@@ -91,7 +91,7 @@ const SERVICE_OPTIONS = [
 ];
 
 function Rewards({ loader, toaster, router }) {
-  const [formdata, setformdata] = useState(false);
+  
   const [selectedPreset, setSelectedPreset] = useState("moderate");
   const [spendValue, setSpendValue] = useState("100");
   const [rewardValue, setRewardValue] = useState("10");
@@ -106,6 +106,7 @@ function Rewards({ loader, toaster, router }) {
   const [services, setServices] = useState([]);
   const [open, setOpen] = useState(false);
   const [allProducts, setAllProducts] = useState([]);
+
   const handleSubmit = async () => {};
 
   const [formData, setFormData] = useState({
@@ -165,7 +166,6 @@ function Rewards({ loader, toaster, router }) {
   const fetchProducts = async () => {
     try {
       loader(true);
-
       const res = await Api("GET", `products`, {}, router);
       loader(false);
       if (res?.status === true) {
@@ -210,15 +210,15 @@ function Rewards({ loader, toaster, router }) {
           <div className="flex items-center gap-3">
             <span
               className={`text-xs font-bold tracking-widest uppercase ${
-                formdata.rewardsActive ? "text-custom-blue" : "text-gray-400"
+                formData.rewardsActive ? "text-custom-blue" : "text-gray-400"
               }`}
             >
-              {formdata.rewardsActive ? "ACTIVE" : "INACTIVE"}
+              {formData.rewardsActive ? "ACTIVE" : "INACTIVE"}
             </span>
             <Toggle
-              checked={formdata.rewardsActive}
+              checked={formData.rewardsActive}
               onChange={() =>
-                setformdata((prev) => ({
+                setFormData((prev) => ({
                   ...prev,
                   rewardsActive: !prev.rewardsActive,
                 }))
@@ -227,7 +227,7 @@ function Rewards({ loader, toaster, router }) {
           </div>
         </div>
 
-        {formdata.rewardsActive && (
+        {formData.rewardsActive && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
@@ -280,7 +280,7 @@ function Rewards({ loader, toaster, router }) {
                   <div
                     key={preset.id}
                     onClick={() =>
-                      setformdata((prev) => ({
+                      setformData((prev) => ({
                         ...prev,
                         selectedPreset: !prev.selectedPreset,
                       }))
