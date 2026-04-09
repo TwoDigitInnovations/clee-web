@@ -1,21 +1,41 @@
 import DashboardHeader from "@/components/DashboardHeader";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Search, Clock, ChevronDown, ChevronUp, ShoppingCart, User, CreditCard, X } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchServices } from "@/redux/actions/serviceActions";
+import { fetchCustomers } from "@/redux/actions/productActions";
+import { useRouter } from "next/router";
 
 function Services({ onTabChange }) {
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const { services: servicesList, loading } = useSelector((state) => state.service);
+  
   const [activeTab, setActiveTab] = useState("services");
-  const [expandedCategories, setExpandedCategories] = useState(["general"]);
+  const [expandedCategories, setExpandedCategories] = useState([]);
   const [selectedClient, setSelectedClient] = useState(null);
   const [showClientSearch, setShowClientSearch] = useState(false);
   const [clientSearchQuery, setClientSearchQuery] = useState("");
+  const [customers, setCustomers] = useState([]);
 
-  // Dummy clients data
-  const dummyClients = [
-    { id: 1, name: "Jayy Jayy", phone: "+61405667366" },
-    { id: 2, name: "John Smith", phone: "+61412345678" },
-    { id: 3, name: "Sarah Johnson", phone: "+61423456789" },
-    { id: 4, name: "Mike Wilson", phone: "+61434567890" },
-  ];
+  useEffect(() => {
+    dispatch(fetchServices(router));
+    loadCustomers();
+  }, []);
+
+  useEffect(() => {
+    if (Array.isArray(servicesList) && servicesList.length > 0) {
+      const categories = [...new Set(servicesList.map(service => 
+        (service.category?.name || "General").toLowerCase().replace(/\s+/g, '-')
+      ))];
+      setExpandedCategories(categories);
+    }
+  }, [servicesList]);
+
+  const loadCustomers = async () => {
+    const customersList = await dispatch(fetchCustomers(router));
+    setCustomers(customersList);
+  };
 
   const tabs = [
     { id: "products", label: "Products" },
@@ -33,36 +53,32 @@ function Services({ onTabChange }) {
     }
   };
 
-  const serviceCategories = [
-    {
-      id: "general",
-      name: "General",
-      count: 6,
-      services: [
-        { id: 1, name: "Existing Client Choose on the Day Deposit", duration: "1 hour", price: 150.00 },
-        { id: 2, name: "First Appt 3D Skin Imaging Consult Scans Only", duration: "20 mins", price: 85.00 },
-        { id: 3, name: "Follow Up", duration: "30 mins", price: 0.00 },
-        { id: 4, name: "Interview", duration: "1 hour", price: 50.00 },
-        { id: 5, name: "Skin Analysis", duration: "45 mins", price: 120.00 },
-        { id: 6, name: "Facial Review Consulting", duration: "30 mins", price: 60.00 },
-      ]
-    },
-    {
-      id: "new-clients",
-      name: "New Clients",
-      count: 4,
-      services: [
-        { id: 7, name: "Initial Consultation", duration: "1 hour", price: 100.00 },
-        { id: 8, name: "Skin Assessment", duration: "45 mins", price: 95.00 },
-        { id: 9, name: "Treatment Planning", duration: "30 mins", price: 75.00 },
-        { id: 10, name: "Welcome Package", duration: "2 hours", price: 250.00 },
-      ]
-    }
-  ];
+  const groupedServices = Array.isArray(servicesList)
+    ? servicesList.reduce((acc, service) => {
+        const groupName = service.category?.name || "General";
+        if (!acc[groupName]) {
+          acc[groupName] = [];
+        }
+        acc[groupName].push(service);
+        return acc;
+      }, {})
+    : {};
+
+  const serviceCategories = Object.keys(groupedServices).map((groupName) => ({
+    id: groupName.toLowerCase().replace(/\s+/g, "-"),
+    name: groupName,
+    count: groupedServices[groupName].length,
+    services: groupedServices[groupName].map((service) => ({
+      id: service._id,
+      name: service.name,
+      duration: `${service.duration || 0} mins`,
+      price: service.price || 0,
+    })),
+  }));
 
   const savedSales = [
-    { name: "Elena Rodriguez", date: "Yesterday 4:35 PM", amount: 245.00 },
-    { name: "Julian Thorne", date: "2 days ago", amount: 120.50 },
+    { name: "Elena Rodriguez", date: "Yesterday 4:35 PM", amount: 245.0 },
+    { name: "Julian Thorne", date: "2 days ago", amount: 120.5 },
   ];
 
   const toggleCategory = (categoryId) => {
@@ -73,10 +89,11 @@ function Services({ onTabChange }) {
     );
   };
 
-  const filteredClients = dummyClients.filter(client =>
-    client.name.toLowerCase().includes(clientSearchQuery.toLowerCase()) ||
-    client.phone.includes(clientSearchQuery)
-  );
+  const filteredClients = Array.isArray(customers) ? customers.filter(client =>
+    client.fullname?.toLowerCase().includes(clientSearchQuery.toLowerCase()) ||
+    client.mobile?.includes(clientSearchQuery) ||
+    client.email?.toLowerCase().includes(clientSearchQuery.toLowerCase())
+  ) : [];
 
   return (
     <>
@@ -198,8 +215,8 @@ function Services({ onTabChange }) {
               <div className="p-4 bg-white border border-gray-200 rounded-lg">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-semibold text-gray-900">{selectedClient.name}</p>
-                    <p className="text-sm text-gray-500">{selectedClient.phone}</p>
+                    <p className="font-semibold text-gray-900">{selectedClient.fullname || selectedClient.name}</p>
+                    <p className="text-sm text-gray-500">{selectedClient.mobile || selectedClient.phone}</p>
                   </div>
                   <button
                     onClick={() => setSelectedClient(null)}
@@ -267,8 +284,8 @@ function Services({ onTabChange }) {
                       }}
                       className="w-full p-3 text-left hover:bg-gray-50 rounded-lg transition-colors"
                     >
-                      <p className="font-semibold text-gray-900">{client.name}</p>
-                      <p className="text-sm text-gray-500">{client.phone}</p>
+                      <p className="font-semibold text-gray-900">{client.fullname || client.name}</p>
+                      <p className="text-sm text-gray-500">{client.mobile || client.phone}</p>
                     </button>
                   ))}
                 </div>
