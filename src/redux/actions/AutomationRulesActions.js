@@ -5,7 +5,7 @@ import {
   addAutomationRule,
   updateAutomationRuleItem,
   removeAutomationRule,
-} from "../slices/automationSlice";
+} from "../slices/AutomationRulesSlice";
 
 // ✅ GET ALL
 export const fetchAutomationRules = (router) => async (dispatch) => {
@@ -30,7 +30,7 @@ export const fetchAutomationRules = (router) => async (dispatch) => {
   }
 };
 
-// ✅ CREATE / UPDATE (single API handler)
+
 export const saveAutomationRule =
   (id, payload, router) => async (dispatch) => {
     try {

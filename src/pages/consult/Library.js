@@ -1,21 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { Activity, useEffect, useState } from "react";
 import {
-  FileText,
-  ClipboardList,
-  Smile,
-  Star,
-  AlertCircle,
-  Edit3,
-  File,
   Search,
   Plus,
   MoreVertical,
   Edit2,
   Trash2,
+  ActivityIcon,
 } from "lucide-react";
 import DashboardHeader from "@/components/DashboardHeader";
 import { ConfirmModal } from "@/components/deleteModel";
-import { Api } from "@/services/service";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -23,105 +16,8 @@ import {
   deleteTemplate,
 } from "@/redux/actions/templateActions";
 
-const dummydata = {
-  Custom: [
-    {
-      _id: 1,
-      title: "Media Release Form",
-      date: "2 DAYS AGO",
-      tag: "custom",
-      color: "bg-indigo-50 text-indigo-700",
-      icon: FileText,
-    },
-    {
-      _id: 2,
-      title: "Clinician Intake Form",
-      date: "1 WEEK AGO",
-      tag: "intake",
-      color: "bg-green-50 text-green-700",
-      icon: ClipboardList,
-    },
-    {
-      _id: 3,
-      title: "Downtime Skin Treatment...",
-      date: "OCT 12, 2023",
-      tag: "consent",
-      color: "bg-amber-50 text-amber-700",
-      icon: Smile,
-    },
-    {
-      _id: 4,
-      title: "Complaint-Based Touch-Up...",
-      date: "OCT 05, 2023",
-      tag: "review",
-      color: "bg-pink-50 text-pink-700",
-      icon: Star,
-    },
-    {
-      _id: 5,
-      title: "Skin Purging Acknowledgemen...",
-      date: "SEP 28, 2023",
-      tag: "alert",
-      color: "bg-red-50 text-red-700",
-      icon: AlertCircle,
-    },
-    {
-      _id: 6,
-      title: "sign off collab content",
-      date: "SEP 15, 2023",
-      tag: "creative",
-      color: "bg-sky-50 text-sky-700",
-      icon: Edit3,
-    },
-    {
-      _id: 7,
-      title: "T & C's",
-      date: "AUG 30, 2023",
-      tag: "legal",
-      color: "bg-gray-100 text-gray-700",
-      icon: File,
-    },
-  ],
-  Industry: [
-    {
-      _id: 1,
-      title: "Salon Consultation Form",
-      date: "OCT 01, 2023",
-      tag: "industry",
-      color: "bg-purple-50 text-purple-700",
-      icon: ClipboardList,
-    },
-    {
-      _id: 2,
-      title: "Spa Intake Form",
-      date: "SEP 20, 2023",
-      tag: "industry",
-      color: "bg-purple-50 text-purple-700",
-      icon: Smile,
-    },
-  ],
-  Expert: [
-    {
-      _id: 1,
-      title: "Medical Grade Peel Form",
-      date: "OCT 08, 2023",
-      tag: "expert",
-      color: "bg-emerald-50 text-emerald-700",
-      icon: ClipboardList,
-    },
-    {
-      _id: 2,
-      title: "Botox Pre-Treatment",
-      date: "SEP 25, 2023",
-      tag: "consent",
-      color: "bg-amber-50 text-amber-700",
-      icon: FileText,
-    },
-  ],
-};
-
 const TemplateManager = ({ loader, toaster }) => {
-  const [currentTab, setCurrentTab] = useState("Custom");
+  const [currentTab, setCurrentTab] = useState("custom");
   const [searchVal, setSearchVal] = useState("");
   const [activeMenu, setActiveMenu] = useState(null);
   const [open, setOpen] = useState(false);
@@ -182,7 +78,9 @@ const TemplateManager = ({ loader, toaster }) => {
                 forms to your clients via SMS or email.
               </p>
               <div className="flex flex-wrap gap-4 items-center">
-                <button className="bg-white text-custom-blue px-5 py-2 rounded-lg text-sm font-bold hover:bg-opacity-90 transition">
+                <button className="bg-white text-custom-blue px-5 py-2 rounded-lg text-sm font-bold hover:bg-opacity-90 transition"
+                onClick={() => router.push("/consult/AddTemplate")}
+                >
                   Give it a try
                 </button>
                 <button className="text-sm font-medium hover:underline decoration-white/50">
@@ -202,7 +100,7 @@ const TemplateManager = ({ loader, toaster }) => {
           <div className="flex flex-col md:flex-row gap-4 mb-8 items-center">
             {/* Tabs */}
             <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
-              {["Custom", "Industry", "Expert"].map((tab) => (
+              {["custom", "Industry", "Expert"].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setCurrentTab(tab)}
@@ -247,18 +145,19 @@ const TemplateManager = ({ loader, toaster }) => {
                 className="group relative bg-white border border-slate-200 rounded-2xl p-5 hover:border-slate-400 transition-all cursor-pointer shadow-sm hover:shadow-md"
               >
                 <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center mb-4 text-slate-600 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
-                  <template.icon size={20} strokeWidth={1.5} />
+                  {/* <template.icon size={20} strokeWidth={1.5} /> */}
+                  <ActivityIcon size={20} strokeWidth={1.5} />
                 </div>
                 <h3 className="text-[15px] font-semibold text-slate-800 mb-1 leading-snug">
-                  {template.title}
+                  {template.name}
                 </h3>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-4">
-                  Last Updated: {template.date}
+                  Last Updated: {template.createdAt}
                 </p>
                 <span
-                  className={`inline-block px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest ${template.color}`}
+                  className={`inline-block px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest `}
                 >
-                  {template.tag}
+                  {/* {template.tag} */}
                 </span>
                 <button
                   onClick={() =>
@@ -298,8 +197,10 @@ const TemplateManager = ({ loader, toaster }) => {
               </div>
             ))}
 
-            {/* Create from Scratch Card */}
-            <div className="border-2 border-dashed border-slate-200 rounded-2xl p-5 flex flex-col items-center justify-center text-center min-h-[160px] hover:bg-slate-50 hover:border-slate-300 transition-all cursor-pointer group">
+            <div
+              className="border-2 border-dashed border-slate-200 rounded-2xl p-5 flex flex-col items-center justify-center text-center min-h-[160px] hover:bg-slate-50 hover:border-slate-300 transition-all cursor-pointer group"
+              onClick={() => router.push("/consult/AddTemplate")}
+            >
               <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center mb-3 text-slate-400 group-hover:scale-110 transition-transform">
                 <Plus size={20} />
               </div>

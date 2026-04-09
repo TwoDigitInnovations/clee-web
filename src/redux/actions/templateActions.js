@@ -1,5 +1,5 @@
 import { Api } from "@/services/service";
-import { setTemplates, setLoading } from "../slices/templateSlice";
+import { setTemplates, setLoading, setCurrentTemplate } from "../slices/templateSlice";
 import {
   removeTemplate,
   addTemplate,
@@ -52,7 +52,6 @@ export const saveTemplate = (id, payload, router) => async (dispatch) => {
     const res = await Api(method, url, payload, router);
 
     if (res?.status) {
-      // ✅ Redux update
       if (id) {
         dispatch(updateTemplateItem(res.data));
       } else {
@@ -69,6 +68,7 @@ export const saveTemplate = (id, payload, router) => async (dispatch) => {
     return { success: false, message: res?.message };
   } catch (err) {
     throw err;
+    
   }
 };
 
@@ -104,3 +104,27 @@ export const deleteTemplate = (id, router) => async (dispatch) => {
     throw err;
   }
 };
+
+  export const fetchTemplateById = (id, router) => async (dispatch) => {
+  if (!id) return;
+
+  try {
+    dispatch(setLoading(true));
+
+    const res = await Api("get", `template/${id}`, "", router);
+
+    if (res?.status) {
+      dispatch(setCurrentTemplate(res.data.data));
+      return { success: true, data: res.data.data };
+    }
+
+    return { success: false, message: res.message };
+  } catch (err) {
+    throw err;
+  } finally {
+    dispatch(setLoading(false));
+  }
+};
+
+
+

@@ -20,18 +20,17 @@ import {
   saveAutomationRule,
 } from "@/redux/actions/AutomationRulesActions";
 import { fetchServices } from "@/redux/actions/servicesActions";
+import { fetchTemplates } from "@/redux/actions/templateActions";
 
 const AddAutomationRules = ({ loader, toaster }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
-
-  const [search, setSearch] = useState("");
   const dispatch = useDispatch();
-
+  // const [services,setservices] = useState([])
   const { templates } = useSelector((state) => state.template);
   const { services } = useSelector((state) => state.service);
-  const { currentRule } = useSelector((state) => state.automation);
+  const { currentRule } = useSelector((state) => state.automationRule);
 
   useEffect(() => {
     if (id) {
@@ -45,7 +44,7 @@ const AddAutomationRules = ({ loader, toaster }) => {
 
   useEffect(() => {
     dispatch(fetchTemplates(router));
-  }, [currentTab]);
+  }, []);
 
   const [formData, setFormData] = useState({
     templateId: "",
@@ -108,10 +107,6 @@ const AddAutomationRules = ({ loader, toaster }) => {
     }
   };
 
-  useEffect(() => {
-    dispatch(fetchServices(router)); 
-  }, [id]);
-
   const customStyles = {
     control: (base) => ({
       ...base,
@@ -155,7 +150,6 @@ const AddAutomationRules = ({ loader, toaster }) => {
     }),
   };
 
-  
   const SectionHeader = ({ icon: Icon, title }) => (
     <div className="flex items-center gap-3 mb-6">
       <div className="p-2 bg-blue-50 rounded-lg text-custom-blue">

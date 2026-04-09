@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   templates: [],
   loading: false,
+  currentTemplate : null,
 };
 
 const templateSlice = createSlice({
@@ -23,7 +24,7 @@ const templateSlice = createSlice({
 
     updateTemplateItem: (state, action) => {
       const index = state.templates.findIndex(
-        (t) => t._id === action.payload._id
+        (t) => t._id === action.payload._id,
       );
 
       if (index !== -1) {
@@ -32,9 +33,10 @@ const templateSlice = createSlice({
     },
 
     removeTemplate: (state, action) => {
-      state.templates = state.templates.filter(
-        (t) => t._id !== action.payload
-      );
+      state.templates = state.templates.filter((t) => t._id !== action.payload);
+    },
+    setCurrentTemplate: (state, action) => {
+      state.currentTemplate = action.payload;
     },
   },
 });
@@ -45,6 +47,7 @@ export const {
   addTemplate,
   updateTemplateItem,
   removeTemplate,
+  setCurrentTemplate,
 } = templateSlice.actions;
 
 export default templateSlice.reducer;
