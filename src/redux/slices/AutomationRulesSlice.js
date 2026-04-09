@@ -7,7 +7,7 @@ const initialState = {
 };
 
 const automationSlice = createSlice({
-  name: "automation",
+  name: "automationRules",
   initialState,
   reducers: {
     setAutomationRules: (state, action) => {
