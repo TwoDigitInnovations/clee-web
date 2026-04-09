@@ -31,6 +31,6 @@ export const store = configureStore({
     services: servicesReducer,
     vouchers: vouchersReducer,
     packages: packagesReducer,
-      closedDates: ClosedDatesReducer,
+    closedDates: ClosedDatesReducer,
   },
 });
