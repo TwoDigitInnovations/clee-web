@@ -17,6 +17,12 @@ import DashboardHeader from "@/components/DashboardHeader";
 import { ConfirmModal } from "@/components/deleteModel";
 import { Api } from "@/services/service";
 import { useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchTemplates,
+  deleteTemplate,
+} from "@/redux/actions/templateActions";
+
 const dummydata = {
   Custom: [
     {
@@ -113,59 +119,50 @@ const dummydata = {
     },
   ],
 };
+
 const TemplateManager = ({ loader, toaster }) => {
   const [currentTab, setCurrentTab] = useState("Custom");
   const [searchVal, setSearchVal] = useState("");
   const [activeMenu, setActiveMenu] = useState(null);
   const [open, setOpen] = useState(false);
-  const [allTemplates, setAllTemplates] = useState(dummydata);
+  //   const [allTemplates, setAllTemplates] = useState(dummydata);
   const [selectedId, setSelectedId] = useState(null);
+  const dispatch = useDispatch();
   const router = useRouter();
 
-  const filteredData = (allTemplates[currentTab] || []).filter(
-    (t) =>
-      t.title.toLowerCase().includes(searchVal.toLowerCase()) ||
-      t.tag.toLowerCase().includes(searchVal.toLowerCase()),
-  );
+  const { templates, loading } = useSelector((state) => state.template);
 
-  const handleDeleteConfirm = () => {
+  useEffect(() => {
+    dispatch(fetchTemplates(router));
+  }, [currentTab]);
+
+  const filteredData = templates
+    ?.filter((t) => t.templateType === currentTab)
+    ?.filter(
+      (t) =>
+        t.name?.toLowerCase().includes(searchVal.toLowerCase()) ||
+        t.templateType?.toLowerCase().includes(searchVal.toLowerCase()),
+    );
+
+  const handleDeleteConfirm = async () => {
     try {
       loader(true);
-      Api("delete", `template/delete/${selectedId}`, "", router).then((res) => {
-        loader(false);
-        if (res?.status === true) {
-          toaster({ type: "success", message: "Rule deleted successfully" });
-          getAllAutomationRules();
-          setOpen(false);
-        }
-      });
+
+      const res = await dispatch(deleteTemplate(selectedId, router));
+
+      loader(false);
+
+      if (res?.success) {
+        toaster("success", "Template deleted successfully");
+        setOpen(false);
+      } else {
+        toaster("error", res.message);
+      }
     } catch {
       loader(false);
       toaster("error", "Server error");
     }
   };
-
-  const getAllAutomationRules = async () => {
-    loader(true);
-    Api("get", `template/getAll?tab=${currentTab}`, " ", router).then(
-      (res) => {
-        loader(false);
-        if (res?.status) {
-          setAllTemplates(res.data.data);
-        } else {
-          setAllTemplates(dummydata);
-        }
-      },
-      (err) => {
-        loader(false);
-        setAllTemplates(dummydata); // Fallback even on error for UI check
-      },
-    );
-  };
-
-  useEffect(() => {
-    getAllAutomationRules();
-  }, [currentTab]);
 
   return (
     <>
@@ -280,9 +277,7 @@ const TemplateManager = ({ loader, toaster }) => {
                     <button
                       className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                       onClick={() => {
-                        router.push(
-                          `/consult/AddAutomationRules?id=${template._id}`,
-                        );
+                        router.push(`/consult/AddTemplate?id=${template._id}`);
                         setActiveMenu(null);
                       }}
                     >

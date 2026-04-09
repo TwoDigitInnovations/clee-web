@@ -1,5 +1,5 @@
 import { Api } from "@/services/service";
-import { setServices, setLoading } from "../slices/serviceSlice";
+import { setServices, setLoading } from "../slices/servicesSlice";
 
 export const fetchServices = (router) => async (dispatch) => {
   try {

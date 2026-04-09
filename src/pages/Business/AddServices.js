@@ -116,7 +116,6 @@ export default function AddServices({ loader, toaster }) {
     description: "",
     priceType: "Fixed price",
     price: "00.00",
-    unassignedPrice: "",
     prices: {},
     durationH: "0",
     durationM: "00:30",
@@ -183,8 +182,6 @@ export default function AddServices({ loader, toaster }) {
 
             priceType: data.priceType || "Fixed price",
             price: data.price?.toString() || "00.00",
-
-            unassignedPrice: "",
             prices: {},
 
             // ✅ duration mapping
@@ -377,7 +374,9 @@ export default function AddServices({ loader, toaster }) {
                 Services
               </span>
               <span>›</span>
-              <span className="text-slate-600">{id ? "Edit Service" : "Add Service"}</span>
+              <span className="text-slate-600">
+                {id ? "Edit Service" : "Add Service"}
+              </span>
             </div>
             <h1 className="text-xl font-bold text-slate-800">Services</h1>
           </div>
@@ -483,11 +482,11 @@ export default function AddServices({ loader, toaster }) {
                           </span>
                           <input
                             type="text"
-                            value={form.unassignedPrice || ""}
+                            value={form.price || ""}
                             onChange={(e) =>
                               setForm((prev) => ({
                                 ...prev,
-                                unassignedPrice: e.target.value,
+                                price: e.target.value,
                               }))
                             }
                             className="flex-1 px-2.5 py-1.5 text-sm text-slate-700 focus:outline-none"

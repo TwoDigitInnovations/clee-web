@@ -8,7 +8,9 @@ import supplierReducer from "./slices/supplierSlice";
 import stockOrderReducer from "./slices/stockOrderSlice";
 import notificationReducer from "./slices/notificationSlice";
 import productReducer from "./slices/productSlice";
-import serviceReducer from "./slices/serviceSlice";
+import templateReducer from "./slices/templateSlice";
+import AutomationRulesReducer from "./slices/AutomationRulesSlice";
+import servicesReducer from "./slices/servicesSlice";
 
 export const store = configureStore({
   reducer: {
@@ -21,6 +23,8 @@ export const store = configureStore({
     stockOrder: stockOrderReducer,
     notification: notificationReducer,
     product: productReducer,
-    service: serviceReducer,
+    template: templateReducer,
+    automationRules: AutomationRulesReducer,
+    services: servicesReducer,
   },
 });

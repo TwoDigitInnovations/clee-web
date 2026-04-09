@@ -9,7 +9,7 @@ import { useRouter } from "next/router";
 function Services({ onTabChange }) {
   const router = useRouter();
   const dispatch = useDispatch();
-  const { services: servicesList, loading } = useSelector((state) => state.service);
+  const { services: servicesList, loading } = useSelector((state) => state.services);
   
   const [activeTab, setActiveTab] = useState("services");
   const [expandedCategories, setExpandedCategories] = useState([]);
