@@ -1,5 +1,5 @@
 import axios from "axios";
-// const ConstantsUrl = "";
+// const ConstantsUrl = "https://api.cleverclee.com/";
 //
 // const ConstantsUrl = "http://localhost:8001/";
 const ConstantsUrl="https://api.cleverclee.com/"

@@ -1,8 +1,12 @@
 import DashboardHeader from "@/components/DashboardHeader";
 import React, { useState, useEffect } from "react";
-import { Search, ShoppingCart, User, CreditCard, Package, Gift, Users, X } from "lucide-react";
+import { Search, Package, X } from "lucide-react";
 import CheckoutPayment from "./CheckoutPayment";
 import Services from "./Services";
+import Vouchers from "./Vouchers";
+import Packages from "./Packages";
+import Credit from "./Credit";
+import CheckoutSidebar from "@/components/CheckoutSidebar";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProducts, fetchCustomers } from "@/redux/actions/productActions";
 import { useRouter } from "next/router";
@@ -10,10 +14,10 @@ import { useRouter } from "next/router";
 function CreateSale() {
   const router = useRouter();
   const dispatch = useDispatch();
-  const { products: productsList, loading } = useSelector((state) => state.product);
+  const { products: productsList } = useSelector((state) => state.product);
   
   const [activeTab, setActiveTab] = useState("products");
-  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [selectedItems, setSelectedItems] = useState([]); // Shared cart for all tabs
   const [selectedClient, setSelectedClient] = useState(null);
   const [showMobileCart, setShowMobileCart] = useState(false);
   const [selectedProductDetail, setSelectedProductDetail] = useState(null);
@@ -38,7 +42,6 @@ function CreateSale() {
 
   const loadCustomers = async () => {
     const customersList = await dispatch(fetchCustomers(router));
-    console.log("Customers List:", customersList);
     setCustomers(customersList);
   };
 
@@ -66,14 +69,14 @@ function CreateSale() {
     { name: "Julian Thorne", date: "2 days ago", amount: 120.5 },
   ];
 
-  const addToCart = (product) => {
-    const existing = selectedProducts.find(p => p.id === product.id);
+  const addToCart = (item) => {
+    const existing = selectedItems.find(p => p.id === item.id);
     if (existing) {
-      setSelectedProducts(selectedProducts.map(p => 
-        p.id === product.id ? { ...p, quantity: p.quantity + 1 } : p
+      setSelectedItems(selectedItems.map(p => 
+        p.id === item.id ? { ...p, quantity: (p.quantity || 1) + 1 } : p
       ));
     } else {
-      setSelectedProducts([...selectedProducts, { ...product, quantity: 1 }]);
+      setSelectedItems([...selectedItems, { ...item, quantity: 1 }]);
     }
   };
 
@@ -105,13 +108,13 @@ function CreateSale() {
 
   const saveProductToCart = () => {
     if (selectedProductDetail) {
-      const existing = selectedProducts.find(p => p.id === selectedProductDetail.id);
+      const existing = selectedItems.find(p => p.id === selectedProductDetail.id);
       if (existing) {
-        setSelectedProducts(selectedProducts.map(p => 
+        setSelectedItems(selectedItems.map(p => 
           p.id === selectedProductDetail.id ? { ...p, quantity: modalQuantity, discount: modalDiscount } : p
         ));
       } else {
-        setSelectedProducts([...selectedProducts, { ...selectedProductDetail, quantity: modalQuantity, discount: modalDiscount }]);
+        setSelectedItems([...selectedItems, { ...selectedProductDetail, quantity: modalQuantity, discount: modalDiscount }]);
       }
       closeProductDetail();
     }
@@ -119,13 +122,13 @@ function CreateSale() {
 
   const removeFromCart = () => {
     if (selectedProductDetail) {
-      setSelectedProducts(selectedProducts.filter(p => p.id !== selectedProductDetail.id));
+      setSelectedItems(selectedItems.filter(p => p.id !== selectedProductDetail.id));
       closeProductDetail();
     }
   };
 
   const getTotal = () => {
-    return selectedProducts.reduce((sum, p) => sum + (p.price * p.quantity), 0);
+    return selectedItems.reduce((sum, p) => sum + (p.price * (p.quantity || 1)), 0);
   };
 
   const getTotalWithOverallDiscount = () => {
@@ -139,18 +142,12 @@ function CreateSale() {
     }
   };
 
-  const filteredClients = Array.isArray(customers) ? customers.filter(client =>
-    client.fullname?.toLowerCase().includes(clientSearchQuery.toLowerCase()) ||
-    client.mobile?.includes(clientSearchQuery) ||
-    client.email?.toLowerCase().includes(clientSearchQuery.toLowerCase())
-  ) : [];
-
   // Show checkout page if checkout is clicked
   if (showCheckout) {
     return (
       <CheckoutPayment
         selectedClient={selectedClient}
-        selectedProducts={selectedProducts}
+        selectedProducts={selectedItems}
         totalAmount={getTotalWithOverallDiscount()}
         onBack={() => setShowCheckout(false)}
       />
@@ -159,7 +156,109 @@ function CreateSale() {
 
   // Show Services page if services tab is active
   if (activeTab === "services") {
-    return <Services onTabChange={(tab) => setActiveTab(tab)} />;
+    return (
+      <Services 
+        onTabChange={(tab) => setActiveTab(tab)}
+        selectedItems={selectedItems}
+        setSelectedItems={setSelectedItems}
+        selectedClient={selectedClient}
+        setSelectedClient={setSelectedClient}
+        customers={customers}
+        showClientSearch={showClientSearch}
+        setShowClientSearch={setShowClientSearch}
+        clientSearchQuery={clientSearchQuery}
+        setClientSearchQuery={setClientSearchQuery}
+        showMobileCart={showMobileCart}
+        setShowMobileCart={setShowMobileCart}
+        overallDiscountValue={overallDiscountValue}
+        overallDiscountType={overallDiscountType}
+        showNoteModal={showNoteModal}
+        setShowNoteModal={setShowNoteModal}
+        showOverallDiscountModal={showOverallDiscountModal}
+        setShowOverallDiscountModal={setShowOverallDiscountModal}
+        setShowCheckout={setShowCheckout}
+      />
+    );
+  }
+
+  // Show Vouchers page if vouchers tab is active
+  if (activeTab === "vouchers") {
+    return (
+      <Vouchers 
+        onTabChange={(tab) => setActiveTab(tab)}
+        selectedItems={selectedItems}
+        setSelectedItems={setSelectedItems}
+        selectedClient={selectedClient}
+        setSelectedClient={setSelectedClient}
+        customers={customers}
+        showClientSearch={showClientSearch}
+        setShowClientSearch={setShowClientSearch}
+        clientSearchQuery={clientSearchQuery}
+        setClientSearchQuery={setClientSearchQuery}
+        showMobileCart={showMobileCart}
+        setShowMobileCart={setShowMobileCart}
+        overallDiscountValue={overallDiscountValue}
+        overallDiscountType={overallDiscountType}
+        showNoteModal={showNoteModal}
+        setShowNoteModal={setShowNoteModal}
+        showOverallDiscountModal={showOverallDiscountModal}
+        setShowOverallDiscountModal={setShowOverallDiscountModal}
+        setShowCheckout={setShowCheckout}
+      />
+    );
+  }
+
+  // Show Credit page if credit tab is active
+  if (activeTab === "credit") {
+    return (
+      <Credit 
+        onTabChange={(tab) => setActiveTab(tab)}
+        selectedItems={selectedItems}
+        setSelectedItems={setSelectedItems}
+        selectedClient={selectedClient}
+        setSelectedClient={setSelectedClient}
+        customers={customers}
+        showClientSearch={showClientSearch}
+        setShowClientSearch={setShowClientSearch}
+        clientSearchQuery={clientSearchQuery}
+        setClientSearchQuery={setClientSearchQuery}
+        showMobileCart={showMobileCart}
+        setShowMobileCart={setShowMobileCart}
+        overallDiscountValue={overallDiscountValue}
+        overallDiscountType={overallDiscountType}
+        showNoteModal={showNoteModal}
+        setShowNoteModal={setShowNoteModal}
+        showOverallDiscountModal={showOverallDiscountModal}
+        setShowOverallDiscountModal={setShowOverallDiscountModal}
+        setShowCheckout={setShowCheckout}
+      />
+    );
+  }
+
+  if (activeTab === "packages") {
+    return (
+      <Packages 
+        onTabChange={(tab) => setActiveTab(tab)}
+        selectedItems={selectedItems}
+        setSelectedItems={setSelectedItems}
+        selectedClient={selectedClient}
+        setSelectedClient={setSelectedClient}
+        customers={customers}
+        showClientSearch={showClientSearch}
+        setShowClientSearch={setShowClientSearch}
+        clientSearchQuery={clientSearchQuery}
+        setClientSearchQuery={setClientSearchQuery}
+        showMobileCart={showMobileCart}
+        setShowMobileCart={setShowMobileCart}
+        overallDiscountValue={overallDiscountValue}
+        overallDiscountType={overallDiscountType}
+        showNoteModal={showNoteModal}
+        setShowNoteModal={setShowNoteModal}
+        showOverallDiscountModal={showOverallDiscountModal}
+        setShowOverallDiscountModal={setShowOverallDiscountModal}
+        setShowCheckout={setShowCheckout}
+      />
+    );
   }
 
   return (
@@ -237,339 +336,38 @@ function CreateSale() {
           </div>
         </div>
 
-        <div className="hidden lg:block lg:w-96 bg-white border-l border-gray-200 p-6 overflow-y-auto max-h-screen">
-          <div className="flex items-center gap-3 mb-6">
-            <ShoppingCart className="text-[#0A4D91]" size={24} />
-            <div>
-              <h3 className="text-lg font-bold text-[#0A4D91]">Current Sale</h3>
-              <p className="text-xs text-gray-500">New Session</p>
-            </div>
-          </div>
-
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-3">
-              <User className="text-[#0A4D91]" size={20} />
-              <h4 className="font-semibold text-gray-900">Select Client</h4>
-            </div>
-            {!selectedClient ? (
-              <div className="text-center py-6 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-500 mb-3">No client selected for this transaction</p>
-                <button 
-                  onClick={() => setShowClientSearch(true)}
-                  className="px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors flex items-center gap-2 mx-auto"
-                >
-                  <Search size={16} />
-                  Find Client
-                </button>
-              </div>
-            ) : (
-              <div className="p-4 bg-white border border-gray-200 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold text-gray-900">{selectedClient.fullname || selectedClient.name}</p>
-                    <p className="text-sm text-gray-500">{selectedClient.mobile || selectedClient.phone}</p>
-                  </div>
-                  <button
-                    onClick={() => setSelectedClient(null)}
-                    className="p-1 hover:bg-gray-100 rounded-full"
-                  >
-                    <X size={18} className="text-gray-500" />
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Selected Products Section - Right after Select Client */}
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-3">
-              <ShoppingCart className="text-[#0A4D91]" size={20} />
-              <h4 className="font-semibold text-gray-900">Selected Items</h4>
-            </div>
-            {selectedProducts.length === 0 ? (
-              <div className="text-center py-8 bg-gray-50 rounded-lg">
-                <ShoppingCart size={48} className="mx-auto mb-2 opacity-20 text-gray-400" />
-                <p className="text-sm text-gray-500">No items added yet</p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {selectedProducts.map((product) => (
-                  <div 
-                    key={product.id} 
-                    onClick={() => openProductDetail(product)}
-                    className="p-4 bg-white border border-gray-200 rounded-lg cursor-pointer hover:border-[#0A4D91] transition-colors"
-                  >
-                    <div className="flex items-start gap-3">
-                      <ShoppingCart size={20} className="text-gray-400 mt-1" />
-                      <div className="flex-1">
-                        <p className="font-semibold text-sm text-gray-900 mb-1">{product.name}</p>
-                        <p className="text-xs text-gray-500 italic">Staff 2</p>
-                      </div>
-                      <p className="font-bold text-lg text-gray-900">${product.price}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-3">
-              <CreditCard className="text-[#0A4D91]" size={20} />
-              <h4 className="font-semibold text-gray-900">Saved Sales</h4>
-            </div>
-            <div className="space-y-2">
-              {savedSales.map((sale, index) => (
-                <div key={index} className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
-                  <p className="font-semibold text-sm text-gray-900">{sale.name}</p>
-                  <p className="text-xs text-gray-500">{sale.date} • ${sale.amount.toFixed(2)}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="border-t border-gray-200 pt-4 mb-4">
-            <div className="flex justify-between mb-2">
-              <span className="text-sm text-gray-600">SUBTOTAL</span>
-              <span className="font-semibold text-gray-600">${getTotal().toFixed(2)}</span>
-            </div>
-            {overallDiscountValue && (
-              <div className="flex justify-between mb-2">
-                <span className="text-sm text-gray-600">DISCOUNT</span>
-                <span className="font-semibold text-red-500">
-                  -{overallDiscountType === "percentage" ? `${overallDiscountValue}%` : `$${overallDiscountValue}`}
-                </span>
-              </div>
-            )}
-            <div className="flex justify-between mb-4">
-              <span className="text-sm text-gray-600">TAX</span>
-              <span className="font-semibold text-gray-600">$0.00</span>
-            </div>
-            <div className="flex justify-between mb-4">
-              <span className="text-lg font-bold text-gray-900">Total</span>
-              <span className="text-2xl font-bold text-[#0A4D91]">${getTotalWithOverallDiscount().toFixed(2)}</span>
-            </div>
-            <div className="flex gap-2 mb-4">
-              <button 
-                onClick={() => setShowNoteModal(true)}
-                className="flex-1 text-sm text-[#0A4D91] hover:underline py-2 border border-[#0A4D91] rounded-lg hover:bg-blue-50 transition-colors"
-              >
-                Add note
-              </button>
-              <button 
-                onClick={() => setShowOverallDiscountModal(true)}
-                className="flex-1 text-sm text-[#0A4D91] hover:underline py-2 border border-[#0A4D91] rounded-lg hover:bg-blue-50 transition-colors"
-              >
-                Add discount
-              </button>
-            </div>
-          </div>
-
-          <button 
-            disabled={selectedProducts.length === 0}
-            onClick={() => {
-              if (!selectedClient) {
-                setShowClientSearch(true);
-              } else {
-                setShowCheckout(true);
-              }
-            }}
-            className="w-full bg-[#0A4D91] text-white py-4 rounded-lg font-bold text-lg hover:bg-[#083d73] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed mb-3"
-          >
-            Checkout
-          </button>
-          <button className="w-full border border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
-            COMPLETE SALE
-          </button>
-        </div>
-
-        {/* Mobile Cart Button - Fixed at bottom */}
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg z-40">
-          <button
-            onClick={() => setShowMobileCart(true)}
-            className="w-full bg-[#0A4D91] text-white py-4 rounded-lg font-bold text-lg flex items-center justify-between px-6"
-          >
-            <div className="flex items-center gap-2">
-              <ShoppingCart size={24} />
-              <span>View Cart</span>
-              {selectedProducts.length > 0 && (
-                <span className="bg-white text-[#0A4D91] rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">
-                  {selectedProducts.length}
-                </span>
-              )}
-            </div>
-            <span className="text-xl font-bold">${getTotal().toFixed(2)}</span>
-          </button>
-        </div>
-
-        {/* Mobile Cart Overlay */}
-        {showMobileCart && (
-          <>
-            <div
-              className="lg:hidden fixed inset-0 bg-black/50 z-50"
-              onClick={() => setShowMobileCart(false)}
-            />
-            <div className="lg:hidden fixed inset-x-0 bottom-0 bg-white rounded-t-3xl z-50 max-h-[90vh] overflow-y-auto animate-slide-up">
-              <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <ShoppingCart className="text-[#0A4D91]" size={24} />
-                  <div>
-                    <h3 className="text-lg font-bold text-[#0A4D91]">Current Sale</h3>
-                    <p className="text-xs text-gray-500">New Session</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowMobileCart(false)}
-                  className="p-2 hover:bg-gray-100 rounded-full"
-                >
-                  <X size={24} />
-                </button>
-              </div>
-
-              <div className="p-6">
-                <div className="mb-6">
-                  <div className="flex items-center gap-2 mb-3">
-                    <User className="text-[#0A4D91]" size={20} />
-                    <h4 className="font-semibold text-gray-900">Select Client</h4>
-                  </div>
-                  {!selectedClient ? (
-                    <div className="text-center py-6 bg-gray-50 rounded-lg">
-                      <p className="text-sm text-gray-500 mb-3">No client selected for this transaction</p>
-                      <button 
-                        onClick={() => {
-                          setShowClientSearch(true);
-                          setShowMobileCart(false);
-                        }}
-                        className="px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors flex items-center gap-2 mx-auto"
-                      >
-                        <Search size={16} />
-                        Find Client
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="p-4 bg-white border border-gray-200 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-semibold text-gray-900">{selectedClient.name}</p>
-                          <p className="text-sm text-gray-500">{selectedClient.phone}</p>
-                        </div>
-                        <button
-                          onClick={() => setSelectedClient(null)}
-                          className="p-1 hover:bg-gray-100 rounded-full"
-                        >
-                          <X size={18} className="text-gray-500" />
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="mb-6">
-                  <div className="flex items-center gap-2 mb-3">
-                    <ShoppingCart className="text-[#0A4D91]" size={20} />
-                    <h4 className="font-semibold text-gray-900">Selected Items</h4>
-                  </div>
-                  {selectedProducts.length === 0 ? (
-                    <div className="text-center py-8 bg-gray-50 rounded-lg">
-                      <ShoppingCart size={48} className="mx-auto mb-2 opacity-20 text-gray-400" />
-                      <p className="text-sm text-gray-500">No items added yet</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {selectedProducts.map((product) => (
-                        <div 
-                          key={product.id} 
-                          onClick={() => openProductDetail(product)}
-                          className="p-4 bg-white border border-gray-200 rounded-lg cursor-pointer hover:border-[#0A4D91] transition-colors"
-                        >
-                          <div className="flex items-start gap-3">
-                            <ShoppingCart size={20} className="text-gray-400 mt-1" />
-                            <div className="flex-1">
-                              <p className="font-semibold text-sm text-gray-900 mb-1">{product.name}</p>
-                              <p className="text-xs text-gray-500 italic">Staff 2</p>
-                            </div>
-                            <p className="font-bold text-lg text-gray-900">${product.price}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="mb-6">
-                  <div className="flex items-center gap-2 mb-3">
-                    <CreditCard className="text-[#0A4D91]" size={20} />
-                    <h4 className="font-semibold text-gray-900">Saved Sales</h4>
-                  </div>
-                  <div className="space-y-2">
-                    {savedSales.map((sale, index) => (
-                      <div key={index} className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
-                        <p className="font-semibold text-sm text-gray-900">{sale.name}</p>
-                        <p className="text-xs text-gray-500">{sale.date} • ${sale.amount.toFixed(2)}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="border-t border-gray-200 pt-4 mb-4">
-                  <div className="flex justify-between mb-2">
-                    <span className="text-sm text-gray-600">SUBTOTAL</span>
-                    <span className="font-semibold text-gray-600">${getTotal().toFixed(2)}</span>
-                  </div>
-                  {overallDiscountValue && (
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm text-gray-600">DISCOUNT</span>
-                      <span className="font-semibold text-red-500">
-                        -{overallDiscountType === "percentage" ? `${overallDiscountValue}%` : `$${overallDiscountValue}`}
-                      </span>
-                    </div>
-                  )}
-                  <div className="flex justify-between mb-4">
-                    <span className="text-sm text-gray-600">TAX</span>
-                    <span className="font-semibold text-gray-600">$0.00</span>
-                  </div>
-                  <div className="flex justify-between mb-4">
-                    <span className="text-lg font-bold text-gray-900">Total</span>
-                    <span className="text-2xl font-bold text-[#0A4D91]">${getTotalWithOverallDiscount().toFixed(2)}</span>
-                  </div>
-                  <div className="flex gap-2 mb-4">
-                    <button 
-                      onClick={() => setShowNoteModal(true)}
-                      className="flex-1 text-sm text-[#0A4D91] hover:underline py-2 border border-[#0A4D91] rounded-lg hover:bg-blue-50 transition-colors"
-                    >
-                      Add note
-                    </button>
-                    <button 
-                      onClick={() => setShowOverallDiscountModal(true)}
-                      className="flex-1 text-sm text-[#0A4D91] hover:underline py-2 border border-[#0A4D91] rounded-lg hover:bg-blue-50 transition-colors"
-                    >
-                      Add discount
-                    </button>
-                  </div>
-                </div>
-
-                <button 
-                  disabled={selectedProducts.length === 0}
-                  onClick={() => {
-                    if (!selectedClient) {
-                      setShowClientSearch(true);
-                      setShowMobileCart(false);
-                    } else {
-                      setShowCheckout(true);
-                      setShowMobileCart(false);
-                    }
-                  }}
-                  className="w-full bg-[#0A4D91] text-white py-4 rounded-lg font-bold text-lg hover:bg-[#083d73] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed mb-3"
-                >
-                  Checkout
-                </button>
-                <button className="w-full border border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
-                  COMPLETE SALE
-                </button>
-              </div>
-            </div>
-          </>
-        )}
+        <CheckoutSidebar
+          selectedClient={selectedClient}
+          setSelectedClient={setSelectedClient}
+          showClientSearch={showClientSearch}
+          setShowClientSearch={setShowClientSearch}
+          clientSearchQuery={clientSearchQuery}
+          setClientSearchQuery={setClientSearchQuery}
+          customers={customers}
+          selectedProducts={selectedItems}
+          selectedItems={selectedItems}
+          setSelectedItems={setSelectedItems}
+          openProductDetail={openProductDetail}
+          savedSales={savedSales}
+          getTotal={getTotal}
+          getTotalWithOverallDiscount={getTotalWithOverallDiscount}
+          overallDiscountValue={overallDiscountValue}
+          overallDiscountType={overallDiscountType}
+          onAddNote={() => setShowNoteModal(true)}
+          onAddDiscount={() => setShowOverallDiscountModal(true)}
+          onCheckout={() => {
+            if (!selectedClient) {
+              setShowClientSearch(true);
+            } else {
+              setShowCheckout(true);
+            }
+          }}
+          onCompleteSale={() => {
+            console.log("Complete sale");
+          }}
+          showMobileCart={showMobileCart}
+          setShowMobileCart={setShowMobileCart}
+        />
 
         {/* Product Detail Modal */}
         {selectedProductDetail && (
@@ -705,7 +503,7 @@ function CreateSale() {
                             <div className="flex justify-between text-gray-600">
                               <span>Discount:</span>
                               <span className="font-medium text-red-500">
-                                -{discountType === "percentage" ? `${discountValue}%` : `$${discountValue}`}
+                                -{discountType === "percentage" ? `${discountValue}%` : `${discountValue}`}
                               </span>
                             </div>
                             <div className="flex justify-between text-lg font-bold text-[#0A4D91] pt-2 border-t border-gray-300">
@@ -737,61 +535,6 @@ function CreateSale() {
                   </svg>
                   Remove from sale
                 </button>
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* Client Search Modal */}
-        {showClientSearch && (
-          <>
-            <div
-              className="fixed inset-0 bg-black/50 z-50"
-              onClick={() => setShowClientSearch(false)}
-            />
-            <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl z-50 w-full max-w-md shadow-2xl">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-gray-900">Select client</h3>
-                  <button
-                    onClick={() => setShowClientSearch(false)}
-                    className="p-2 hover:bg-gray-100 rounded-full"
-                  >
-                    <X size={20} />
-                  </button>
-                </div>
-
-                <div className="relative mb-4">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                  <input
-                    type="text"
-                    value={clientSearchQuery}
-                    onChange={(e) => setClientSearchQuery(e.target.value)}
-                    placeholder="Search clients..."
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A4D91] focus:border-transparent outline-none"
-                    autoFocus
-                  />
-                </div>
-
-                <div className="max-h-96 overflow-y-auto space-y-2">
-                  {filteredClients.map((client) => (
-                    <div
-                      key={client._id || client.id}
-                      onClick={() => {
-                        setSelectedClient(client);
-                        setShowClientSearch(false);
-                        setClientSearchQuery("");
-                      }}
-                      className="p-4 border border-gray-200 rounded-lg hover:border-[#0A4D91] hover:bg-blue-50 cursor-pointer transition-colors"
-                    >
-                      <p className="font-semibold text-gray-900">{client.fullname || client.name}</p>
-                      <p className="text-sm text-gray-500">{client.mobile || client.phone}</p>
-                    </div>
-                  ))}
-                  {filteredClients.length === 0 && (
-                    <p className="text-center text-gray-500 py-8">No clients found</p>
-                  )}
-                </div>
               </div>
             </div>
           </>

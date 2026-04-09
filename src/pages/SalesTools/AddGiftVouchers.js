@@ -30,6 +30,9 @@ function getInitialState() {
     price_includes_tax: false,
     selected_template: "signature_atelier",
     custom_amount_online: true,
+    allow_redeem_online: true,
+    hide_price: false,
+    allow_void: false,
     expiry_type: "after",
     expiry_value: 12,
     expiry_unit: "Months",
@@ -171,10 +174,16 @@ export default function AddGiftVouchers(props) {
             <h1 className="text-xl font-medium">Gift Vouchers</h1>
           </div>
           <div className="flex gap-2">
-            <button className="px-4 py-1.5 border border-gray-300 rounded-md text-sm font-medium hover:bg-gray-50 transition-colors">
+            <button 
+              className="px-4 py-1.5 border border-gray-300 rounded-md text-sm font-medium hover:bg-gray-50 transition-colors"
+              onClick={() => router.push("/SalesTools/GiftVouchers")}
+            >
               Cancel
             </button>
-            <button className="px-5 py-1.5 bg-custom-blue text-white rounded-md text-sm font-medium hover:bg-[#132a4e] transition-colors">
+            <button 
+              className="px-5 py-1.5 bg-custom-blue text-white rounded-md text-sm font-medium hover:bg-[#132a4e] transition-colors"
+              onClick={handleSubmit}
+            >
               Save
             </button>
           </div>
@@ -340,6 +349,7 @@ export default function AddGiftVouchers(props) {
                 className="flex items-center gap-2 cursor-pointer"
                 onClick={() => {
                   set("expiry_type", "after");
+                  setExpiryType("after");
                 }}
               >
                 <div
@@ -380,8 +390,92 @@ export default function AddGiftVouchers(props) {
             </div>
           </section>
 
-          {/* T&C Card */}
+          {/* Gift Voucher Terms Card */}
           <section className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+            <div className="flex items-center gap-2 mb-4">
+              <CheckCircle2 size={18} className="text-gray-500" />
+              <h2 className="text-sm font-semibold">Gift voucher terms</h2>
+            </div>
+            <p className="text-[11px] text-gray-500 mb-4">Set rules for your gift voucher.</p>
+            
+            <div className="space-y-3">
+              <div className="flex gap-3 items-start">
+                <input
+                  type="checkbox"
+                  checked={formData.allow_redeem_online}
+                  onChange={(e) => set("allow_redeem_online", e.target.checked)}
+                  className="mt-1 w-4 h-4 text-custom-blue border-gray-300 rounded focus:ring-custom-blue"
+                />
+                <div>
+                  <div className="text-sm font-medium">Allow gift voucher to be redeemed online</div>
+                  <div className="text-[11px] text-gray-500">Clients can use this voucher for online bookings</div>
+                </div>
+              </div>
+
+              <div className="flex gap-3 items-start">
+                <input
+                  type="checkbox"
+                  checked={formData.hide_price}
+                  onChange={(e) => set("hide_price", e.target.checked)}
+                  className="mt-1 w-4 h-4 text-custom-blue border-gray-300 rounded focus:ring-custom-blue"
+                />
+                <div>
+                  <div className="text-sm font-medium">Hide price</div>
+                  <div className="text-[11px] text-gray-500">Price will not be visible to clients</div>
+                </div>
+              </div>
+
+              <div className="flex gap-3 items-start">
+                <input
+                  type="checkbox"
+                  checked={formData.allow_void}
+                  onChange={(e) => set("allow_void", e.target.checked)}
+                  className="mt-1 w-4 h-4 text-custom-blue border-gray-300 rounded focus:ring-custom-blue"
+                />
+                <div>
+                  <div className="text-sm font-medium">Allow gift voucher to be voided</div>
+                  <div className="text-[11px] text-gray-500">Staff can void this voucher if needed</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 space-y-1">
+              <label className="text-[11px] font-bold text-gray-500 uppercase flex items-center gap-1">
+                Terms
+                <Info size={12} className="text-gray-400" />
+              </label>
+              <select
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:border-custom-blue outline-none bg-white"
+                value={formData.terms_template}
+                onChange={(e) => set("terms_template", e.target.value)}
+              >
+                <option value="default">Default</option>
+                <option value="none">None</option>
+                <option value="custom">Custom</option>
+              </select>
+            </div>
+
+            {formData.terms_template === "custom" && (
+              <div className="mt-3">
+                <textarea
+                  value={formData.termsValue}
+                  rows={4}
+                  placeholder="Enter custom terms and conditions..."
+                  onChange={(e) => set("termsValue", e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:border-custom-blue outline-none resize-none"
+                />
+              </div>
+            )}
+
+            <div className="mt-4 p-3 bg-gray-50 border border-gray-100 rounded-lg">
+              <p className="text-[11px] text-gray-500 leading-relaxed italic">
+                Note: Please check with the laws of your country as some prohibit the use of expiry dates
+              </p>
+            </div>
+          </section>
+
+          {/* T&C Card - Removed as it's now part of Gift Voucher Terms */}
+          {/* <section className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
             <div className="flex items-center gap-2 mb-4">
               <FileText size={18} className="text-gray-500" />
               <h2 className="text-sm font-semibold">
@@ -411,15 +505,19 @@ export default function AddGiftVouchers(props) {
                 className=" mt-8 w-full appearance-none border border-gray-300 rounded pl-3 pr-8 py-2 text-[13px] text-gray-900 bg-white cursor-pointer focus:border-custom-blue outline-none"
               />
             )}
-          </section>
+          </section> */}
 
           {/* Footer Actions */}
           <div className="flex justify-end gap-2 pt-2">
-            <button className="px-4 py-1.5 border border-gray-300 rounded-md text-sm font-medium hover:bg-gray-50 transition-colors">
+            <button 
+              className="px-4 py-1.5 border border-gray-300 rounded-md text-sm font-medium hover:bg-gray-50 transition-colors"
+              onClick={() => router.push("/SalesTools/GiftVouchers")}
+            >
               Cancel
             </button>
-            <button className="px-5 py-1.5 bg-custom-blue text-white rounded-md text-sm font-medium hover:bg-[#132a4e] transition-colors shadow-lg shadow-blue-900/10"
-            onClick={handleSubmit}
+            <button 
+              className="px-5 py-1.5 bg-custom-blue text-white rounded-md text-sm font-medium hover:bg-[#132a4e] transition-colors shadow-lg shadow-blue-900/10"
+              onClick={handleSubmit}
             >
               Save Change
             </button>

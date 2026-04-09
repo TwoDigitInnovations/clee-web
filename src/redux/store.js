@@ -11,7 +11,6 @@ import productReducer from "./slices/productSlice";
 import templateReducer from "./slices/templateSlice";
 import AutomationRulesReducer from "./slices/AutomationRulesSlice";
 import servicesReducer from "./slices/servicesSlice";
-import ClosedDatesReducer from "./slices/closedDataSlice";
 
 export const store = configureStore({
   reducer: {
@@ -25,8 +24,7 @@ export const store = configureStore({
     notification: notificationReducer,
     product: productReducer,
     template: templateReducer,
-    automationRule: AutomationRulesReducer,
-    service: servicesReducer,
-    closedDates: ClosedDatesReducer,
+    automationRules: AutomationRulesReducer,
+    services: servicesReducer,
   },
 });

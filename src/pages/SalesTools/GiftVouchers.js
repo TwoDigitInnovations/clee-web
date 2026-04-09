@@ -476,7 +476,10 @@ function GiftVouchers(props) {
                       </td>
                       <td className="px-3 py-3">
                         <div className="flex gap-1.5">
-                          <button className="w-7 h-7 rounded border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-100">
+                          <button 
+                            className="w-7 h-7 rounded border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-100"
+                            onClick={() => router.push(`/SalesTools/AddGiftVouchers?id=${v?._id}`)}
+                          >
                             <Edit size={14} />
                           </button>
                           <button className="w-7 h-7 rounded border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-100">

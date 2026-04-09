@@ -175,7 +175,7 @@ export default function AddServices({ loader, toaster }) {
           const hours = Math.floor((data.duration || 0) / 60);
           const minutes = (data.duration || 0) % 60;
 
-          setFormData({
+          setForm({
             serviceName: data.name || "",
             category: data.category?._id || "",
             description: data.description || "",
