@@ -13,15 +13,39 @@ import {
 import DashboardHeader from "@/components/DashboardHeader";
 import { Api } from "@/services/service";
 import Select from "react-select";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchAutomationById,
+  fetchAutomationRules,
+  saveAutomationRule,
+} from "@/redux/actions/AutomationRulesActions";
+import { fetchServices } from "@/redux/actions/servicesActions";
 
 const AddAutomationRules = ({ loader, toaster }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
-  const [templates, setTemplates] = useState([]);
-  const [services, setServices] = useState([]);
   const [search, setSearch] = useState("");
+  const dispatch = useDispatch();
+
+  const { templates } = useSelector((state) => state.template);
+  const { services } = useSelector((state) => state.service);
+  const { currentRule } = useSelector((state) => state.automation);
+
+  useEffect(() => {
+    if (id) {
+      dispatch(fetchAutomationById(id, router));
+    }
+  }, [id]);
+
+  useEffect(() => {
+    dispatch(fetchServices(router));
+  }, []);
+
+  useEffect(() => {
+    dispatch(fetchTemplates(router));
+  }, [currentTab]);
 
   const [formData, setFormData] = useState({
     templateId: "",
@@ -32,51 +56,6 @@ const AddAutomationRules = ({ loader, toaster }) => {
     viaSMS: true,
     newClientsOnly: false,
   });
-
-  const fetchTemplates = async () => {
-    try {
-      const res = await Api("get", "templates/getAll", "", router);
-      setTemplates(res?.data.data || []);
-    } catch (err) {
-      console.error("Template Error", err);
-    }
-  };
-
-  const fetchServices = async () => {
-    try {
-      const res = await Api("get", "services/getAll", "", router);
-      setServices(res?.data?.data || []);
-    } catch (err) {
-      console.error("Services Error", err);
-    }
-  };
-
-  const fetchAutomationById = async () => {
-    if (!id) return;
-    try {
-      const res = await Api("get", `automation/${id}`, "", router);
-      if (res?.status) {
-        const data = res.data.data;
-        setFormData(data);
-      }
-    } catch (err) {
-      console.error("Edit Error", err);
-    }
-  };
-  const fetchData = async () => {
-    loader(true);
-    try {
-      fetchTemplates(); // parallel
-      fetchServices(); // parallel
-      fetchAutomationById(); // parallel
-    } finally {
-      loader(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [id]);
 
   const serviceOptions = services?.map((s) => ({
     value: s._id,
@@ -107,16 +86,20 @@ const AddAutomationRules = ({ loader, toaster }) => {
 
   const handleSubmit = async () => {
     loader(true);
-    const config = id
-      ? { method: "put", url: `automation/update/${id}`, msg: "Rule updated" }
-      : { method: "post", url: "automation/create", msg: "Rule created" };
 
     try {
-      const res = await Api(config.method, config.url, formData, router);
-      if (res?.status) {
-        toaster("success", config.msg);
+      const res = await dispatch(saveAutomationRule(id, formData, router));
+
+      if (res?.success) {
+        toaster("success", res.message);
+
+        // optional: refresh list
+        dispatch(fetchAutomationRules(router));
+
         router.push("/consult/AutomationRules");
         setFormData({});
+      } else {
+        toaster("error", res.message);
       }
     } catch {
       toaster("error", "Server error");
@@ -124,6 +107,10 @@ const AddAutomationRules = ({ loader, toaster }) => {
       loader(false);
     }
   };
+
+  useEffect(() => {
+    dispatch(fetchServices(router)); 
+  }, [id]);
 
   const customStyles = {
     control: (base) => ({
@@ -168,7 +155,7 @@ const AddAutomationRules = ({ loader, toaster }) => {
     }),
   };
 
-  // Reusable Section Header Component to keep code short
+  
   const SectionHeader = ({ icon: Icon, title }) => (
     <div className="flex items-center gap-3 mb-6">
       <div className="p-2 bg-blue-50 rounded-lg text-custom-blue">

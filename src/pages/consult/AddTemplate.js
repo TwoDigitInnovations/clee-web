@@ -27,6 +27,8 @@ import {
 import { Api } from "@/services/service";
 import { useRouter } from "next/navigation";
 import DashboardHeader from "@/components/DashboardHeader";
+import { saveTemplate } from "@/redux/actions/templateActions";
+import { useDispatch } from "react-redux";
 
 const STANDARD_ELEMENTS = [
   {
@@ -417,8 +419,10 @@ export default function AddTemplate({ loader, toaster }) {
       prev.map((i) => (i.uid === uid ? { ...i, label, desc } : i)),
     );
   };
-
+  const dispatch = useDispatch();
+  
   const handleSubmit = async () => {
+    // 🔴 Validation
     if (!templateName?.trim()) {
       toaster("error", "Template name is required");
       return;
@@ -437,24 +441,18 @@ export default function AddTemplate({ loader, toaster }) {
       templateType: "custom",
     };
 
-    const config = id
-      ? { method: "put", url: `template/update/${id}`, msg: "Rule updated" }
-      : { method: "post", url: "template/create", msg: "Rule created" };
-
     try {
-      const res = await Api(config.method, config.url, data, router);
-      if (res?.status) {
-        toaster({ type: "success", message: config.msg });
+      const res = await dispatch(saveTemplate(id, data, router));
+
+      if (res?.success) {
+        toaster("success", res.message);
         router.push("/consult/Library");
         setFormData({});
       } else {
-        toaster({
-          type: "error",
-          message: res?.message || "Something went wrong",
-        });
+        toaster("error", res.message || "Something went wrong");
       }
     } catch {
-      toaster({ type: "error", message: "Server error" });
+      toaster("error", "Server error");
     } finally {
       loader(false);
     }
