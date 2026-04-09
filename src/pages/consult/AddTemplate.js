@@ -24,6 +24,9 @@ import {
   X,
   GripVertical,
 } from "lucide-react";
+import { Api } from "@/services/service";
+import { useRouter } from "next/navigation";
+import DashboardHeader from "@/components/DashboardHeader";
 
 const STANDARD_ELEMENTS = [
   {
@@ -233,7 +236,6 @@ function ThreeDotMenu({ onEdit, onRemove }) {
 }
 
 function FormFieldCard({ item, onEdit, onRemove }) {
-  const Icon = item.icon;
   return (
     <div className="group flex items-start gap-3 bg-white border border-slate-200 rounded-xl px-4 py-3.5 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-200">
       {/* <div
@@ -380,11 +382,13 @@ function DropZone({ onAdd }) {
   );
 }
 
-export default function AddTemplate() {
+export default function AddTemplate({ loader, toaster }) {
   const [tab, setTab] = useState("standard"); // "standard" | "client"
   const [search, setSearch] = useState("");
   const [formItems, setFormItems] = useState([]);
+  const [templateName, setTemplateName] = useState("");
   const [editingItem, setEditingItem] = useState(null);
+  const router = useRouter();
 
   const addedClientIds = new Set(
     formItems.filter((i) => i.isClientDetail).map((i) => i.id),
@@ -414,164 +418,226 @@ export default function AddTemplate() {
     );
   };
 
+  const handleSubmit = async () => {
+    if (!templateName?.trim()) {
+      toaster("error", "Template name is required");
+      return;
+    }
+
+    if (!formItems || formItems.length === 0) {
+      toaster("error", "At least one item is required");
+      return;
+    }
+
+    loader(true);
+
+    const data = {
+      items: formItems,
+      name: templateName,
+      templateType: "custom",
+    };
+
+    const config = id
+      ? { method: "put", url: `template/update/${id}`, msg: "Rule updated" }
+      : { method: "post", url: "template/create", msg: "Rule created" };
+
+    try {
+      const res = await Api(config.method, config.url, data, router);
+      if (res?.status) {
+        toaster({ type: "success", message: config.msg });
+        router.push("/consult/Library");
+        setFormData({});
+      } else {
+        toaster({
+          type: "error",
+          message: res?.message || "Something went wrong",
+        });
+      }
+    } catch {
+      toaster({ type: "error", message: "Server error" });
+    } finally {
+      loader(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-custom-gray">
-      <div className="bg-white border-b border-slate-200 px-4 md:px-6 py-4 flex items-center justify-between sticky top-0 z-30 shadow-sm">
-        <h1 className="text-xl font-bold text-slate-900 tracking-tight">
-          Client Intake Form
-        </h1>
-        <div className="flex items-center gap-2">
-          <button className="px-4 py-2 border border-slate-300 text-slate-700 text-sm font-semibold rounded-lg hover:bg-slate-50 transition-colors">
-            Preview
-          </button>
-          <button className="px-5 py-2 bg-custom-blue text-white text-sm font-semibold rounded-lg hover:bg-indigo-800 transition-colors shadow-sm">
-            Save
-          </button>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 py-4 md:py-8 flex gap-6">
-        <div className="flex-1 min-w-0">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-            {/* Fixed fields */}
-            <div className="space-y-4 mb-6">
-              <div className="w-full group flex flex-col items-start gap-3 bg-white border border-slate-200 rounded-xl px-4 py-3.5 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-200">
-                <label className="text-sm font-semibold text-slate-800 leading-tight ">
-                  Full Name
-                </label>
-
-                <input
-                  placeholder=" Client's legal name..."
-                  className="w-full border border-slate-200 rounded-lg px-4 py-3 text-sm text-slate-400 bg-slate-50"
-                />
-              </div>
-              <div className="w-full group flex flex-col items-start gap-3 bg-white border border-slate-200 rounded-xl px-4 py-3.5 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-200">
-                <label className="text-sm font-semibold text-slate-800 leading-tight">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  placeholder="  example@domain.com"
-                  className="text-[13px]  text-slate-400 rounded-md mt-0.5 truncate w-full border border-gray-100 py-2 px-4"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-3 mb-5">
-              {formItems.map((item) => (
-                <FormFieldCard
-                  key={item.uid}
-                  item={item}
-                  onEdit={() => setEditingItem(item)}
-                  onRemove={removeItem}
-                />
-              ))}
-            </div>
-
-            <DropZone />
+    <>
+      <DashboardHeader title="Consult" />
+      <div className="min-h-screen bg-custom-gray pb-20">
+        <div className=" px-4 md:px-6 py-4 flex items-center justify-between ">
+          <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+            Client Intake Form
+          </h1>
+          <div className="flex items-center gap-2">
+            <button className="px-4 py-2 border border-slate-300 text-slate-700 text-sm font-semibold rounded-lg hover:bg-slate-50 transition-colors">
+              Preview
+            </button>
+            <button
+              className="px-5 py-2 bg-custom-blue text-white text-sm font-semibold rounded-lg hover:bg-indigo-800 transition-colors shadow-sm"
+              onClick={handleSubmit}
+            >
+              Save
+            </button>
           </div>
         </div>
 
-        <div className="w-80 flex-shrink-0">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden sticky top-24">
-            <div className="px-5 pt-5 pb-4 border-b border-slate-100">
-              <h2 className="text-sm font-bold text-slate-800 mb-4">
-                Add elements
-              </h2>
+        <div className="max-w-7xl mx-auto px-4 py-4 md:py-0 flex gap-6">
+          <div className="flex-1 min-w-0">
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-3 md:p-5">
+              <div className="space-y-4 mb-6">
+                <div className="w-full group flex flex-col items-start gap-3 bg-white border border-slate-200 rounded-xl px-4 py-3.5 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-200">
+                  <label className="text-sm font-semibold text-slate-800 leading-tight ">
+                    Template name
+                  </label>
 
-              <div className="flex gap-1 bg-slate-100 p-1 rounded-xl">
-                {["standard", "client"].map((t) => (
-                  <button
-                    key={t}
-                    onClick={() => {
-                      setTab(t);
-                      setSearch("");
-                    }}
-                    className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all duration-200 capitalize
-                      ${tab === t ? "bg-white shadow-sm text-slate-800" : "text-slate-500 hover:text-slate-700"}`}
-                  >
-                    {t === "client" ? "Client details" : "Standard"}
-                  </button>
+                  <input
+                    type="text"
+                    value={templateName}
+                    placeholder="template Name"
+                    onChange={(e) => setTemplateName(e.target.value)}
+                    className="text-[13px]  text-slate-400 rounded-md mt-0.5 truncate w-full border border-gray-100 py-2 px-4"
+                  />
+                </div>
+                <div className="w-full group flex flex-col items-start gap-3 bg-white border border-slate-200 rounded-xl px-4 py-3.5 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-200">
+                  <label className="text-sm font-semibold text-slate-800 leading-tight ">
+                    Full Name
+                  </label>
+
+                  <input
+                    type="text"
+                    // value={fullName}
+                    placeholder=" Client's legal name..."
+                    className="text-[13px]  text-slate-400 rounded-md mt-0.5 truncate w-full border border-gray-100 py-2 px-4"
+                  />
+                </div>
+                <div className="w-full group flex flex-col items-start gap-3 bg-white border border-slate-200 rounded-xl px-4 py-3.5 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-200">
+                  <label className="text-sm font-semibold text-slate-800 leading-tight">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="  example@domain.com"
+                    className="text-[13px]  text-slate-400 rounded-md mt-0.5 truncate w-full border border-gray-100 py-2 px-4"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-3 mb-5">
+                {formItems.map((item) => (
+                  <FormFieldCard
+                    key={item.uid}
+                    item={item}
+                    onEdit={() => setEditingItem(item)}
+                    onRemove={removeItem}
+                  />
                 ))}
               </div>
-            </div>
 
-            {/* Search */}
-            <div className="px-4 py-3 border-b border-slate-100">
-              <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
-                <Search size={13} className="text-slate-400 flex-shrink-0" />
-                <input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Find elements..."
-                  className="bg-transparent text-sm text-slate-700 placeholder:text-slate-400 outline-none w-full"
-                />
-                {search && (
-                  <button
-                    onClick={() => setSearch("")}
-                    className="text-slate-400 hover:text-slate-600"
-                  >
-                    <X size={12} />
-                  </button>
+              <DropZone />
+            </div>
+          </div>
+
+          <div className="w-80 flex-shrink-0">
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden sticky top-24">
+              <div className="px-5 pt-5 pb-4 border-b border-slate-100">
+                <h2 className="text-sm font-bold text-slate-800 mb-4">
+                  Add elements
+                </h2>
+
+                <div className="flex gap-1 bg-slate-100 p-1 rounded-xl">
+                  {["standard", "client"].map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => {
+                        setTab(t);
+                        setSearch("");
+                      }}
+                      className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all duration-200 capitalize
+                      ${tab === t ? "bg-white shadow-sm text-slate-800" : "text-slate-500 hover:text-slate-700"}`}
+                    >
+                      {t === "client" ? "Client details" : "Standard"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="px-4 py-3 border-b border-slate-100">
+                <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+                  <Search size={13} className="text-slate-400 flex-shrink-0" />
+                  <input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Find elements..."
+                    className="bg-transparent text-sm text-slate-700 placeholder:text-slate-400 outline-none w-full"
+                  />
+                  {search && (
+                    <button
+                      onClick={() => setSearch("")}
+                      className="text-slate-400 hover:text-slate-600"
+                    >
+                      <X size={12} />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="p-3 space-y-2 overflow-y-auto max-h-[480px]">
+                {filtered.length === 0 ? (
+                  <div className="text-center py-8 text-slate-400 text-sm">
+                    No elements found
+                  </div>
+                ) : (
+                  filtered.map((el) => (
+                    <SidebarRow
+                      key={el.id}
+                      el={el}
+                      onClick={addElement}
+                      disabled={tab === "client" && addedClientIds.has(el.id)}
+                    />
+                  ))
                 )}
               </div>
-            </div>
 
-            {/* Element list */}
-            <div className="p-3 space-y-2 overflow-y-auto max-h-[480px]">
-              {filtered.length === 0 ? (
-                <div className="text-center py-8 text-slate-400 text-sm">
-                  No elements found
+              {tab === "standard" && (
+                <div className="mx-3 mb-3 bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-3">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <span className="text-custom-blue text-xs">✦</span>
+                    <span className="text-xs font-bold text-custom-blue">
+                      Pro Tip
+                    </span>
+                  </div>
+                  <p className="text-xs text-custom-blue leading-relaxed">
+                    Combine "Signature" with "Date" elements for legally binding
+                    consent forms.
+                  </p>
                 </div>
-              ) : (
-                filtered.map((el) => (
-                  <SidebarRow
-                    key={el.id}
-                    el={el}
-                    onClick={addElement}
-                    disabled={tab === "client" && addedClientIds.has(el.id)}
-                  />
-                ))
+              )}
+              {tab === "client" && (
+                <div className="mx-3 mb-3 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <span className="text-amber-500 text-xs">✦</span>
+                    <span className="text-xs font-bold text-amber-700">
+                      Note
+                    </span>
+                  </div>
+                  <p className="text-xs text-amber-600 leading-relaxed">
+                    Each client detail can only be added once to the form.
+                  </p>
+                </div>
               )}
             </div>
-
-            {tab === "standard" && (
-              <div className="mx-3 mb-3 bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-3">
-                <div className="flex items-center gap-1.5 mb-1">
-                  <span className="text-custom-blue text-xs">✦</span>
-                  <span className="text-xs font-bold text-custom-blue">
-                    Pro Tip
-                  </span>
-                </div>
-                <p className="text-xs text-custom-blue leading-relaxed">
-                  Combine "Signature" with "Date" elements for legally binding
-                  consent forms.
-                </p>
-              </div>
-            )}
-            {tab === "client" && (
-              <div className="mx-3 mb-3 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
-                <div className="flex items-center gap-1.5 mb-1">
-                  <span className="text-amber-500 text-xs">✦</span>
-                  <span className="text-xs font-bold text-amber-700">Note</span>
-                </div>
-                <p className="text-xs text-amber-600 leading-relaxed">
-                  Each client detail can only be added once to the form.
-                </p>
-              </div>
-            )}
           </div>
         </div>
-      </div>
 
-      {/* Edit modal */}
-      {editingItem && (
-        <EditModal
-          item={editingItem}
-          onClose={() => setEditingItem(null)}
-          onSave={saveEdit}
-        />
-      )}
-    </div>
+        {/* Edit modal */}
+        {editingItem && (
+          <EditModal
+            item={editingItem}
+            onClose={() => setEditingItem(null)}
+            onSave={saveEdit}
+          />
+        )}
+      </div>
+    </>
   );
 }

@@ -36,7 +36,7 @@ const AddAutomationRules = ({ loader, toaster }) => {
   const fetchTemplates = async () => {
     try {
       const res = await Api("get", "templates/getAll", "", router);
-      setTemplates(res?.data || []);
+      setTemplates(res?.data.data || []);
     } catch (err) {
       console.error("Template Error", err);
     }
