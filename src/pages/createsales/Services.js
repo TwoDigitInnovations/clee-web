@@ -2,7 +2,7 @@ import DashboardHeader from "@/components/DashboardHeader";
 import React, { useState, useEffect } from "react";
 import { Search, Clock, ChevronDown, ChevronUp } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchServices } from "@/redux/actions/serviceActions";
+import { fetchServices } from "@/redux/actions/servicesActions";
 import { fetchCustomers } from "@/redux/actions/productActions";
 import { useRouter } from "next/router";
 import CheckoutSidebar from "@/components/CheckoutSidebar";
