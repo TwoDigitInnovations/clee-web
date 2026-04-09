@@ -1,26 +1,42 @@
 import DashboardHeader from "@/components/DashboardHeader";
 import React, { useState, useEffect } from "react";
-import { Search, Clock, ChevronDown, ChevronUp, ShoppingCart, User, CreditCard, X } from "lucide-react";
+import { Search, Clock, ChevronDown, ChevronUp } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchServices } from "@/redux/actions/serviceActions";
 import { fetchCustomers } from "@/redux/actions/productActions";
 import { useRouter } from "next/router";
+import CheckoutSidebar from "@/components/CheckoutSidebar";
 
-function Services({ onTabChange }) {
+function Services({ 
+  onTabChange,
+  selectedItems = [],
+  setSelectedItems,
+  selectedClient,
+  setSelectedClient,
+  customers = [],
+  showClientSearch,
+  setShowClientSearch,
+  clientSearchQuery,
+  setClientSearchQuery,
+  showMobileCart,
+  setShowMobileCart,
+  overallDiscountValue,
+  overallDiscountType,
+  showNoteModal,
+  setShowNoteModal,
+  showOverallDiscountModal,
+  setShowOverallDiscountModal,
+  setShowCheckout,
+}) {
   const router = useRouter();
   const dispatch = useDispatch();
   const { services: servicesList, loading } = useSelector((state) => state.services);
   
   const [activeTab, setActiveTab] = useState("services");
   const [expandedCategories, setExpandedCategories] = useState([]);
-  const [selectedClient, setSelectedClient] = useState(null);
-  const [showClientSearch, setShowClientSearch] = useState(false);
-  const [clientSearchQuery, setClientSearchQuery] = useState("");
-  const [customers, setCustomers] = useState([]);
 
   useEffect(() => {
     dispatch(fetchServices(router));
-    loadCustomers();
   }, []);
 
   useEffect(() => {
@@ -31,11 +47,6 @@ function Services({ onTabChange }) {
       setExpandedCategories(categories);
     }
   }, [servicesList]);
-
-  const loadCustomers = async () => {
-    const customersList = await dispatch(fetchCustomers(router));
-    setCustomers(customersList);
-  };
 
   const tabs = [
     { id: "products", label: "Products" },
@@ -80,6 +91,33 @@ function Services({ onTabChange }) {
     { name: "Elena Rodriguez", date: "Yesterday 4:35 PM", amount: 245.0 },
     { name: "Julian Thorne", date: "2 days ago", amount: 120.5 },
   ];
+
+  const getTotal = () => {
+    return selectedItems.reduce((sum, s) => sum + (s.price * (s.quantity || 1)), 0);
+  };
+
+  const getTotalWithOverallDiscount = () => {
+    const subtotal = getTotal();
+    if (!overallDiscountValue) return subtotal;
+    
+    if (overallDiscountType === "percentage") {
+      return subtotal - (subtotal * parseFloat(overallDiscountValue)) / 100;
+    } else {
+      return subtotal - parseFloat(overallDiscountValue);
+    }
+  };
+
+  const openServiceDetail = (service) => {
+    // Add service to cart
+    const existing = selectedItems.find(s => s.id === service.id);
+    if (existing) {
+      setSelectedItems(selectedItems.map(s => 
+        s.id === service.id ? { ...s, quantity: (s.quantity || 1) + 1 } : s
+      ));
+    } else {
+      setSelectedItems([...selectedItems, { ...service, quantity: 1 }]);
+    }
+  };
 
   const toggleCategory = (categoryId) => {
     setExpandedCategories(prev =>
@@ -160,6 +198,7 @@ function Services({ onTabChange }) {
                     {category.services.map((service) => (
                       <div
                         key={service.id}
+                        onClick={() => openServiceDetail(service)}
                         className="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow cursor-pointer"
                       >
                         <div className="flex items-center justify-between">
@@ -185,114 +224,38 @@ function Services({ onTabChange }) {
           </div>
         </div>
 
-        {/* Right Sidebar - Same as index.js */}
-        <div className="hidden lg:block lg:w-96 bg-white border-l border-gray-200 p-6 overflow-y-auto max-h-screen">
-          <div className="flex items-center gap-3 mb-6">
-            <ShoppingCart className="text-[#0A4D91]" size={24} />
-            <div>
-              <h3 className="text-lg font-bold text-[#0A4D91]">Current Sale</h3>
-              <p className="text-xs text-gray-500">New Session</p>
-            </div>
-          </div>
-
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-3">
-              <User className="text-[#0A4D91]" size={20} />
-              <h4 className="font-semibold text-gray-900">Select Client</h4>
-            </div>
-            {!selectedClient ? (
-              <div className="text-center py-6 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-500 mb-3">No client selected for this transaction</p>
-                <button 
-                  onClick={() => setShowClientSearch(true)}
-                  className="px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors flex items-center gap-2 mx-auto"
-                >
-                  <Search size={16} />
-                  Find Client
-                </button>
-              </div>
-            ) : (
-              <div className="p-4 bg-white border border-gray-200 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold text-gray-900">{selectedClient.fullname || selectedClient.name}</p>
-                    <p className="text-sm text-gray-500">{selectedClient.mobile || selectedClient.phone}</p>
-                  </div>
-                  <button
-                    onClick={() => setSelectedClient(null)}
-                    className="p-1 hover:bg-gray-100 rounded-full"
-                  >
-                    <X size={18} className="text-gray-500" />
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-3">
-              <CreditCard className="text-[#0A4D91]" size={20} />
-              <h4 className="font-semibold text-gray-900">Saved Sales</h4>
-            </div>
-            <div className="space-y-2">
-              {savedSales.map((sale, index) => (
-                <div key={index} className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
-                  <p className="font-semibold text-sm text-gray-900">{sale.name}</p>
-                  <p className="text-xs text-gray-500">{sale.date} • ${sale.amount.toFixed(2)}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Client Search Modal */}
-        {showClientSearch && (
-          <>
-            <div
-              className="fixed inset-0 bg-black/50 z-50"
-              onClick={() => setShowClientSearch(false)}
-            />
-            <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl z-50 w-full max-w-md shadow-2xl">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-gray-900">Find Client</h2>
-                  <button
-                    onClick={() => setShowClientSearch(false)}
-                    className="p-2 hover:bg-gray-100 rounded-full"
-                  >
-                    <X size={20} className="text-gray-400" />
-                  </button>
-                </div>
-                <div className="relative mb-4">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                  <input
-                    type="text"
-                    value={clientSearchQuery}
-                    onChange={(e) => setClientSearchQuery(e.target.value)}
-                    placeholder="Search by name or phone..."
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A4D91] outline-none"
-                  />
-                </div>
-                <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {filteredClients.map((client) => (
-                    <button
-                      key={client.id}
-                      onClick={() => {
-                        setSelectedClient(client);
-                        setShowClientSearch(false);
-                        setClientSearchQuery("");
-                      }}
-                      className="w-full p-3 text-left hover:bg-gray-50 rounded-lg transition-colors"
-                    >
-                      <p className="font-semibold text-gray-900">{client.fullname || client.name}</p>
-                      <p className="text-sm text-gray-500">{client.mobile || client.phone}</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </>
-        )}
+        <CheckoutSidebar
+          selectedClient={selectedClient}
+          setSelectedClient={setSelectedClient}
+          showClientSearch={showClientSearch}
+          setShowClientSearch={setShowClientSearch}
+          clientSearchQuery={clientSearchQuery}
+          setClientSearchQuery={setClientSearchQuery}
+          customers={customers}
+          selectedProducts={selectedItems}
+          selectedItems={selectedItems}
+          setSelectedItems={setSelectedItems}
+          openProductDetail={openServiceDetail}
+          savedSales={savedSales}
+          getTotal={getTotal}
+          getTotalWithOverallDiscount={getTotalWithOverallDiscount}
+          overallDiscountValue={overallDiscountValue}
+          overallDiscountType={overallDiscountType}
+          onAddNote={() => setShowNoteModal && setShowNoteModal(true)}
+          onAddDiscount={() => setShowOverallDiscountModal && setShowOverallDiscountModal(true)}
+          onCheckout={() => {
+            if (!selectedClient) {
+              setShowClientSearch(true);
+            } else {
+              setShowCheckout && setShowCheckout(true);
+            }
+          }}
+          onCompleteSale={() => {
+            console.log("Complete sale");
+          }}
+          showMobileCart={showMobileCart}
+          setShowMobileCart={setShowMobileCart}
+        />
       </div>
     </>
   );

@@ -11,6 +11,8 @@ import productReducer from "./slices/productSlice";
 import templateReducer from "./slices/templateSlice";
 import AutomationRulesReducer from "./slices/AutomationRulesSlice";
 import servicesReducer from "./slices/servicesSlice";
+import vouchersReducer from "./slices/vouchersSlice";
+import packagesReducer from "./slices/packagesSlice";
 
 export const store = configureStore({
   reducer: {
@@ -26,5 +28,7 @@ export const store = configureStore({
     template: templateReducer,
     automationRules: AutomationRulesReducer,
     services: servicesReducer,
+    vouchers: vouchersReducer,
+    packages: packagesReducer,
   },
 });
