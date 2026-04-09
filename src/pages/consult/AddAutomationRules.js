@@ -27,10 +27,10 @@ const AddAutomationRules = ({ loader, toaster }) => {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
   const dispatch = useDispatch();
-  // const [services,setservices] = useState([])
+
   const { templates } = useSelector((state) => state.template);
-  const { services } = useSelector((state) => state.service);
-  const { currentRule } = useSelector((state) => state.automationRule);
+  const { services } = useSelector((state) => state.services);
+  const { currentRule } = useSelector((state) => state.automationRules);
 
   useEffect(() => {
     if (id) {

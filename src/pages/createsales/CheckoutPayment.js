@@ -200,7 +200,7 @@ function CheckoutPayment({
                         </p>
                       </div>
                       <p className="font-bold text-gray-900">
-                        ${product.price.toFixed(2)}
+                        ${product.price?.toFixed(2)}
                       </p>
                     </div>
                   ))}
@@ -210,13 +210,13 @@ function CheckoutPayment({
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Subtotal</span>
                     <span className="font-semibold text-gray-600">
-                      ${totalAmount.toFixed(2)}
+                      ${totalAmount?.toFixed(2)}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Tax (GST 10%)</span>
                     <span className="font-semibold text-gray-600">
-                      ${(totalAmount * 0.1).toFixed(2)}
+                      ${(totalAmount * 0.1)?.toFixed(2)}
                     </span>
                   </div>
                   <div className="flex justify-between pt-2 border-t border-gray-200">
@@ -224,7 +224,7 @@ function CheckoutPayment({
                       Total Amount
                     </span>
                     <span className="text-xl font-bold text-[#0A4D91]">
-                      ${(totalAmount * 1.1).toFixed(2)}
+                      ${(totalAmount * 1.1)?.toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -239,7 +239,7 @@ function CheckoutPayment({
                   Amount to Pay
                 </p>
                 <p className="text-5xl font-bold text-[#0A4D91] mb-2">
-                  ${(totalAmount * 1.1).toFixed(2)}
+                  ${(totalAmount * 1.1)?.toFixed(2)}
                 </p>
                 <button className="text-sm text-[#0A4D91] hover:underline">
                   Edit to make partial payment
