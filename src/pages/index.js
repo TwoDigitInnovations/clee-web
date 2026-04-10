@@ -16,6 +16,7 @@ import DashboardHeader from "@/components/DashboardHeader";
 import StaffDashboard from "@/components/satafDashboard";
 import TargetsDashboard from "@/components/TargetDashboard";
 import ActvityDashboard from "@/components/ActvityDashboard";
+import isAuth from "@/components/isAuth";
 
 const TABS = ["Business", "Staff", "Targets", "Activity"];
 
@@ -146,7 +147,6 @@ function StatCard({
 }) {
   return (
     <div className="relative bg-white rounded-[12px] px-5 py-5 shadow-sm overflow-hidden">
- 
       <div className="absolute top-0 left-0 right-0 h-[3px] bg-custom-blue rounded-t-2xl" />
 
       <div className="flex items-center justify-between mb-2">
@@ -265,7 +265,7 @@ function TxRow({ initials, name, date, amount, status, avatarBg }) {
   );
 }
 
-export default function Dashboard() {
+function Dashboard() {
   const [activeTab, setActiveTab] = useState("Business");
   const [chartToggle, setChartToggle] = useState("Days");
 
@@ -430,9 +430,11 @@ export default function Dashboard() {
         )}
 
         {activeTab === "Staff" && <StaffDashboard />}
-         {activeTab === "Targets" && <TargetsDashboard />}
-          {activeTab === "Activity" && <ActvityDashboard />}
+        {activeTab === "Targets" && <TargetsDashboard />}
+        {activeTab === "Activity" && <ActvityDashboard />}
       </div>
     </>
   );
 }
+
+export default isAuth(Dashboard);

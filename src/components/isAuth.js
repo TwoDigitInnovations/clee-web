@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 
 const roleAccess = {
   user: ["/", "/profile", "/Settings"],
-  admin: ["/"],
+  admin: ["/", "/Calender", "/createsales", "/Customers", "/Reports"],
 };
 
 const publicPages = ["/privacyPolicy", "/termsAndConditions"];

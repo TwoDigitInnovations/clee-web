@@ -2,6 +2,7 @@ import AddCustomer from "@/components/AddCustomer";
 import DashboardHeader from "@/components/DashboardHeader";
 import { ConfirmModal } from "@/components/deleteModel";
 import ImportCustomer from "@/components/ImportCustomer";
+import isAuth from "@/components/isAuth";
 import { Api } from "@/services/service";
 import {
   EllipsisVertical,
@@ -817,4 +818,4 @@ function Customers(props) {
   );
 }
 
-export default Customers;
+export default isAuth(Customers);

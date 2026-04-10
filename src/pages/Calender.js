@@ -24,6 +24,7 @@ import {
 } from "@/redux/actions/waitlistActions";
 import { Api } from "@/services/service";
 import { useRouter } from "next/router";
+import isAuth from "@/components/isAuth";
 
 const STAFF = [
   {
@@ -679,4 +680,4 @@ function Calender(props) {
   );
 }
 
-export default Calender;
+export default isAuth(Calender);

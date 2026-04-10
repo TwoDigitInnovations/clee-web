@@ -6,6 +6,7 @@ import { DateRange } from "react-date-range";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 import { format } from "date-fns";
+import isAuth from "@/components/isAuth";
 
 const REPORTS = {
   Stock: [
@@ -284,4 +285,4 @@ function Reports() {
   );
 }
 
-export default Reports;
+export default isAuth(Reports);
