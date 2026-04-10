@@ -18,7 +18,7 @@ import InputField from "./UI/InputField";
 import SelectField from "./UI/SelectField";
 import TextareaField from "./UI/TextAreaField";
 import { useRouter } from "next/router";
-import { Api } from "@/services/service";
+import { Api, ApiFormData } from "@/services/service";
 
 const Toggle = ({ checked, onChange, label }) => (
   <label className="flex items-center gap-2 cursor-pointer select-none">
@@ -293,7 +293,7 @@ const AddCustomer = ({
       });
       return;
     }
-    const data = { ...formData, role: "user" };
+    const data = { ...formData, photo_preview: null, role: "user" };
 
     const form = new FormData();
 
@@ -311,7 +311,7 @@ const AddCustomer = ({
         ? `auth/updateCustomer/${editId}`
         : "auth/createCustomer";
 
-      const res = await Api("post", endpoint, data, router);
+      const res = await ApiFormData("post", endpoint, data, router);
       loader(false);
 
       if (res?.status === true) {

@@ -16,7 +16,6 @@ export default function AppWrapper(props) {
   );
 }
 
-// ✅ Actual App Component
 function InnerApp({ Component, pageProps }) {
   const [open, setOpen] = useState(false);
   const [toast, setToast] = useState({
@@ -36,7 +35,7 @@ function InnerApp({ Component, pageProps }) {
 
   useEffect(() => {
     const user = localStorage.getItem("userDetail");
-    console.log(user);
+    
     
     if (user) {
       dispatch(setUser(JSON.parse(user)));
