@@ -17,7 +17,7 @@ function AutomationRules(props) {
   const [activeMenu, setActiveMenu] = useState(null); // Menu toggle ke liye
   const router = useRouter();
 
-  const { automationRules: rules } = useSelector((state) => state.services);
+  const { automationRules: rules } = useSelector((state) => state.automationRules);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -78,9 +78,9 @@ function AutomationRules(props) {
           {/* Grid Layout */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Rule Cards */}
-            {rules.map((rule) => (
+            {rules?.map((rule, key) => (
               <div
-                key={rule.id}
+                key={key}
                 className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 relative flex flex-col justify-between min-h-[200px]"
               >
                 <div>

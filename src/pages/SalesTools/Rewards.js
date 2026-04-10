@@ -106,6 +106,9 @@ function Rewards({ loader, toaster }) {
   const [servicesItems, setServicesItems] = useState([]);
   const [editData, setEditData] = useState({});
   const router = useRouter();
+  const { services: services } = useSelector((state) => state.services);
+  const dispatch = useDispatch();
+  
   const handleSubmit = async (items) => {
     setProductsItems(items);
   };
@@ -127,9 +130,10 @@ function Rewards({ loader, toaster }) {
   });
 
   useEffect(() => {
-    if (editData) return;
+    if (editData && Object.keys(editData).length > 0) return;
+
     if (productEarning === "all") {
-      const updated = allProducts.map((item) => ({
+      const updated = allProducts?.map((item) => ({
         ...item,
         included: true,
       }));
@@ -138,9 +142,10 @@ function Rewards({ loader, toaster }) {
   }, [allProducts, productEarning]);
 
   useEffect(() => {
-    if (editData) return;
+    if (editData && Object.keys(editData).length > 0) return;
+
     if (serviceEarning === "all") {
-      const updated = services.map((item) => ({
+      const updated = services?.map((item) => ({
         ...item,
         included: true,
       }));
@@ -150,7 +155,7 @@ function Rewards({ loader, toaster }) {
   }, [services, serviceEarning]);
 
   useEffect(() => {
-    if (editData) {
+    if (editData && Object.keys(editData).length > 0) {
       setFormData({
         rewardsActive: editData.rewardsActive,
         selectedPreset: editData.selectedPreset,
@@ -197,8 +202,7 @@ function Rewards({ loader, toaster }) {
     }
   };
 
-  const { services: services } = useSelector((state) => state.services);
-  const dispatch = useDispatch();
+
 
   useEffect(() => {
     dispatch(fetchServices(router));
@@ -328,13 +332,14 @@ function Rewards({ loader, toaster }) {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {FORMULA_PRESETS.map((preset) => (
+                {FORMULA_PRESETS?.map((preset) => (
                   <div
                     key={preset.id}
                     onClick={() =>
                       setFormData((prev) => ({
                         ...prev,
-                        selectedPreset: !prev.selectedPreset,
+                        selectedPreset: preset.id
+,
                       }))
                     }
                     className={`relative bg-white rounded-xl border-2 cursor-pointer p-4 transition-all ${
@@ -360,7 +365,7 @@ function Rewards({ loader, toaster }) {
                     <p className="text-xl font-bold text-gray-800 mb-3">
                       {preset.targetSpend}
                     </p>
-                    {preset.perks.map((perk) => (
+                    {preset.perks?.map((perk) => (
                       <div
                         key={perk}
                         className={`flex items-center gap-2 text-xs px-3 py-1.5 rounded-full mb-2 border font-medium ${
@@ -407,10 +412,10 @@ function Rewards({ loader, toaster }) {
                     <input
                       type="number"
                       value={formData.spendValue}
-                      onChange={() =>
+                      onChange={(e) =>
                         setFormData((prev) => ({
                           ...prev,
-                          spendValue: !prev.spendValue,
+                          spendValue: e.target.value,
                         }))
                       }
                       className="w-20 text-center bg-gray-100 border-none rounded-lg p-2 text-sm font-bold text-gray-800 outline-none focus:ring-2 focus:ring-custom-blue/30"
@@ -476,7 +481,7 @@ function Rewards({ loader, toaster }) {
                         Products Earning Points
                       </p>
                       <div className="flex gap-3 mb-5">
-                        {PRODUCT_OPTIONS.map((opt) => (
+                        {PRODUCT_OPTIONS?.map((opt) => (
                           <button
                             key={opt.id}
                             onClick={() => {
@@ -507,7 +512,7 @@ function Rewards({ loader, toaster }) {
                         Services Earning Points
                       </p>
                       <div className="flex gap-3">
-                        {SERVICE_OPTIONS.map((opt) => (
+                        {SERVICE_OPTIONS?.map((opt) => (
                           <button
                             key={opt.id}
                             onClick={() => {
@@ -595,16 +600,13 @@ function Rewards({ loader, toaster }) {
                       />
                     </div>
 
-                    {/* Table */}
                     <div className="border border-gray-200 rounded-xl overflow-hidden">
-                      {/* Header */}
                       <div className="grid grid-cols-3 bg-gray-50 px-4 py-2 text-[10px] font-black text-gray-400 uppercase tracking-wider border-b border-gray-200">
                         <div>Setting Configuration</div>
                         <div>Preference</div>
                         <div>Visibility</div>
                       </div>
 
-                      {/* Row 1 - Expiry Timeframe */}
                       <div className="grid grid-cols-3 items-center px-4 py-4 border-b border-gray-100">
                         <div>
                           <p className="text-xs font-bold text-gray-700">

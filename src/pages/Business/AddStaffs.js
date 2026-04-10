@@ -64,7 +64,7 @@ export default function AddStaff(props) {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
-  const { services: services } = useSelector((state) => state.services);
+  const { services: services,loading } = useSelector((state) => state.services);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -491,7 +491,7 @@ member's relationship."
                 />
               </div>
 
-              {servicesLoading ? (
+              {loading ? (
                 <div className="text-sm text-gray-400 py-6 text-center">
                   Loading services...
                 </div>
