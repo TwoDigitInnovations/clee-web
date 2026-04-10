@@ -19,6 +19,11 @@ import SelectField from "./UI/SelectField";
 import TextareaField from "./UI/TextAreaField";
 import { useRouter } from "next/router";
 import { Api, ApiFormData } from "@/services/service";
+import {
+  createCustomer,
+  updateCustomerById,
+} from "@/redux/actions/userActions";
+import { useDispatch } from "react-redux";
 
 const Toggle = ({ checked, onChange, label }) => (
   <label className="flex items-center gap-2 cursor-pointer select-none">
@@ -189,6 +194,7 @@ const AddCustomer = ({
   const [activeTab, setActiveTab] = useState("details");
   const [formData, setFormData] = useState(getInitialState());
   const router = useRouter();
+  const dispatch = useDispatch();
 
   console.log(formData);
 
@@ -286,13 +292,13 @@ const AddCustomer = ({
     const { isValid, errors } = validateCustomerForm(formData);
 
     if (!isValid) {
-      console.log(errors);
       toaster({
         type: "error",
         message: Object.values(errors)[0],
       });
       return;
     }
+
     const data = { ...formData, photo_preview: null, role: "user" };
 
     const form = new FormData();
@@ -307,11 +313,15 @@ const AddCustomer = ({
 
     try {
       loader(true);
-      const endpoint = editId
-        ? `auth/updateCustomer/${editId}`
-        : "auth/createCustomer";
 
-      const res = await ApiFormData("post", endpoint, data, router);
+      let res;
+
+      if (editId) {
+        res = await dispatch(updateCustomerById(editId, form, router));
+      } else {
+        res = await dispatch(createCustomer(form, router));
+      }
+
       loader(false);
 
       if (res?.status === true) {
@@ -321,11 +331,10 @@ const AddCustomer = ({
             ? "Customer updated successfully"
             : "Customer added successfully",
         });
+
         setFormData(getInitialState());
         onClose();
-        if (shouldRefresh && getCustomer) {
-          getCustomer();
-        }
+        getCustomer?.();
         setEditId("");
       } else {
         toaster({
@@ -333,9 +342,15 @@ const AddCustomer = ({
           message: res?.message || "Something went wrong",
         });
       }
-    } catch {
+    } catch (error) {
       loader(false);
-      toaster({ type: "error", message: "Server error" });
+
+      console.log("ERROR:", error);
+
+      toaster({
+        type: "error",
+        message: error?.response?.data?.message || "Server error",
+      });
     }
   };
 

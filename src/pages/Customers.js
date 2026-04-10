@@ -3,6 +3,8 @@ import DashboardHeader from "@/components/DashboardHeader";
 import { ConfirmModal } from "@/components/deleteModel";
 import ImportCustomer from "@/components/ImportCustomer";
 import isAuth from "@/components/isAuth";
+import { deleteCustomerById } from "@/redux/actions/userActions";
+import { deleteCustomer } from "@/redux/slices/userSlice";
 import { Api } from "@/services/service";
 import {
   EllipsisVertical,
@@ -107,14 +109,21 @@ function Customers(props) {
 
   const loadCustomerBookings = async () => {
     if (!selected?._id) return;
-    
+
     try {
       setLoadingBookings(true);
-      const res = await Api("get", `booking/getAll?customer=${selected._id}`, "", router);
+      const res = await Api(
+        "get",
+        `booking/getAll?customer=${selected._id}`,
+        "",
+        router,
+      );
       setLoadingBookings(false);
-      
+
       if (res?.status) {
-        const bookingsData = Array.isArray(res.data) ? res.data : res.data?.data || [];
+        const bookingsData = Array.isArray(res.data)
+          ? res.data
+          : res.data?.data || [];
         setCustomerBookings(bookingsData);
       }
     } catch (err) {
@@ -148,35 +157,37 @@ function Customers(props) {
     }
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (!editId) return;
-    const id = editId;
-    props.loader(true);
-    Api("delete", `auth/deleteCustomer/${id}`, "", router)
-      .then((res) => {
-        props.loader(false);
-        if (res?.status === true) {
-          props.toaster({
-            type: "success",
-            message: res?.data?.message || "Customer deleted successfully",
-          });
-          getCustomer();
-          setEditId("");
-          setIsConfirmOpen(false);
-        } else {
-          props.toaster({
-            type: "success",
-            message: res?.data?.message || "Failed to delete Customer",
-          });
-        }
-      })
-      .catch((err) => {
-        props.loader(false);
+
+    try {
+      props.loader(true);
+
+      const res = await dispatch(deleteCustomerById(editId, router));
+
+      if (res?.status === true) {
+        props.toaster({
+          type: "success",
+          message: res?.message || "Customer deleted successfully",
+        });
+
+        getCustomer();
+        setEditId("");
+        setIsConfirmOpen(false);
+      } else {
         props.toaster({
           type: "error",
-          message: err?.data?.message || "An error occurred",
+          message: res?.message || "Failed to delete customer",
         });
+      }
+    } catch (err) {
+      props.toaster({
+        type: "error",
+        message: err?.message || "An error occurred",
       });
+    } finally {
+      props.loader(false);
+    }
   };
 
   return (
@@ -267,8 +278,9 @@ function Customers(props) {
               Add Customer
             </button>
 
-            <button className="border border-slate-200 text-slate-700 text-xs sm:text-sm font-semibold px-3 py-2 sm:px-4 rounded-xl hover:bg-slate-50 transition-colors w-full sm:w-auto"
-            onClick={()=> setOpenCustomer(true)}
+            <button
+              className="border border-slate-200 text-slate-700 text-xs sm:text-sm font-semibold px-3 py-2 sm:px-4 rounded-xl hover:bg-slate-50 transition-colors w-full sm:w-auto"
+              onClick={() => setOpenCustomer(true)}
             >
               Import Customers
             </button>
@@ -388,7 +400,12 @@ function Customers(props) {
                       : "border-transparent text-slate-500 hover:text-slate-700"
                   }`}
                 >
-                  {tab} {tab === "Appointments" ? `(${customerBookings.length})` : tab !== "Summary" ? "(0)" : ""}
+                  {tab}{" "}
+                  {tab === "Appointments"
+                    ? `(${customerBookings.length})`
+                    : tab !== "Summary"
+                      ? "(0)"
+                      : ""}
                 </button>
               ))}
             </div>
@@ -704,7 +721,9 @@ function Customers(props) {
                 {loadingBookings ? (
                   <div className="flex flex-col items-center justify-center py-20">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-custom-blue mb-4"></div>
-                    <p className="text-sm text-slate-600">Loading appointments...</p>
+                    <p className="text-sm text-slate-600">
+                      Loading appointments...
+                    </p>
                   </div>
                 ) : customerBookings.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-20 text-slate-400">
@@ -721,7 +740,9 @@ function Customers(props) {
                         d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                       />
                     </svg>
-                    <p className="text-sm">No appointments found for this customer</p>
+                    <p className="text-sm">
+                      No appointments found for this customer
+                    </p>
                   </div>
                 ) : (
                   <div className="grid gap-4">
@@ -733,21 +754,29 @@ function Customers(props) {
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
-                              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                booking.status === 'Confirmed' ? 'bg-green-100 text-green-700' :
-                                booking.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
-                                booking.status === 'Completed' ? 'bg-blue-100 text-blue-700' :
-                                'bg-red-100 text-red-700'
-                              }`}>
+                              <span
+                                className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                  booking.status === "Confirmed"
+                                    ? "bg-green-100 text-green-700"
+                                    : booking.status === "Pending"
+                                      ? "bg-yellow-100 text-yellow-700"
+                                      : booking.status === "Completed"
+                                        ? "bg-blue-100 text-blue-700"
+                                        : "bg-red-100 text-red-700"
+                                }`}
+                              >
                                 {booking.status}
                               </span>
                               <span className="text-sm font-semibold text-slate-800">
-                                {new Date(booking.date).toLocaleDateString("en-US", {
-                                  weekday: "short",
-                                  day: "2-digit",
-                                  month: "short",
-                                  year: "numeric",
-                                })}
+                                {new Date(booking.date).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    weekday: "short",
+                                    day: "2-digit",
+                                    month: "short",
+                                    year: "numeric",
+                                  },
+                                )}
                               </span>
                             </div>
                             <p className="text-base font-bold text-slate-900 mb-1">
@@ -758,11 +787,14 @@ function Customers(props) {
                                 Staff: {booking.staff?.fullname || "Unassigned"}
                               </span>
                               <span>
-                                Time: {booking.startHour === 12 ? "12:00 PM" : booking.startHour < 12 ? `${booking.startHour}:00 AM` : `${booking.startHour - 12}:00 PM`}
+                                Time:{" "}
+                                {booking.startHour === 12
+                                  ? "12:00 PM"
+                                  : booking.startHour < 12
+                                    ? `${booking.startHour}:00 AM`
+                                    : `${booking.startHour - 12}:00 PM`}
                               </span>
-                              <span>
-                                Duration: {booking.durationMins} mins
-                              </span>
+                              <span>Duration: {booking.durationMins} mins</span>
                             </div>
                           </div>
                           <div className="text-right">
@@ -773,7 +805,9 @@ function Customers(props) {
                         </div>
                         {booking.notes && (
                           <div className="mt-3 pt-3 border-t border-slate-100">
-                            <p className="text-sm text-slate-600">{booking.notes}</p>
+                            <p className="text-sm text-slate-600">
+                              {booking.notes}
+                            </p>
                           </div>
                         )}
                       </div>

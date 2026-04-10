@@ -79,7 +79,6 @@ export const updateClosedDate = (id, payload, router) => async (dispatch) => {
   }
 };
 
-// DELETE
 export const deleteClosedDate = (id, router) => async (dispatch) => {
   try {
     const res = await Api("delete", `closed-date/delete/${id}`, "", router);

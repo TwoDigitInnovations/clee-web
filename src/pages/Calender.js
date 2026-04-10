@@ -158,6 +158,10 @@ function Calender(props) {
     }
   };
 
+
+
+  
+
   const loadBookings = async () => {
     try {
       props.loader(true);

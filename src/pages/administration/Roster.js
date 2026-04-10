@@ -1,204 +1,385 @@
-import React, { useEffect, useState } from "react";
-import { Check, X, ChevronDown, Info } from "lucide-react";
+"use client";
+import React, { useEffect, useState, useRef } from "react";
+import { Check, X, ChevronDown, RefreshCw, Edit2 } from "lucide-react";
 import DashboardHeader from "@/components/DashboardHeader";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchStaff } from "@/redux/actions/staffActions";
+import { useRouter } from "next/navigation";
+import { fetchClosedDates } from "@/redux/actions/ClosedDatesActions";
 
-const StaffRoster = () => {
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
 
-  const days = [
-    { date: "19", day: "THU" },
-    { date: "20", day: "FRI" },
-    { date: "21", day: "SAT" },
-    { date: "22", day: "SUN" },
-    { date: "23", day: "MON" },
-    { date: "24", day: "TUE" },
-    { date: "25", day: "WED" },
-    { date: "26", day: "THU" },
-    { date: "27", day: "FRI" },
-  ];
+const DAYS_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-  const { staff, loading } = useSelector((state) => state.staff);
+const currentYear = new Date().getFullYear();
+const YEARS = Array.from({ length: 5 }, (_, i) => currentYear - 1 + i);
+
+function getDaysInMonth(month, year) {
+  return new Date(year, month + 1, 0).getDate();
+}
+
+function buildCalendarDays(month, year) {
+  const total = getDaysInMonth(month, year);
+  return Array.from({ length: total }, (_, i) => {
+    const d = new Date(year, month, i + 1);
+    return { date: i + 1, day: DAYS_SHORT[d.getDay()] };
+  });
+}
+
+const SHIFT_BG = "bg-custom-blue";
+
+export default function StaffRoster() {
   const dispatch = useDispatch();
+  const { staff: reduxStaff } = useSelector((state) => state.staff);
+  const router = useRouter();
+  const now = new Date();
+  const [selMonth, setSelMonth] = useState(now.getMonth());
+  const [selYear, setSelYear] = useState(now.getFullYear());
+  const [selStaff, setSelStaff] = useState("all");
+  const [rosterData, setRosterData] = useState([]);
+  const [calDays, setCalDays] = useState([]);
+  const scrollRef = useRef(null);
+  const closedDates = useSelector(
+    (state) => state.closedDates?.closedDates || [],
+  );
 
   useEffect(() => {
     dispatch(fetchStaff());
-  }, []);
+    dispatch(fetchClosedDates());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (reduxStaff?.length) {
+      // Attach shifts array sized to current month if missing
+      const days = buildCalendarDays(selMonth, selYear);
+      const seeded = reduxStaff.map((m) => ({
+        ...m,
+        shifts: days.map((d, i) =>
+          d.day === "Sun" ? "off" : (m.shifts?.[i] ?? "10am\n3pm"),
+        ),
+      }));
+      setRosterData(seeded);
+      setCalDays(days);
+    }
+  }, [reduxStaff, selMonth, selYear]);
+
+  const handleGo = () => {
+    const days = buildCalendarDays(selMonth, selYear);
+    setCalDays(days);
+    setRosterData((prev) =>
+      prev.map((m) => ({
+        ...m,
+        shifts: days.map((d, i) =>
+          d.day === "Sun" ? "off" : (m.shifts?.[i] ?? "10am\n3pm"),
+        ),
+      })),
+    );
+  };
+
+  const handleShiftToggle = (mIdx, sIdx) => {
+    setRosterData((prev) => {
+      const updated = prev.map((m, mi) => {
+        if (mi !== mIdx) return m;
+        const newShifts = [...m.shifts];
+        newShifts[sIdx] = newShifts[sIdx] === "off" ? "10am\n3pm" : "off";
+        return { ...m, shifts: newShifts };
+      });
+      return updated;
+    });
+  };
+
+  const displayed =
+    selStaff === "all"
+      ? rosterData
+      : rosterData.filter((m) => m.fullname === selStaff);
+
+  // Scroll arrows
+  const scrollBy = (dir) => {
+    if (scrollRef.current) scrollRef.current.scrollLeft += dir * 200;
+  };
 
   return (
     <>
       <DashboardHeader title="Administration" />
       <div className="min-h-screen bg-[#f8f9fa] pb-20 font-sans">
-        <div className="max-w-7xl mx-auto md:p-6 p-4">
-          <div className="flex justify-between items-start mb-8">
+        <div className="max-w-[1400px] mx-auto md:p-6 p-4">
+          {/* Page title */}
+          <div className="flex justify-between items-start mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-[#1a3a6b]">
+              <h1 className="text-2xl font-bold text-custom-blue">
                 Staff Roster
               </h1>
               <p className="text-gray-500 text-sm mt-1">
-                Manage weekly shifts and personnel availability
+                Manage monthly shifts and personnel availability
               </p>
             </div>
-            <button className="bg-custom-blue text-white px-6 py-2 rounded-md text-sm font-semibold hover:bg-[#0a3d75] transition-all">
+            <button className="bg-custom-blue text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-custom-blue transition-all shadow-sm">
               Save roster
             </button>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8 flex flex-wrap items-end gap-4">
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-custom-blue uppercase tracking-wider">
-                Staff Member
+          {/* ── Filters ── */}
+          <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-5 flex flex-wrap items-end gap-4">
+            {/* Staff */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-custom-blue uppercase tracking-widest">
+                Staff
               </label>
-              <div className="relative min-w-[180px]">
-                <select className="w-full appearance-none bg-gray-50 border-none p-2.5 rounded-lg text-sm text-gray-700 outline-none pr-10">
-                  <option>All Staff</option>
+              <div className="relative">
+                <select
+                  value={selStaff}
+                  onChange={(e) => setSelStaff(e.target.value)}
+                  className="appearance-none bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 pr-9 text-sm text-gray-700 outline-none min-w-[160px] focus:border-indigo-400 transition-colors"
+                >
+                  <option value="all">All Staff</option>
+                  {rosterData.map((m, i) => (
+                    <option key={i} value={m.fullname}>
+                      {m.fullname}
+                    </option>
+                  ))}
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
               </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-custom-blue uppercase tracking-wider">
+
+            {/* Month */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-custom-blue uppercase tracking-widest">
                 Month
               </label>
-              <div className="relative min-w-[140px]">
-                <select className="w-full appearance-none bg-gray-50 border-none p-2.5 rounded-lg text-sm text-gray-700 outline-none pr-10">
-                  <option>March</option>
+              <div className="relative">
+                <select
+                  value={selMonth}
+                  onChange={(e) => setSelMonth(Number(e.target.value))}
+                  className="appearance-none bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 pr-9 text-sm text-gray-700 outline-none min-w-[130px] focus:border-indigo-400 transition-colors"
+                >
+                  {MONTHS.map((m, i) => (
+                    <option key={i} value={i}>
+                      {m}
+                    </option>
+                  ))}
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
               </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-custom-blue uppercase tracking-wider">
+
+            {/* Year */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-custom-blue uppercase tracking-widest">
                 Year
               </label>
-              <div className="relative min-w-[100px]">
-                <select className="w-full appearance-none bg-gray-50 border-none p-2.5 rounded-lg text-sm text-gray-700 outline-none pr-10">
-                  <option>2026</option>
+              <div className="relative">
+                <select
+                  value={selYear}
+                  onChange={(e) => setSelYear(Number(e.target.value))}
+                  className="appearance-none bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 pr-9 text-sm text-gray-700 outline-none min-w-[100px] focus:border-indigo-400 transition-colors"
+                >
+                  {YEARS.map((y) => (
+                    <option key={y} value={y}>
+                      {y}
+                    </option>
+                  ))}
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
               </div>
             </div>
-            <button className="bg-custom-blue text-white px-8 py-2.5 rounded-lg text-sm font-bold">
+
+            <button
+              onClick={handleGo}
+              className="flex items-center gap-2 bg-custom-blue text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-[#3d35a0] transition-all shadow-sm"
+            >
+              <RefreshCw size={14} />
               Go
             </button>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto mb-6">
-            <table className="w-full min-w-[1000px] border-collapse">
-              <thead>
-                <tr className="bg-gray-50/50">
-                  <th className="text-left p-4 text-[11px] font-bold text-blue-900 uppercase border-b border-gray-100 w-48">
-                    Team Member
-                  </th>
-                  {days.map((d, i) => (
-                    <th
-                      key={i}
-                      className="p-4 border-b border-gray-100 text-center"
-                    >
-                      <div className="text-lg font-bold text-blue-900 leading-none">
-                        {d.date}
-                      </div>
-                      <div className="text-[10px] font-bold text-gray-400 mt-1">
-                        {d.day}
-                      </div>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 mb-5 relative">
+            <div ref={scrollRef} className="overflow-x-auto">
+              <table
+                className="border-collapse"
+                style={{ minWidth: "max-content", width: "100%" }}
+              >
+                <thead>
+                  <tr>
+                    <th className="sticky left-0 z-20 bg-[#eef0f5] text-left px-5 py-4 text-lg font-bold text-custom-blue border-b border-gray-200 min-w-[170px]">
+                      {MONTHS[selMonth]} {selYear}
                     </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {staff.map((member, idx) => (
-                  <tr
-                    key={idx}
-                    className="border-b border-gray-50 last:border-none"
-                  >
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${member?.color}`}
-                        >
-                          {member?._id}
+                    {calDays.map((d, i) => (
+                      <th
+                        key={i}
+                        className="px-3 py-2 border-b border-gray-200 text-center bg-[#eef0f5] min-w-[72px]"
+                      >
+                        <div className="text-sm font-bold text-custom-blue">
+                          {d.date}
                         </div>
-                        <span className="text-sm font-semibold text-gray-700">
-                          {member?.name}
-                        </span>
-                      </div>
-                    </td>
-                    {member?.shifts?.map((shift, sIdx) => (
-                      <td key={sIdx} className="p-2 text-center">
-                        {shift === "off" ? (
-                          <div className="flex justify-center">
-                            <X className="text-gray-200 w-4 h-4" />
-                          </div>
-                        ) : (
-                          <div
-                            className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-semibold cursor-pointer transition-all ${sIdx === 2 ? "bg-blue-50 text-blue-700 border border-blue-200" : "bg-gray-100 text-gray-600"}`}
-                          >
-                            {shift}
-                            <Check className="w-3 h-3 text-gray-400" />
-                          </div>
-                        )}
-                      </td>
+                        <div className="text-[10px] font-semibold text-gray-400 mt-0.5">
+                          {d.day}
+                        </div>
+                      </th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+
+                <tbody>
+                  {displayed.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={calDays.length + 1}
+                        className="text-center py-16 text-gray-400 text-sm"
+                      >
+                        No staff data available.
+                      </td>
+                    </tr>
+                  ) : (
+                    displayed.map((member, mIdx) => {
+                      const origIdx = rosterData.findIndex(
+                        (m) => m.fullname === member.fullname,
+                      );
+                      return (
+                        <tr
+                          key={mIdx}
+                          className="border-b border-gray-100 last:border-none"
+                        >
+                          <td className="sticky left-0 z-10 bg-white px-5 py-4 border-r border-gray-100 min-w-[170px]">
+                            <div className="flex items-center gap-2.5 mb-1.5">
+                              <div className="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-700 flex-shrink-0">
+                                {member?.fullname?.charAt(0)?.toUpperCase()}
+                              </div>
+                              <span className="text-sm font-semibold text-gray-800 leading-tight">
+                                {member?.fullname}
+                              </span>
+                            </div>
+                            <button
+                              className="text-xs text-custom-blue hover:underline font-medium pl-9"
+                              onClick={() =>
+                                router.push(
+                                  `/Business/AddStaffs?id=${member._id}`,
+                                )
+                              }
+                            >
+                              Set normal hours
+                            </button>
+                          </td>
+
+                          {member?.shifts?.map((shift, sIdx) => (
+                            <td key={sIdx} className="p-0.5 text-center">
+                              {shift === "off" ? (
+                                <div
+                                  onClick={() =>
+                                    handleShiftToggle(origIdx, sIdx)
+                                  }
+                                  className="flex items-center justify-center h-[72px] cursor-pointer hover:bg-gray-50 rounded transition-colors"
+                                >
+                                  <X
+                                    className="text-gray-400 w-4 h-4"
+                                    strokeWidth={2.5}
+                                  />
+                                </div>
+                              ) : (
+                                <div
+                                  onClick={() =>
+                                    handleShiftToggle(origIdx, sIdx)
+                                  }
+                                  className={`${SHIFT_BG} rounded cursor-pointer h-[72px] flex flex-col items-center justify-center gap-1 px-2 hover:brightness-110 transition-all`}
+                                >
+                                  <span className="text-white text-xs font-semibold leading-tight whitespace-pre-line text-center">
+                                    {shift}
+                                  </span>
+                                  <Check
+                                    className="text-white w-3.5 h-3.5"
+                                    strokeWidth={2.5}
+                                  />
+                                </div>
+                              )}
+                            </td>
+                          ))}
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
 
-          <div className="bg-[#f0f4f8] p-4 rounded-xl mb-8 flex flex-wrap gap-8">
-            <div className="flex items-center gap-2 text-xs font-medium text-blue-900">
-              <div className="w-5 h-5 bg-gray-100 rounded flex items-center justify-center border border-gray-200">
-                <Check size={12} className="text-gray-400" />
-              </div>{" "}
-              Working
-            </div>
-            <div className="flex items-center gap-2 text-xs font-medium text-blue-900">
-              <div className="w-5 h-5 bg-white rounded flex items-center justify-center border border-gray-200">
-                <X size={12} className="text-gray-300" />
-              </div>{" "}
-              Not working
-            </div>
-            <div className="flex items-center gap-2 text-xs font-medium text-blue-900">
-              <div className="w-5 h-5 bg-gray-200 rounded border border-gray-300"></div>{" "}
-              Normal working hours
-            </div>
-            <div className="flex items-center gap-2 text-xs font-medium text-blue-900">
-              <div className="w-5 h-5 bg-blue-50 rounded border border-blue-200"></div>{" "}
-              Modified date
-            </div>
-            <div className="flex items-center gap-2 text-xs font-medium text-blue-900">
-              <div className="w-5 h-5 bg-[#1a3a6b] rounded"></div>
-              <div>
-                <p>Business closed</p>
-                <button className="text-[10px] text-blue-600 font-bold hover:underline">
-                  Edit
-                </button>
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-6 py-5 mb-5">
+            <div className="flex flex-wrap items-center gap-x-8 gap-y-3 mb-3">
+              <span className="text-sm font-bold text-gray-700">Key:</span>
+              <span className="flex items-center gap-1.5 text-sm text-gray-700">
+                <Check className="w-4 h-4 text-gray-700" strokeWidth={2.5} />{" "}
+                Working
+              </span>
+              <span className="flex items-center gap-1.5 text-sm text-gray-700">
+                <X className="w-4 h-4 text-gray-700" strokeWidth={2.5} /> Not
+                working
+              </span>
+              <span className="flex items-center gap-2 text-sm text-gray-700">
+                <span className="w-6 h-5 rounded bg-custom-blue inline-block" />{" "}
+                Normal working hours
+              </span>
+              <span className="flex items-center gap-2 text-sm text-gray-700">
+                <span className="w-6 h-5 rounded bg-amber-400 inline-block" />{" "}
+                Modified date
+              </span>
+              <div className="flex flex-wrap gap-2 items-center">
+                {closedDates.length > 0 ? (
+                  closedDates.map((item, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 border border-red-200 shadow-sm"
+                    >
+                      <span className="w-2 h-2 rounded-full bg-red-500"></span>
+
+                      <span className="text-xs font-medium text-red-700">
+                        {new Date(item.startDate).toLocaleDateString()} -{" "}
+                        {new Date(item.endDate).toLocaleDateString()}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                    <span className="text-sm">Business Closed</span>
+                  </div>
+                )}
               </div>
+
+              <button
+                className="text-sm text-custom-blue font-semibold hover:underline flex items-center gap-1"
+                onClick={() => router.push("/administration/ClosedDates")}
+              >
+                <Edit2 size={16} /> Edit
+              </button>
             </div>
           </div>
 
-          {/* Staffing Insight Box */}
-          <div className="bg-[#eff6ff] rounded-xl border-l-4 border-blue-600 p-8 mb-8">
-            <h3 className="text-blue-900 font-bold text-md mb-2">
+          <div className="bg-[#eff6ff] rounded-xl border-l-4 border-custom-blue px-6 py-5 mb-6">
+            <h3 className="text-custom-blue font-bold text-sm mb-1">
               Staffing Insight:
             </h3>
-            <p className="text-custom-blue/80 text-sm leading-relaxed max-w-4xl">
-              Scheduling efficiency for March is currently at 84%. There is a
-              potential coverage gap on Saturday, March 21st during peak hours
-              (1pm - 4pm). Consider adjusting the afternoon shift for Elena
-              Rossi or Marcus Chen to ensure seamless guest experience.
+            <p className="text-custom-blue/80 text-sm leading-relaxed">
+              Clicking any shift cell toggles between "Off" and "Working"
+              status. Use the filters above to view a specific staff member or
+              navigate to a different month.
             </p>
           </div>
 
-          <div className="flex justify-end">
-            <button className="bg-custom-blue text-white px-8 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#0a3d75]">
-              Save roster
-            </button>
-          </div>
+          
         </div>
       </div>
     </>
   );
-};
-
-export default StaffRoster;
+}

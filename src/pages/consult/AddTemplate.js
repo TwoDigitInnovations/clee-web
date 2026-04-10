@@ -460,7 +460,7 @@ useEffect(()=> {
       templateType: "custom",
     };
 
-    console.log(data);
+    
 
     try {
       const res = await dispatch(saveTemplate(id, data, router));

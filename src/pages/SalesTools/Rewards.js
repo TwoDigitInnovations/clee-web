@@ -202,8 +202,6 @@ function Rewards({ loader, toaster }) {
     }
   };
 
-
-
   useEffect(() => {
     dispatch(fetchServices(router));
   }, []);

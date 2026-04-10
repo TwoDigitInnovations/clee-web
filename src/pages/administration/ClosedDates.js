@@ -11,6 +11,7 @@ import {
 } from "@/redux/actions/ClosedDatesActions";
 import { ConfirmModal } from "@/components/deleteModel";
 import DashboardHeader from "@/components/DashboardHeader";
+import { useRouter } from "next/navigation";
 
 function ClosedDates({ toaster, loader }) {
   const dispatch = useDispatch();
@@ -18,7 +19,7 @@ function ClosedDates({ toaster, loader }) {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(false);
-
+  const router = useRouter();
   const [formData, setFormData] = useState({
     startDate: "",
     endDate: "",
@@ -68,8 +69,8 @@ function ClosedDates({ toaster, loader }) {
         });
         setIsOpen(false);
         setFormData({ startDate: "", endDate: "", description: "" });
-        setSelectedId("")
-        dispatch(fetchClosedDates()); 
+        setSelectedId("");
+        dispatch(fetchClosedDates());
       } else {
         toaster({
           type: "error",
@@ -87,6 +88,7 @@ function ClosedDates({ toaster, loader }) {
   const handleDeleteConfirm = async () => {
     try {
       loader(true);
+      console.log(selectedId);
 
       const res = await dispatch(deleteClosedDate(selectedId, router));
       console.log(res);
@@ -102,12 +104,15 @@ function ClosedDates({ toaster, loader }) {
       } else {
         toaster({ type: "error", message: res.message });
       }
-    } catch {
+    } catch (err) {
       loader(false);
+      console.log(err.message);
+
       toaster({ type: "error", message: "Server error" });
     }
   };
-  const CloseDateCard = ({ item, onEdit, onDelete }) => {
+
+  const CloseDateCard = ({ item, onEdit }) => {
     return (
       <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition flex justify-between items-start">
         <div className="flex gap-3 items-center">
@@ -134,7 +139,10 @@ function ClosedDates({ toaster, loader }) {
           </button>
 
           <button
-            onClick={() => onDelete(item._id)}
+            onClick={() => {
+              setSelectedId(item._id);
+              setOpen(true);
+            }}
             className="p-2 rounded-lg hover:bg-red-50 border border-gray-200 px-3 py-2.5 text-red-600"
           >
             <Trash2 size={16} />
@@ -199,10 +207,6 @@ function ClosedDates({ toaster, loader }) {
                       });
 
                       setIsOpen(true);
-                    }}
-                    onDelete={(id) => {
-                      setSelectedId(id);
-                      setOpen(true);
                     }}
                   />
                 ))}

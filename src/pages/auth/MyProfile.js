@@ -11,6 +11,8 @@ import {
   MdClose,
   MdCameraAlt,
 } from "react-icons/md";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchProfile, updateProfile } from "@/redux/actions/userActions";
 
 function MyProfile(props) {
   const router = useRouter();
@@ -29,34 +31,26 @@ function MyProfile(props) {
   const [previewImage, setPreviewImage] = useState(null);
   const [imageFile, setImageFile] = useState(null);
 
-  const getMyProfile = async () => {
-    props.loader(true);
-    Api("get", "auth/profile", " ", router).then(
-      (res) => {
-        props.loader(false);
-        if (res?.status && res?.data) {
-          const data = res.data;
-          setProfile({
-            fullname: data.fullname || "",
-            email: data.email || "",
-            phone: data.phone || "",
-          });
-          setForm({
-            fullname: data.fullname || "",
-            email: data.email || "",
-            phone: data.phone || "",
-          });
-        }
-      },
-      (err) => {
-        props.loader(false);
-        props.toaster({ type: "error", message: err?.message });
-      },
-    );
-  };
+  const { user } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    getMyProfile();
+    if (user) {
+      setProfile({
+        fullname: user.fullname || "",
+        email: user.email || "",
+        phone: user.phone || "",
+      });
+      setForm({
+        fullname: user.fullname || "",
+        email: user.email || "",
+        phone: user.phone || "",
+      });
+    }
+  }, [user]);
+
+  useEffect(() => {
+    dispatch(fetchProfile(router));
   }, []);
 
   const validate = (data = form) => {
@@ -84,57 +78,54 @@ function MyProfile(props) {
     setPreviewImage(URL.createObjectURL(file));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setSubmitted(true);
     const errs = validate();
+
     setErrors(errs);
     if (Object.keys(errs).length > 0) {
       props.toaster({ type: "error", message: "Please fix the errors below" });
       return;
     }
 
-    props.loader(true);
+    try {
+      props.loader(true);
 
-    const payload = new FormData();
-    payload.append("fullname", form.fullname);
-    payload.append("email", form.email);
-    payload.append("phone", form.phone);
+      const payload = new FormData();
+      payload.append("fullname", form.fullname);
+      payload.append("email", form.email);
+      payload.append("phone", form.phone);
 
-    const data = {
-      fullname: form.fullname,
-      email: form.email,
-      phone: form.email,
-    };
+      if (imageFile) {
+        payload.append("photo", imageFile);
+      }
 
-    Api("post", "auth/updateprofile", data, router).then(
-      (res) => {
-        props.loader(false);
-        if (res?.status) {
-          setProfile({
-            ...form,
-          });
-          setEditMode(false);
-          setSubmitted(false);
-          setImageFile(null);
-          props.toaster({
-            type: "success",
-            message: "Profile updated successfully!",
-          });
-        } else {
-          props.toaster({
-            type: "error",
-            message: res?.message || "Update failed.",
-          });
-        }
-      },
-      (err) => {
-        props.loader(false);
+      const res = await dispatch(updateProfile(payload, router));
+
+      if (res?.status) {
+        setProfile({ ...form });
+        setEditMode(false);
+        setSubmitted(false);
+        setImageFile(null);
+
+        props.toaster({
+          type: "success",
+          message: "Profile updated successfully!",
+        });
+      } else {
         props.toaster({
           type: "error",
-          message: err?.message || "Something went wrong.",
+          message: res?.message || "Update failed.",
         });
-      },
-    );
+      }
+    } catch (err) {
+      props.toaster({
+        type: "error",
+        message: err?.message || "Something went wrong.",
+      });
+    } finally {
+      props.loader(false);
+    }
   };
 
   const handleCancel = () => {
@@ -190,13 +181,19 @@ function MyProfile(props) {
                     background: "linear-gradient(135deg, #0A4D91, #65ADF5)",
                   }}
                 >
-                  <MdPerson className="text-white text-5xl" />
+                  {" "}
+                  {profile?.photo ? (
+                    <img
+                      src={profile.photo}
+                      alt="profile"
+                      className="object-contain"
+                    />
+                  ) : (
+                    <MdPerson className="text-white text-5xl" />
+                  )}
                 </div>
-
-            
               </div>
 
-         
               <div className="mb-6">
                 <h2 className="text-xl font-bold text-slate-800">
                   {profile.fullname || "Your Name"}
