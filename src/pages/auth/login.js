@@ -59,7 +59,7 @@ export default function Login(props) {
     <div className="min-h-screen flex flex-col md:flex-row w-full overflow-hidden">
       <div className="hidden md:block md:w-1/2 relative overflow-hidden">
         <img
-          src="/images/women.png"
+          src="/images/Women.png"
           alt="Signin Image"
           className="min-h-[500px] absolute inset-0 w-full  object-cover object-center"
         />
