@@ -103,7 +103,6 @@ const TABS = [
 ];
 
 const getInitialState = () => ({
-  // Details
   first_name: "",
   last_name: "",
   telephone: "",
@@ -111,7 +110,7 @@ const getInitialState = () => ({
   email: "",
   occupation: "",
   customer_type: "New",
-  // Addresses
+
   physical_address: {
     physical_address: "",
     physical_suburb: "",
@@ -295,6 +294,17 @@ const AddCustomer = ({
       return;
     }
     const data = { ...formData, role: "user" };
+
+    const form = new FormData();
+
+    Object.keys(data).forEach((key) => {
+      form.append(key, data[key]);
+    });
+
+    if (formData.photo) {
+      form.append("photo", formData.photo);
+    }
+
     try {
       loader(true);
       const endpoint = editId
