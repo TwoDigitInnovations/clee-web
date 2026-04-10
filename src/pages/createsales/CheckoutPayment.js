@@ -30,8 +30,22 @@ function CheckoutPayment({
   const [cvc, setCvc] = useState("");
   const [saveCard, setSaveCard] = useState(true);
   const [processing, setProcessing] = useState(false);
+  const [showReviewScreen, setShowReviewScreen] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
 
-  const handlePayment = async (paymentMethod) => {
+  const handlePaymentMethodSelect = (paymentMethod, label) => {
+   
+    if (paymentMethod === 'credit-card') {
+      setShowAddCardModal(true);
+      setSelectedPaymentMethod({ method: paymentMethod, label: label });
+    } else {
+     
+      setSelectedPaymentMethod({ method: paymentMethod, label: label });
+      setShowReviewScreen(true);
+    }
+  };
+
+  const handleCompletePayment = async () => {
     if (processing) return;
 
     try {
@@ -39,7 +53,8 @@ function CheckoutPayment({
 
       const saleData = {
         customer: selectedClient?._id || null,
-        items: selectedProducts?.map((product) => ({
+        items: selectedProducts.map(product => ({
+          itemType: product.type || 'product', // product, service, voucher, credit, package
           product: product.id,
           productName: product.name,
           quantity: product.quantity || 1,
@@ -50,7 +65,7 @@ function CheckoutPayment({
         tax: totalAmount * 0.1,
         discount: 0,
         total: totalAmount * 1.1,
-        paymentMethod: paymentMethod,
+        paymentMethod: selectedPaymentMethod?.method || 'cash'
       };
 
       const response = await dispatch(createSale(saleData, router));
@@ -135,56 +150,142 @@ function CheckoutPayment({
     },
   ];
 
-  return (
-    <>
-      <DashboardHeader title="Checkout Payment" />
-
-      <div className="min-h-screen bg-custom-gray">
-        {/* Tabs */}
-        <div className="bg-white border-b border-gray-200">
-          <div className="flex overflow-x-auto">
-            {tabs?.map((tab) => (
+  // Show Review Screen
+  if (showReviewScreen && selectedPaymentMethod) {
+    return (
+      <>
+        <DashboardHeader title="Review and Complete" />
+        
+        <div className="min-h-screen bg-custom-gray">
+          <div className="max-w-4xl mx-auto p-4 md:p-6">
+            {/* Header with Back Button */}
+            <div className="flex items-center gap-4 mb-6">
               <button
-                key={tab.id}
-                onClick={() => handleTabClick(tab.id)}
-                className={`px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors ${
-                  activeTab === tab.id
-                    ? "text-[#0A4D91] border-b-2 border-[#0A4D91]"
-                    : "text-gray-500 hover:text-gray-700"
-                }`}
+                onClick={() => setShowReviewScreen(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                {tab.label}
+                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
               </button>
-            ))}
-          </div>
-        </div>
+              <h1 className="text-2xl font-bold text-gray-900">Payment</h1>
+            </div>
 
-        <div className="max-w-7xl mx-auto p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Column - Client & Sale Summary */}
-            <div className="lg:col-span-1 space-y-6">
-              {/* Client Info */}
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <h3 className="text-xs font-bold text-[#0A4D91] uppercase mb-4">
-                  Client
-                </h3>
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-[#E2E8F0] rounded-full flex items-center justify-center">
-                    <User size={24} className="text-[#0A4D91]" />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+           
+              <div className="space-y-4">
+              
+                <div className="bg-white rounded-xl shadow-sm p-4">
+                  <h3 className="text-sm font-bold text-[#0A4D91] mb-3">{selectedClient?.fullname || selectedClient?.name || "Walk-in"}</h3>
+                  <p className="text-xs text-gray-500">{selectedClient?.mobile || selectedClient?.phone || ""}</p>
+                </div>
+
+                <div className="bg-white rounded-xl shadow-sm p-4">
+                  <div className="space-y-3">
+                    {selectedProducts.map((product, index) => (
+                      <div key={product.id} className="flex items-start gap-3 pb-3 border-b border-gray-100 last:border-0">
+                        <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center flex-shrink-0">
+                          <span className="text-xs font-bold text-gray-600">{index + 1}</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
+                          <p className="text-xs text-gray-500">Qty: {product.quantity || 1}</p>
+                        </div>
+                        <p className="text-sm font-bold text-gray-900">${product.price.toFixed(2)}</p>
+                      </div>
+                    ))}
                   </div>
-                  <div>
-                    <p className="font-bold text-gray-900">
-                      {selectedClient?.name || "Walk-in"}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {selectedClient?.phone || ""}
-                    </p>
+
+             
+                  <div className="mt-4 pt-4 border-t-2 border-gray-200 space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Total</span>
+                      <span className="font-bold text-gray-900">${totalAmount.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-sm font-medium text-gray-700">{selectedPaymentMethod.label}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-gray-900">${totalAmount.toFixed(2)}</span>
+                        <button
+                          onClick={() => setShowReviewScreen(false)}
+                          className="p-1 hover:bg-gray-100 rounded transition-colors"
+                        >
+                          <X size={16} className="text-gray-400" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="pt-2 border-t border-gray-200">
+                      <p className="text-center text-sm font-bold text-[#0A4D91]">Paid in full</p>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Sale Summary */}
-              <div className="bg-white rounded-xl shadow-sm p-6">
+            
+              <div className="flex flex-col">
+                <div className="bg-white rounded-xl shadow-sm p-6 md:p-8 flex-1 flex flex-col items-center justify-center text-center">
+                  <h2 className="text-2xl md:text-3xl font-light text-gray-800 mb-8 italic">Review and complete</h2>
+                  
+                  <button
+                    onClick={handleCompletePayment}
+                    disabled={processing}
+                    className="w-full max-w-md bg-[#0A4D91] text-white py-4 rounded-xl font-bold text-lg hover:bg-[#083d73] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                  >
+                    {processing ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        Processing...
+                      </span>
+                    ) : (
+                      "Tap to complete"
+                    )}
+                  </button>
+                </div>
+
+                <div className="mt-4 text-center">
+                  <button className="text-sm text-gray-500 hover:text-[#0A4D91] hover:underline flex items-center gap-1 mx-auto">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Sale options
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <DashboardHeader title="Checkout Payment" />
+
+      <div className="max-w-7xl mx-auto p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+         
+          <div className="lg:col-span-1 space-y-6">
+          
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <h3 className="text-xs font-bold text-[#0A4D91] uppercase mb-4">Client</h3>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-[#E2E8F0] rounded-full flex items-center justify-center">
+                  <User size={24} className="text-[#0A4D91]" />
+                </div>
+                <div>
+                  <p className="font-bold text-gray-900">{selectedClient?.name || "Walk-in"}</p>
+                  <p className="text-sm text-gray-500">{selectedClient?.phone || ""}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Sale Summary */}
+            <div className="bg-white rounded-xl shadow-sm p-6">
                 <h3 className="text-xs font-bold text-[#0A4D91] uppercase mb-4">
                   Sale Summary
                 </h3>
@@ -229,14 +330,35 @@ function CheckoutPayment({
                   </div>
                 </div>
               </div>
+          </div>
+
+          {/* Right Column - Payment Methods */}
+          <div className="lg:col-span-2 space-y-6">
+          
+            <div className=" p-6 text-center">
+              <p className="text-xs font-bold text-[#0A4D91] uppercase mb-2">Amount to Pay</p>
+              <p className="text-5xl font-bold text-[#0A4D91] mb-2">
+                ${(totalAmount * 1.1).toFixed(2)}
+              </p>
+              <button className="text-sm text-[#0A4D91] hover:underline">
+                Edit to make partial payment
+              </button>
             </div>
 
-            {/* Right Column - Payment Methods */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Amount to Pay */}
-              <div className=" p-6 text-center">
-                <p className="text-xs font-bold text-[#0A4D91] uppercase mb-2">
-                  Amount to Pay
+            {/* Payment Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div 
+                onClick={() => handlePaymentMethodSelect('credit-card', 'Credit card')}
+                className="bg-white rounded-xl shadow-sm p-6 border-2 border-gray-200 hover:border-[#0A4D91] transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-12 h-12 bg-[#E2E8F0] rounded-full flex items-center justify-center">
+                    <CreditCard size={24} className="text-[#0A4D91]" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900">Take card payment</h3>
+                </div>
+                <p className="text-sm text-gray-500">
+                  Process via connected terminal terminal_id_G2E
                 </p>
                 <p className="text-5xl font-bold text-[#0A4D91] mb-2">
                   ${(totalAmount * 1.1)?.toFixed(2)}
@@ -246,83 +368,62 @@ function CheckoutPayment({
                 </button>
               </div>
 
-              {/* Payment Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div
-                  onClick={() => handlePayment("credit-card")}
-                  className="bg-white rounded-xl shadow-sm p-6 border-2 border-gray-200 hover:border-[#0A4D91] transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-12 h-12 bg-[#E2E8F0] rounded-full flex items-center justify-center">
-                      <CreditCard size={24} className="text-[#0A4D91]" />
+              <div 
+                onClick={() => handlePaymentMethodSelect('cash', 'Cash')}
+                className="bg-white rounded-xl shadow-sm p-6 border-2 border-gray-200 hover:border-[#0A4D91] transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-12 h-12 bg-[#E2E8F0] rounded-full flex items-center justify-center">
+                    <DollarSign size={24} className="text-[#0A4D91]" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900">Cash</h3>
+                </div>
+                <p className="text-sm text-gray-500">Complete sale with cash payment</p>
+              </div>
+            </div>
+
+            {/* Other Payment Methods */}
+            <div>
+              <h3 className="text-xs font-bold text-[#0A4D91] uppercase mb-4">
+                Other Payment Methods
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {paymentMethods.map((method) => (
+                  <button
+                    key={method.id}
+                    onClick={() => handlePaymentMethodSelect(method.id, method.label)}
+                    disabled={processing}
+                    className="bg-[#E2E8F0] rounded-xl p-6 hover:bg-[#d1dce8] transition-colors text-center disabled:opacity-50"
+                  >
+                    <div className="flex justify-center mb-3 text-[#0A4D91]">
+                      {method.icon}
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900">
-                      Take card payment
+                    <h3 className="text-sm font-bold text-gray-900 mb-1">
+                      {method.label}
                     </h3>
-                  </div>
-                  <p className="text-sm text-gray-500">
-                    Process via connected terminal terminal_id_G2E
-                  </p>
-                </div>
-
-                <div
-                  onClick={() => handlePayment("cash")}
-                  className="bg-white rounded-xl shadow-sm p-6 border-2 border-gray-200 hover:border-[#0A4D91] transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-12 h-12 bg-[#E2E8F0] rounded-full flex items-center justify-center">
-                      <DollarSign size={24} className="text-[#0A4D91]" />
-                    </div>
-                    <h3 className="text-lg font-bold text-gray-900">Cash</h3>
-                  </div>
-                  <p className="text-sm text-gray-500">
-                    Complete sale with cash payment
-                  </p>
-                </div>
+                    <p className="text-xs text-gray-500">{method.subtitle}</p>
+                  </button>
+                ))}
               </div>
+            </div>
 
-              {/* Other Payment Methods */}
-              <div>
-                <h3 className="text-xs font-bold text-[#0A4D91] uppercase mb-4">
-                  Other Payment Methods
-                </h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {paymentMethods?.map((method) => (
-                    <button
-                      key={method.id}
-                      onClick={() => handlePayment(method.id)}
-                      disabled={processing}
-                      className="bg-[#E2E8F0] rounded-xl p-6 hover:bg-[#d1dce8] transition-colors text-center disabled:opacity-50"
-                    >
-                      <div className="flex justify-center mb-3 text-[#0A4D91]">
-                        {method.icon}
-                      </div>
-                      <p className="font-bold text-[#0A4D91] mb-1">
-                        {method.label}
-                      </p>
-                      <p className="text-xs text-gray-600">{method.subtitle}</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Charge to Account */}
-              <div className="text-center">
-                <button
-                  onClick={() => handlePayment("account")}
-                  disabled={processing}
-                  className="text-sm text-gray-500 hover:text-[#0A4D91] hover:underline disabled:opacity-50"
-                >
-                  Charge to account (no payment)
-                </button>
-              </div>
+            {/* Charge to Account */}
+            <div className="text-center">
+              <button 
+                onClick={() => handlePaymentMethodSelect('account', 'Account')}
+                disabled={processing}
+                className="text-sm text-gray-500 hover:text-[#0A4D91] hover:underline disabled:opacity-50"
+              >
+                Charge to account (no payment)
+              </button>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Add Card Modal */}
-        {showAddCardModal && (
-          <>
+      {/* Add Card Modal */}
+      {showAddCardModal && (
+          <div>
             <div
               className="fixed inset-0 bg-black/50 z-50"
               onClick={() => setShowAddCardModal(false)}
@@ -448,7 +549,14 @@ function CheckoutPayment({
                 {/* Save Button */}
                 <button
                   onClick={() => {
+                    // Validate card details
+                    if (!cardNumber || !expiry || !cvc) {
+                      alert('Please fill in all card details');
+                      return;
+                    }
+                    // Close modal and show review screen
                     setShowAddCardModal(false);
+                    setShowReviewScreen(true);
                   }}
                   className="w-full bg-[#0A4D91] text-white py-3 rounded-lg font-bold hover:bg-[#083d73] transition-colors mb-3"
                 >
@@ -457,16 +565,18 @@ function CheckoutPayment({
 
                 {/* Cancel Link */}
                 <button
-                  onClick={() => setShowAddCardModal(false)}
+                  onClick={() => {
+                    setShowAddCardModal(false);
+                    setSelectedPaymentMethod(null);
+                  }}
                   className="w-full text-[#0A4D91] hover:underline font-medium text-sm"
                 >
                   Cancel and return to checkout
                 </button>
               </div>
             </div>
-          </>
+          </div>
         )}
-      </div>
     </>
   );
 }

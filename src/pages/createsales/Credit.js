@@ -38,7 +38,7 @@ function Credit({
   const [variableCreditAmount, setVariableCreditAmount] = useState("0");
 
   useEffect(() => {
-    // No need to load customers here, they're passed as props
+    
   }, []);
 
   const tabs = [
@@ -78,19 +78,20 @@ function Credit({
   };
 
   const handleAddCredit = () => {
-    // Check if credit amount is empty or 0
+    
     const amount = parseFloat(creditAmount);
     if (!creditAmount || creditAmount === "0.00" || amount === 0 || isNaN(amount)) {
       setShowVariablePriceModal(true);
       return;
     }
     
-    // Add credit to selected items
+    
     const creditItem = {
       id: Date.now(),
       name: `Credit ${reason ? `- ${reason}` : ""}`,
       amount: creditAmount,
       price: parseFloat(creditAmount),
+      type: 'credit',
       expiryDate: expiryDate,
     };
     setSelectedItems([...selectedItems, creditItem]);
@@ -135,7 +136,7 @@ function Credit({
             </div>
           </div>
 
-          {/* Add Credit Card */}
+       
           <div className="max-w-2xl mx-auto">
             <div className="bg-white rounded-xl shadow-sm p-6 md:p-8">
               <div className="mb-6">
@@ -143,7 +144,7 @@ function Credit({
                 <p className="text-sm text-gray-500">Assign store credit to the current transaction</p>
               </div>
 
-              {/* Credit Amount Display */}
+             
               <div className="bg-gray-50 rounded-xl p-8 mb-6 text-center">
                 <div className="flex items-center justify-center">
                   <span className="text-5xl md:text-6xl font-bold text-[#0A4D91]">$</span>

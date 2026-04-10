@@ -79,6 +79,7 @@ function Packages({
       id: pkg._id,
       name: pkg.name || "Package",
       price: pkg.price || 0,
+      type: 'package',
     };
     setSelectedItems([...selectedItems, packageItem]);
   };
