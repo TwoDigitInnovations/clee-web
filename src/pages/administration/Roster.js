@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Check, X, ChevronDown, Info } from "lucide-react";
 import DashboardHeader from "@/components/DashboardHeader";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchStaff } from "@/redux/actions/staffActions";
 
 const StaffRoster = () => {
-  // Sample Data matching the image
+
   const days = [
     { date: "19", day: "THU" },
     { date: "20", day: "FRI" },
@@ -16,46 +18,17 @@ const StaffRoster = () => {
     { date: "27", day: "FRI" },
   ];
 
-  const staff = [
-    {
-      id: "ER",
-      name: "Elena Rossi",
-      shifts: [
-        "10am-6pm",
-        "10am-6pm",
-        "10am-3pm",
-        "off",
-        "10am-6pm",
-        "10am-6pm",
-        "10am-6pm",
-        "10am-6pm",
-        "10am-6pm",
-      ],
-      color: "bg-blue-100 text-blue-600",
-    },
-    {
-      id: "MC",
-      name: "Marcus Chen",
-      shifts: [
-        "11am-8pm",
-        "off",
-        "9am-5pm",
-        "9am-5pm",
-        "11am-8pm",
-        "11am-8pm",
-        "11am-8pm",
-        "11am-8pm",
-        "off",
-      ],
-      color: "bg-indigo-100 text-indigo-600",
-    },
-  ];
+  const { staff, loading } = useSelector((state) => state.staff);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchStaff());
+  }, []);
 
   return (
     <>
       <DashboardHeader title="Administration" />
       <div className="min-h-screen bg-[#f8f9fa] pb-20 font-sans">
-        
         <div className="max-w-7xl mx-auto md:p-6 p-4">
           <div className="flex justify-between items-start mb-8">
             <div>
@@ -141,16 +114,16 @@ const StaffRoster = () => {
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${member.color}`}
+                          className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${member?.color}`}
                         >
-                          {member.id}
+                          {member?._id}
                         </div>
                         <span className="text-sm font-semibold text-gray-700">
-                          {member.name}
+                          {member?.name}
                         </span>
                       </div>
                     </td>
-                    {member.shifts.map((shift, sIdx) => (
+                    {member?.shifts?.map((shift, sIdx) => (
                       <td key={sIdx} className="p-2 text-center">
                         {shift === "off" ? (
                           <div className="flex justify-center">

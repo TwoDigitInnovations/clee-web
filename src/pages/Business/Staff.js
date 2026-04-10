@@ -5,28 +5,21 @@ import { Plus, Trash2, Search, UserPlus, CreditCard } from "lucide-react";
 import { ConfirmModal } from "@/components/deleteModel";
 import { Api } from "@/services/service";
 import PriceTierModal from "@/components/Pricetier";
+import { useDispatch, useSelector } from "react-redux";
+import { deleteStaff, fetchStaff } from "@/redux/actions/staffActions";
 
 function Staff(props) {
-  const [staffList, setStaffList] = useState([]);
   const [tiers, setTiers] = useState([{ name: "", assignedStaffIds: [] }]);
   const [id, setId] = useState(null);
   const [open, setOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
+  const { staff, loading } = useSelector((state) => state.staff);
+  const dispatch = useDispatch();
 
-  const fetchStaff = async () => {
-    try {
-      props.loader(true);
-      const res = await Api("get", `Staff/getAll`, "", router);
-      props.loader(false);
-      if (res?.status === true && res.data.data.length > 0) {
-        setStaffList(res.data.data);
-      }
-    } catch (err) {
-      props.loader(false);
-      props.toaster({ type: "error", message: "Failed to fetch Staff" });
-    }
-  };
+  useEffect(() => {
+    dispatch(fetchStaff());
+  }, []);
 
   const fetchPriceTiers = async () => {
     try {
@@ -50,7 +43,6 @@ function Staff(props) {
   };
 
   useEffect(() => {
-    fetchStaff();
     fetchPriceTiers();
   }, []);
 
@@ -70,16 +62,24 @@ function Staff(props) {
     }
   };
 
-  const handleDeleteConfirm = () => {
-    props.loader(true);
-    Api("delete", `Staff/delete/${id}`, "", router).then((res) => {
+  const handleDeleteConfirm = async () => {
+    try {
+      props.loader(true);
+
+      const res = await dispatch(deleteStaff(id, router));
+
       props.loader(false);
-      if (res?.status === true) {
-        props.toaster({ type: "success", message: "Staff deleted" });
-        fetchStaff();
+
+      if (res?.success) {
+        props.toaster("success", "Staff deleted successfully");
         setOpen(false);
+      } else {
+        props.toaster("error", res.message);
       }
-    });
+    } catch {
+      props.loader(false);
+      props.toaster("error", "Server error");
+    }
   };
 
   return (
@@ -130,7 +130,7 @@ function Staff(props) {
           <div className="flex items-center gap-6 text-sm font-medium">
             <div className="flex items-center gap-2 text-slate-700">
               <span className="w-2 h-2 rounded-full bg-blue-600"></span> Total
-              Staff: {staffList.length}
+              Staff: {staff.length}
             </div>
             <div className="flex items-center gap-2 text-slate-700">
               <span className="w-2 h-2 rounded-full bg-red-500"></span> On
@@ -140,7 +140,7 @@ function Staff(props) {
         </div>
 
         <div className="space-y-4">
-          {staffList.map((item) => (
+          {staff.map((item) => (
             <div
               key={item.id}
               className="bg-white rounded-xl p-4 flex flex-col gap-4 border border-gray-100 shadow-sm hover:shadow-md transition"
@@ -253,7 +253,7 @@ function Staff(props) {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={handlePriceTierSave}
-        allStaff={staffList}
+        allStaff={staff}
         tiers={tiers}
         setTiers={setTiers}
       />

@@ -6,24 +6,10 @@ import { useSearchParams } from "next/navigation";
 import { Api } from "@/services/service";
 import { Globe, Eye, Lock } from "lucide-react";
 import { Camera, Plus, ChevronDown, Upload } from "lucide-react";
-const DUMMY_SERVICES = [
-  { _id: "s1", category: "Hair", name: "Haircut" },
-  { _id: "s2", category: "Hair", name: "Hair Coloring" },
-  { _id: "s3", category: "Hair", name: "Blowout" },
-  { _id: "s4", category: "Hair", name: "Hair Treatment" },
-  { _id: "s5", category: "Skin", name: "Facial" },
-  { _id: "s6", category: "Skin", name: "Microdermabrasion" },
-  { _id: "s7", category: "Skin", name: "Chemical Peel" },
-  { _id: "s8", category: "Nails", name: "Manicure" },
-  { _id: "s9", category: "Nails", name: "Pedicure" },
-  { _id: "s10", category: "Nails", name: "Gel Nails" },
-  { _id: "s11", category: "Massage", name: "Swedish Massage" },
-  { _id: "s12", category: "Massage", name: "Deep Tissue Massage" },
-  { _id: "s13", category: "Waxing", name: "Full Body Wax" },
-  { _id: "s14", category: "Waxing", name: "Eyebrow Wax" },
-  { _id: "s15", category: "Makeup", name: "Bridal Makeup" },
-  { _id: "s16", category: "Makeup", name: "Evening Makeup" },
-];
+import { useDispatch, useSelector } from "react-redux";
+import { fetchStaff } from "@/redux/actions/staffActions";
+import { saveTemplate } from "@/redux/actions/templateActions";
+import { fetchServices } from "@/redux/actions/servicesActions";
 
 function getInitialState() {
   return {
@@ -72,36 +58,18 @@ function validate(formData) {
 export default function AddStaff(props) {
   const [formData, setFormData] = useState(getInitialState());
   const [errors, setErrors] = useState({});
-  const [services, setServices] = useState([]);
-  const [servicesLoading, setServicesLoading] = useState(false);
   const [serviceSearch, setServiceSearch] = useState("");
- 
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
-  // Fetch services list
-  useEffect(() => {
-    const fetchServices = async () => {
-      setServicesLoading(true);
-      try {
-        const res = await Api("get", "services/getAll", "", router);
-        if (res?.status === true && res?.data?.data?.length > 0) {
-          setServices(res.data.data);
-        } else {
-          setServices(DUMMY_SERVICES);
-        }
-      } catch {
-        setServices(DUMMY_SERVICES);
-      } finally {
-        setServicesLoading(false);
-      }
-    };
-    fetchServices();
-   
-  }, []);
+  const { services: services } = useSelector((state) => state.services);
+  const dispatch = useDispatch();
 
- 
+  useEffect(() => {
+    dispatch(fetchServices(router));
+  }, []);
 
   useEffect(() => {
     if (!id) return;
@@ -202,12 +170,15 @@ export default function AddStaff(props) {
 
     try {
       props.loader(true);
-      let res;
-      if (id) {
-        res = await Api("put", `staff/update/${id}`, payload, router);
-      } else {
-        res = await Api("post", "staff/create", payload, router);
-      }
+      // let res;
+      // if (id) {
+      //   res = await Api("put", `staff/update/${id}`, payload, router);
+      // } else {
+      //   res = await Api("post", "staff/create", payload, router);
+      // }
+
+      const res = await dispatch(saveTemplate(id, payload, router));
+
       props.loader(false);
       if (res?.status === true) {
         props.toaster(

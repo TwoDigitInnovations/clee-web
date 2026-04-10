@@ -17,6 +17,7 @@ import DashboardHeader from "@/components/DashboardHeader";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { Api } from "@/services/service";
+import { useDispatch, useSelector } from "react-redux";
 
 function getInitialState() {
   return {
@@ -51,8 +52,6 @@ function validate(formData) {
 
 export default function AddGiftVouchers(props) {
   const [formData, setFormData] = useState(getInitialState());
-  const [errors, setErrors] = useState({});
-  const [services, setServices] = useState([]);
 
   const [selectedTemplate, setSelectedTemplate] = useState("signature");
   const [expiryType, setExpiryType] = useState("after");
@@ -61,17 +60,8 @@ export default function AddGiftVouchers(props) {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
-  useEffect(() => {
-    const fetchServices = async () => {
-      try {
-        const res = await Api("get", "services/getAll", "", router);
-        if (res?.status === true) {
-          setServices(res.data?.data || []);
-        }
-      } catch {}
-    };
-    fetchServices();
-  }, []);
+  const dispatch = useDispatch();
+
 
   useEffect(() => {
     if (!id) return;
@@ -174,13 +164,13 @@ export default function AddGiftVouchers(props) {
             <h1 className="text-xl font-medium">Gift Vouchers</h1>
           </div>
           <div className="flex gap-2">
-            <button 
+            <button
               className="px-4 py-1.5 border border-gray-300 rounded-md text-sm font-medium hover:bg-gray-50 transition-colors"
               onClick={() => router.push("/SalesTools/GiftVouchers")}
             >
               Cancel
             </button>
-            <button 
+            <button
               className="px-5 py-1.5 bg-custom-blue text-white rounded-md text-sm font-medium hover:bg-[#132a4e] transition-colors"
               onClick={handleSubmit}
             >
@@ -396,8 +386,10 @@ export default function AddGiftVouchers(props) {
               <CheckCircle2 size={18} className="text-gray-500" />
               <h2 className="text-sm font-semibold">Gift voucher terms</h2>
             </div>
-            <p className="text-[11px] text-gray-500 mb-4">Set rules for your gift voucher.</p>
-            
+            <p className="text-[11px] text-gray-500 mb-4">
+              Set rules for your gift voucher.
+            </p>
+
             <div className="space-y-3">
               <div className="flex gap-3 items-start">
                 <input
@@ -407,8 +399,12 @@ export default function AddGiftVouchers(props) {
                   className="mt-1 w-4 h-4 text-custom-blue border-gray-300 rounded focus:ring-custom-blue"
                 />
                 <div>
-                  <div className="text-sm font-medium">Allow gift voucher to be redeemed online</div>
-                  <div className="text-[11px] text-gray-500">Clients can use this voucher for online bookings</div>
+                  <div className="text-sm font-medium">
+                    Allow gift voucher to be redeemed online
+                  </div>
+                  <div className="text-[11px] text-gray-500">
+                    Clients can use this voucher for online bookings
+                  </div>
                 </div>
               </div>
 
@@ -421,7 +417,9 @@ export default function AddGiftVouchers(props) {
                 />
                 <div>
                   <div className="text-sm font-medium">Hide price</div>
-                  <div className="text-[11px] text-gray-500">Price will not be visible to clients</div>
+                  <div className="text-[11px] text-gray-500">
+                    Price will not be visible to clients
+                  </div>
                 </div>
               </div>
 
@@ -433,8 +431,12 @@ export default function AddGiftVouchers(props) {
                   className="mt-1 w-4 h-4 text-custom-blue border-gray-300 rounded focus:ring-custom-blue"
                 />
                 <div>
-                  <div className="text-sm font-medium">Allow gift voucher to be voided</div>
-                  <div className="text-[11px] text-gray-500">Staff can void this voucher if needed</div>
+                  <div className="text-sm font-medium">
+                    Allow gift voucher to be voided
+                  </div>
+                  <div className="text-[11px] text-gray-500">
+                    Staff can void this voucher if needed
+                  </div>
                 </div>
               </div>
             </div>
@@ -469,7 +471,8 @@ export default function AddGiftVouchers(props) {
 
             <div className="mt-4 p-3 bg-gray-50 border border-gray-100 rounded-lg">
               <p className="text-[11px] text-gray-500 leading-relaxed italic">
-                Note: Please check with the laws of your country as some prohibit the use of expiry dates
+                Note: Please check with the laws of your country as some
+                prohibit the use of expiry dates
               </p>
             </div>
           </section>
@@ -509,13 +512,13 @@ export default function AddGiftVouchers(props) {
 
           {/* Footer Actions */}
           <div className="flex justify-end gap-2 pt-2">
-            <button 
+            <button
               className="px-4 py-1.5 border border-gray-300 rounded-md text-sm font-medium hover:bg-gray-50 transition-colors"
               onClick={() => router.push("/SalesTools/GiftVouchers")}
             >
               Cancel
             </button>
-            <button 
+            <button
               className="px-5 py-1.5 bg-custom-blue text-white rounded-md text-sm font-medium hover:bg-[#132a4e] transition-colors shadow-lg shadow-blue-900/10"
               onClick={handleSubmit}
             >

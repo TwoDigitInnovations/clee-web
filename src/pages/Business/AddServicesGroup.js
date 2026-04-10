@@ -3,6 +3,8 @@ import { ChevronDown, Info, ChevronRight } from "lucide-react";
 import DashboardHeader from "@/components/DashboardHeader";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Api } from "@/services/service";
+import { fetchServices } from "@/redux/actions/servicesActions";
+import { useDispatch, useSelector } from "react-redux";
 
 const AddServicesGroup = (props) => {
   const [formData, setFormData] = useState({
@@ -20,24 +22,18 @@ const AddServicesGroup = (props) => {
   const [category, setCategory] = useState([]);
   const router = useRouter();
   const [addedServices, setAddedServices] = useState([]);
-  const [services, setServices] = useState([]);
 
-  const fetchServices = async () => {
-    try {
-      props.loader(true);
-      const res = await Api("get", "services/getAll", "", null);
-      props.loader(false);
-      if (res?.status === true && res.data?.data?.length > 0) {
-        setServices(res.data.data);
-      }
-    } catch {
-      props.loader(false);
-      props.toaster("error", "Failed to fetch services");
-    }
-  };
+  const { services: services, loading } = useSelector(
+    (state) => state.services,
+  );
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchServices(router));
+  }, []);
+
   useEffect(() => {
     fetchCategory();
-    fetchServices();
   }, []);
 
   const fetchCategory = async () => {

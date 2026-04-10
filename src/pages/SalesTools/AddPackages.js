@@ -4,6 +4,8 @@ import DashboardHeader from "@/components/DashboardHeader";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { Api, ApiFormData } from "@/services/service";
+import { fetchServices } from "@/redux/actions/servicesActions";
+import { useDispatch, useSelector } from "react-redux";
 
 const TAX_OPTIONS = [
   { label: "Standard (15%)", value: "standard_15" },
@@ -44,7 +46,6 @@ function validate(formData) {
 export default function AddPackages(props) {
   const [formData, setFormData] = useState(getInitialState());
   const [errors, setErrors] = useState({});
-  const [services, setServices] = useState([]);
   const [selectedServiceId, setSelectedServiceId] = useState("");
   const [editModal, setEditModal] = useState(null);
   const fileRef = useRef(null);
@@ -53,16 +54,11 @@ export default function AddPackages(props) {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
+  const { services: services } = useSelector((state) => state.services);
+  const dispatch = useDispatch();
+
   useEffect(() => {
-    const fetchServices = async () => {
-      try {
-        const res = await Api("get", "services/getAll", "", router);
-        if (res?.status === true) {
-          setServices(res.data?.data || []);
-        }
-      } catch {}
-    };
-    fetchServices();
+    dispatch(fetchServices(router));
   }, []);
 
   useEffect(() => {

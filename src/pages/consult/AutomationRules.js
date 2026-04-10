@@ -1,97 +1,48 @@
 import DashboardHeader from "@/components/DashboardHeader";
 import { ConfirmModal } from "@/components/deleteModel";
-import { Api } from "@/services/service";
 import React, { useState, useEffect } from "react";
-import {
-  MoreVertical,
-  Calendar,
-  Palette,
-  Briefcase,
-  Plus,
-  FileText,
-  Edit2,
-  Trash2,
-} from "lucide-react";
+import { MoreVertical, Plus, FileText, Edit2, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import {
+  deleteAutomationRule,
+  fetchAutomationRules,
+} from "@/redux/actions/AutomationRulesActions";
+import { useDispatch, useSelector } from "react-redux";
 
 function AutomationRules(props) {
   const { loader, toaster } = props;
   const [open, setOpen] = useState(false);
-  const [rules, setRules] = useState([]);
+
   const [selectedId, setSelectedId] = useState(null);
   const [activeMenu, setActiveMenu] = useState(null); // Menu toggle ke liye
   const router = useRouter();
-  // Exact dummy data from screenshot
-  const dummyRules = [
-    {
-      _id: 1,
-      title: "First Appointment",
-      description:
-        "Sent to new clients immediately after booking their first session.",
-      status: "ACTIVE",
-      sentCount: 128,
-      icon: <Calendar size={20} className="text-blue-600" />,
-    },
-    {
-      _id: 2,
-      title: "Color Services",
-      description:
-        "Pre-service instruction sent for all Balayage and Highlights.",
-      status: "ACTIVE",
-      sentCount: 45,
-      icon: <Palette size={20} className="text-blue-600" />,
-    },
-    {
-      _id: 3,
-      title: "Treatment Follow-up",
-      description:
-        "Post-care routine sent 24 hours after deep conditioning treatments.",
-      status: "PAUSED",
-      sentCount: 312,
-      icon: <Briefcase size={20} className="text-blue-600" />,
-    },
-  ];
 
-  const getAllAutomationRules = async () => {
-    loader(true);
-    Api("get", "automation/getAll", " ", router).then(
-      (res) => {
-        loader(false);
-        if (res?.status) {
-          setRules(res.data.data);
-        } else {
-          setRules(dummyRules); // Fallback to dummy
-        }
-      },
-      (err) => {
-        loader(false);
-        setRules(dummyRules); // Fallback even on error for UI check
-      },
-    );
-  };
-
-  const handleDeleteConfirm = () => {
-    try {
-      loader(true);
-      Api("delete", `automation/delete/${selectedId}`, "", router).then(
-        (res) => {
-          loader(false);
-          if (res?.status === true) {
-            toaster({ type: "success", message: "Rule deleted successfully" });
-            getAllAutomationRules();
-            setOpen(false);
-          }
-        },
-      );
-    } catch {
-      loader(false);
-      toaster("error", "Server error");
-    }
-  };
+  const { automationRules: rules } = useSelector((state) => state.services);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    getAllAutomationRules();
+    dispatch(fetchAutomationRules(router));
   }, []);
+
+  const handleDeleteConfirm = async () => {
+    try {
+      loader(true);
+
+      const res = await dispatch(deleteAutomationRule(selectedId, router));
+
+      loader(false);
+
+      if (res?.success) {
+        toaster({ type: "success", message: "Rule deleted successfully" });
+        setOpen(false);
+      } else {
+        toaster({ type: "error", message: res.message });
+      }
+    } catch {
+      loader(false);
+      toaster({ type: "error", message: "Server error" });
+    }
+  };
 
   return (
     <>

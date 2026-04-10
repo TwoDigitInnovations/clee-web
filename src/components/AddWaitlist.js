@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 import InputField from "./UI/InputField";
 import SelectField from "./UI/SelectField";
@@ -8,13 +8,13 @@ import TextareaField from "./UI/TextAreaField";
 import { TextAlignStart, User, X } from "lucide-react";
 import { Api } from "@/services/service";
 import { createWaitlist, updateWaitlist } from "@/redux/actions/waitlistActions";
+import { fetchServices } from "@/redux/actions/servicesActions";
 
 const AddWaitlist = ({ onClose, loader, toaster, editId }) => {
   const dispatch = useDispatch();
   const router = useRouter();
   
   const [customers, setCustomers] = useState([]);
-  const [services, setServices] = useState([]);
   const [selectedServices, setSelectedServices] = useState([]);
   
   const [formData, setFormData] = useState({
@@ -26,9 +26,14 @@ const AddWaitlist = ({ onClose, loader, toaster, editId }) => {
     notes: "",
   });
 
+  const { services: services, loading } = useSelector((state) => state.services);
+  
+  useEffect(() => {
+    dispatch(fetchServices(router));
+  }, []);
+
   useEffect(() => {
     fetchCustomers();
-    fetchServices();
     if (editId) {
       fetchWaitlistData();
     }
@@ -42,17 +47,6 @@ const AddWaitlist = ({ onClose, loader, toaster, editId }) => {
       }
     } catch (err) {
       console.error("Error fetching customers:", err);
-    }
-  };
-
-  const fetchServices = async () => {
-    try {
-      const res = await Api("get", "services/getAll", "", router);
-      if (res?.status && res.data?.data) {
-        setServices(res.data.data);
-      }
-    } catch (err) {
-      console.error("Error fetching services:", err);
     }
   };
 

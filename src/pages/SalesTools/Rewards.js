@@ -16,6 +16,8 @@ import {
 import ProductPointsModal from "@/components/ProductPointsModal";
 import ServicesPointsModal from "@/components/ServicesPointsModal";
 import { useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchServices } from "@/redux/actions/servicesActions";
 
 // ── helpers ────────────────────────────────────────────────────────────────────
 function Toggle({ checked, onChange }) {
@@ -97,7 +99,6 @@ function Rewards({ loader, toaster }) {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [productEarning, setProductEarning] = useState("all");
   const [serviceEarning, setServiceEarning] = useState("all");
-  const [services, setServices] = useState([]);
   const [open, setOpen] = useState(false);
   const [open1, setOpen1] = useState(false);
   const [allProducts, setAllProducts] = useState([]);
@@ -160,7 +161,6 @@ function Rewards({ loader, toaster }) {
         applyExisting: editData.applyExisting,
         showToCustomers: editData.showToCustomers,
       });
-
     }
   });
 
@@ -197,18 +197,12 @@ function Rewards({ loader, toaster }) {
     }
   };
 
-  const fetchServices = async () => {
-    try {
-      loader(true);
-      const res = await Api("get", "services/getAll", "", null);
-      loader(false);
-      if (res?.status === true) {
-        setServices(res.data.data || []);
-      }
-    } catch {
-      loader(false);
-    }
-  };
+  const { services: services } = useSelector((state) => state.services);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchServices(router));
+  }, []);
 
   const fetchRewards = async () => {
     try {
@@ -237,12 +231,9 @@ function Rewards({ loader, toaster }) {
   };
 
   useEffect(() => {
-    fetchServices();
     fetchProducts();
     fetchRewards();
   }, []);
-
-  console.log(allProducts);
 
   return (
     <div className="bg-[#f8f9fa] min-h-screen pb-24">

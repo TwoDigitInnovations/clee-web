@@ -7,7 +7,7 @@ import {
   removeService,
 } from "../slices/servicesSlice";
 
-// GET ALL
+
 export const fetchServices = (router) => async (dispatch) => {
   try {
     dispatch(setLoading(true));
@@ -30,7 +30,7 @@ export const fetchServices = (router) => async (dispatch) => {
   }
 };
 
-// GET BY ID
+
 export const fetchServiceById = (id, router) => async () => {
   try {
     const res = await Api("get", `services/${id}`, "", router);
@@ -40,7 +40,7 @@ export const fetchServiceById = (id, router) => async () => {
   }
 };
 
-// CREATE
+
 export const createService = (payload, router) => async (dispatch) => {
   try {
     const res = await Api("post", "services/create", payload, router);
@@ -56,7 +56,7 @@ export const createService = (payload, router) => async (dispatch) => {
   }
 };
 
-// UPDATE
+
 export const updateService = (id, payload, router) => async (dispatch) => {
   try {
     const res = await Api("put", `services/update/${id}`, payload, router);
@@ -72,7 +72,6 @@ export const updateService = (id, payload, router) => async (dispatch) => {
   }
 };
 
-// DELETE
 export const deleteService = (id, router) => async (dispatch) => {
   try {
     const res = await Api("delete", `services/delete/${id}`, "", router);

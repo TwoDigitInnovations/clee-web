@@ -4,6 +4,8 @@ import DashboardHeader from "@/components/DashboardHeader";
 import { Api } from "@/services/service";
 import { useRouter, useSearchParams } from "next/navigation";
 import PriceTierModal from "@/components/Pricetier";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchStaff } from "@/redux/actions/staffActions";
 
 const SERVICE_COLORS = [
   "#e53e3e",
@@ -109,6 +111,7 @@ export default function AddServices({ loader, toaster }) {
 
   const [categories, setCategories] = useState([]);
   const [tiers, setTiers] = useState([]);
+  const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState({
     serviceName: "",
@@ -133,7 +136,7 @@ export default function AddServices({ loader, toaster }) {
     paymentPolicy: "default",
     onlinePayment: "default",
   });
-  const [staffList, setStaffList] = useState([]);
+
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
@@ -145,19 +148,12 @@ export default function AddServices({ loader, toaster }) {
   const setCheck = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.checked }));
 
-  const fetchStaff = async () => {
-    try {
-      loader(true);
-      const res = await Api("get", `Staff/getAll`, "", router);
-      loader(false);
-      if (res?.status === true && res.data.data.length > 0) {
-        setStaffList(res.data.data);
-      }
-    } catch (err) {
-      loader(false);
-      toaster({ type: "error", message: "Failed to fetch Staff" });
-    }
-  };
+  const { staff, loading } = useSelector((state) => state.staff);
+
+  useEffect(() => {
+    dispatch(fetchStaff());
+  }, []);
+
   useEffect(() => {
     if (!id) return;
 
@@ -243,6 +239,7 @@ export default function AddServices({ loader, toaster }) {
       toaster({ type: "error", message: "Failed to fetch Price Tiers" });
     }
   };
+
   useEffect(() => {
     const fetch = async () => {
       try {
@@ -256,7 +253,6 @@ export default function AddServices({ loader, toaster }) {
     };
     fetch();
     fetchPriceTiers();
-    fetchStaff();
   }, []);
 
   const handleStaffToggle = (id) => {
@@ -264,9 +260,9 @@ export default function AddServices({ loader, toaster }) {
       const updated = { ...prev.selectedStaff, [id]: !prev.selectedStaff[id] };
       if (id === "all") {
         const val = !prev.selectedStaff["all"];
-        staffList.forEach((s) => (updated[s.id] = val));
+        staff.forEach((s) => (updated[s.id] = val));
       } else {
-        const allChecked = staffList
+        const allChecked = staff
           .filter((s) => s.id !== "all")
           .every((s) => updated[s.id]);
         updated["all"] = allChecked;
@@ -293,6 +289,7 @@ export default function AddServices({ loader, toaster }) {
       toaster({ type: "error", message: "Failed to save price tier" });
     }
   };
+
   const handleSubmit = async (e) => {
     e?.preventDefault();
 
@@ -721,7 +718,7 @@ export default function AddServices({ loader, toaster }) {
               }}
               right={
                 <div className="flex flex-col gap-1.5">
-                  {staffList.map((s, key) => (
+                  {staff.map((s, key) => (
                     <Checkbox
                       key={key}
                       checked={!!form.selectedStaff[s._id]}
@@ -876,7 +873,7 @@ export default function AddServices({ loader, toaster }) {
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
             onSave={handlePriceTierSave}
-            allStaff={staffList}
+            allStaff={staff}
             tiers={tiers}
             setTiers={setTiers}
           />

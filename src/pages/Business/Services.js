@@ -13,6 +13,8 @@ import { Api } from "@/services/service";
 import DashboardHeader from "@/components/DashboardHeader";
 import { useRouter } from "next/navigation";
 import { ConfirmModal } from "@/components/deleteModel";
+import { useDispatch, useSelector } from "react-redux";
+import { deleteService, fetchServices } from "@/redux/actions/servicesActions";
 
 function AddCategoryModal({
   isOpen,
@@ -149,12 +151,11 @@ function AddCategoryModal({
 
 export default function Services(props) {
   const [categories, setCategories] = useState([]);
-  const [services, setServices] = useState([]);
   const [activeCategory, setActiveCategory] = useState(null);
   const [loading, setLoading] = useState(false);
   const [addCategoryOpen, setAddCategoryOpen] = useState(false);
   const [open, setOpen] = useState(false);
-  const [serviceToDelete, setServiceToDelete] = useState('');
+  const [serviceToDelete, setServiceToDelete] = useState("");
   const router = useRouter();
 
   const fetchCategories = async () => {
@@ -177,21 +178,15 @@ export default function Services(props) {
     }
   }, [categories]);
 
-  const fetchServices = async () => {
-    try {
-      setLoading(true);
-      const res = await Api("get", "services/getAll", "", null);
-      setLoading(false);
-      if (res?.status === true && res.data?.data?.length > 0) {
-        setServices(res.data.data);
-      }
-    } catch {
-      setLoading(false);
-    }
-  };
+  const { services: services } = useSelector((state) => state.services);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchServices(router));
+  }, []);
+
   useEffect(() => {
     fetchCategories();
-    fetchServices();
   }, []);
 
   const handleCategorySave = (newCat) => {
@@ -199,21 +194,24 @@ export default function Services(props) {
     setCategories((prev) => [...prev, newEntry]);
   };
 
-  const handleDeleteService = (id) => {
-    if (!serviceToDelete) return;
-    props.loader(true);
-     id = serviceToDelete;
-    Api("delete", `services/delete/${id}`, "", router)
-      .then((res) => {
-        props.loader(false);
-        if (res?.status === true) {
-          props.toaster({ type: "success", message: "Deleted successfully" });
-          setOpen(false);
-          setServices((prev) => prev.filter((s) => s.id !== id));
-          fetchServices();
-        }
-      })
-      .catch(() => props.loader(false));
+  const handleDeleteService = async () => {
+    try {
+      loader(true);
+
+      const res = await dispatch(deleteService(serviceToDelete, router));
+
+      loader(false);
+
+      if (res?.success) {
+        toaster("success", "Services deleted successfully");
+        setOpen(false);
+      } else {
+        toaster("error", res.message);
+      }
+    } catch {
+      loader(false);
+      toaster("error", "Server error");
+    }
   };
 
   const filteredServices = services.filter(
