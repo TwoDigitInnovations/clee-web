@@ -108,14 +108,14 @@ function Services({
   };
 
   const openServiceDetail = (service) => {
-    // Add service to cart
+    // Add service to cart with type field
     const existing = selectedItems.find(s => s.id === service.id);
     if (existing) {
       setSelectedItems(selectedItems.map(s => 
         s.id === service.id ? { ...s, quantity: (s.quantity || 1) + 1 } : s
       ));
     } else {
-      setSelectedItems([...selectedItems, { ...service, quantity: 1 }]);
+      setSelectedItems([...selectedItems, { ...service, type: 'service', quantity: 1 }]);
     }
   };
 

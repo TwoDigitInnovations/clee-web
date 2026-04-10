@@ -17,7 +17,7 @@ function CreateSale() {
   const { products: productsList } = useSelector((state) => state.product);
   
   const [activeTab, setActiveTab] = useState("products");
-  const [selectedItems, setSelectedItems] = useState([]); // Shared cart for all tabs
+  const [selectedItems, setSelectedItems] = useState([]); 
   const [selectedClient, setSelectedClient] = useState(null);
   const [showMobileCart, setShowMobileCart] = useState(false);
   const [selectedProductDetail, setSelectedProductDetail] = useState(null);
@@ -76,7 +76,7 @@ function CreateSale() {
         p.id === item.id ? { ...p, quantity: (p.quantity || 1) + 1 } : p
       ));
     } else {
-      setSelectedItems([...selectedItems, { ...item, quantity: 1 }]);
+      setSelectedItems([...selectedItems, { ...item, type: 'product', quantity: 1 }]);
     }
   };
 
