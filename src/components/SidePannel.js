@@ -158,11 +158,27 @@ function SidePannel({ open, setOpen }) {
               title: "Automation Rules",
               href: "/consult/AutomationRules",
             },
-
           ],
         },
         { title: "Promote", href: "/Promote" },
-        { title: "Administration", href: "/Administration" },
+        {
+          title: "Administration",
+          href: "/Administration",
+          children: [
+            {
+              title: "Administrators",
+              href: "/administration/Administrators",
+            },
+            {
+              title: "Roster",
+              href: "/administration/Roster",
+            },
+            {
+              title: "Closed Dates",
+              href: "/administration/ClosedDates",
+            },
+          ],
+        },
       ],
     },
 

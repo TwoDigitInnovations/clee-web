@@ -23,12 +23,17 @@ import {
   Search,
   X,
   GripVertical,
+  ArrowLeft,
 } from "lucide-react";
 import { Api } from "@/services/service";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import DashboardHeader from "@/components/DashboardHeader";
-import { saveTemplate } from "@/redux/actions/templateActions";
-import { useDispatch } from "react-redux";
+import {
+  fetchTemplateById,
+  saveTemplate,
+} from "@/redux/actions/templateActions";
+import { useDispatch, useSelector } from "react-redux";
+import { FaRightLeft } from "react-icons/fa6";
 
 const STANDARD_ELEMENTS = [
   {
@@ -240,12 +245,6 @@ function ThreeDotMenu({ onEdit, onRemove }) {
 function FormFieldCard({ item, onEdit, onRemove }) {
   return (
     <div className="group flex items-start gap-3 bg-white border border-slate-200 rounded-xl px-4 py-3.5 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-200">
-      {/* <div
-        className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-        style={{ backgroundColor: item.bg }}
-      >
-        <Icon size={15} style={{ color: item.color }} />
-      </div> */}
       <div className="flex-1 min-w-0 py-1 ">
         <p className="text-sm font-semibold text-slate-800 leading-tight">
           {item.label}
@@ -391,6 +390,8 @@ export default function AddTemplate({ loader, toaster }) {
   const [templateName, setTemplateName] = useState("");
   const [editingItem, setEditingItem] = useState(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const id = searchParams.get("id");
 
   const addedClientIds = new Set(
     formItems.filter((i) => i.isClientDetail).map((i) => i.id),
@@ -419,40 +420,67 @@ export default function AddTemplate({ loader, toaster }) {
       prev.map((i) => (i.uid === uid ? { ...i, label, desc } : i)),
     );
   };
+
   const dispatch = useDispatch();
-  
+  const { currentTemplate } = useSelector((state) => state.template);
+
+  useEffect(() => {
+    if (id) {
+      dispatch(fetchTemplateById(id, router));
+    }
+  }, [id]);
+
+
+useEffect(()=> {
+  if(currentTemplate) {
+    setFormItems(currentTemplate.items);
+    setTemplateName(currentTemplate.name);
+  }
+})
+
   const handleSubmit = async () => {
-    // 🔴 Validation
     if (!templateName?.trim()) {
-      toaster("error", "Template name is required");
+      toaster({ type: "error", message: "Template name is required" });
       return;
     }
 
     if (!formItems || formItems.length === 0) {
-      toaster("error", "At least one item is required");
+      toaster({ type: "error", message: "At least one item is required" });
       return;
     }
 
     loader(true);
 
     const data = {
-      items: formItems,
+      items: formItems.map((r) => ({
+        label: r.label,
+        value: r.desc,
+      })),
       name: templateName,
       templateType: "custom",
     };
+
+    console.log(data);
 
     try {
       const res = await dispatch(saveTemplate(id, data, router));
 
       if (res?.success) {
-        toaster("success", res.message);
+        toaster({ type: "success", message: res.message });
         router.push("/consult/Library");
-        setFormData({});
+        // setFormItems({});
       } else {
-        toaster("error", res.message || "Something went wrong");
+        toaster({
+          type: "error",
+          message: res.message || "Something went wrong",
+        });
       }
-    } catch {
-      toaster("error", "Server error");
+    } catch (err) {
+      toaster({
+        type: "error",
+        message: "Server error",
+      });
+      console.log(err);
     } finally {
       loader(false);
     }
@@ -462,27 +490,36 @@ export default function AddTemplate({ loader, toaster }) {
     <>
       <DashboardHeader title="Consult" />
       <div className="min-h-screen bg-custom-gray pb-20">
-        <div className=" px-4 md:px-6 py-4 flex items-center justify-between ">
-          <h1 className="text-xl font-bold text-slate-900 tracking-tight">
-            Client Intake Form
-          </h1>
+        <div className=" px-4 md:px-6 py-4 flex md:flex-row flex-col gap-2 md:items-center justify-between ">
+          <div className="flex flex-col">
+            <p
+              className="text-xs flex gap-1 cursor-pointer items-center underline mb-1 text-black"
+              onClick={() => router.push("/consult/Library")}
+            >
+              {" "}
+              <ArrowLeft size={16} /> Back{" "}
+            </p>
+            <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+              Client Intake Form
+            </h1>
+          </div>
           <div className="flex items-center gap-2">
             <button className="px-4 py-2 border border-slate-300 text-slate-700 text-sm font-semibold rounded-lg hover:bg-slate-50 transition-colors">
               Preview
             </button>
             <button
-              className="px-5 py-2 bg-custom-blue text-white text-sm font-semibold rounded-lg hover:bg-indigo-800 transition-colors shadow-sm"
-              onClick={handleSubmit}
+              className="px-5 py-2 bg-custom-blue text-white text-sm font-semibold rounded-lg hover:bg-custom-blue/90 transition-colors shadow-sm"
+              onClick={() => handleSubmit()}
             >
               Save
             </button>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 py-4 md:py-0 flex gap-6">
-          <div className="flex-1 min-w-0">
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-3 md:p-5">
-              <div className="space-y-4 mb-6">
+        <div className="max-w-7xl mx-auto px-4 py-4 md:py-0 flex gap-6 grid grid-cols-1 md:grid-cols-3">
+          <div className="md:col-span-2 flex-1 min-w-0">
+            <div className="bg-white  rounded-2xl border border-slate-200 shadow-sm p-3 md:p-5">
+              <div className="md:col-span-2 space-y-4 mb-6">
                 <div className="w-full group flex flex-col items-start gap-3 bg-white border border-slate-200 rounded-xl px-4 py-3.5 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-200">
                   <label className="text-sm font-semibold text-slate-800 leading-tight ">
                     Template name
@@ -535,7 +572,7 @@ export default function AddTemplate({ loader, toaster }) {
             </div>
           </div>
 
-          <div className="w-80 flex-shrink-0">
+          <div className="w-full flex-shrink-0">
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden sticky top-24">
               <div className="px-5 pt-5 pb-4 border-b border-slate-100">
                 <h2 className="text-sm font-bold text-slate-800 mb-4">

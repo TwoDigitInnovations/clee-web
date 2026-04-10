@@ -13,6 +13,7 @@ import AutomationRulesReducer from "./slices/AutomationRulesSlice";
 import servicesReducer from "./slices/servicesSlice";
 import vouchersReducer from "./slices/vouchersSlice";
 import packagesReducer from "./slices/packagesSlice";
+import ClosedDatesReducer from "./slices/closedDataSlice";
 
 export const store = configureStore({
   reducer: {
@@ -30,5 +31,6 @@ export const store = configureStore({
     services: servicesReducer,
     vouchers: vouchersReducer,
     packages: packagesReducer,
+    closedDates: ClosedDatesReducer,
   },
 });

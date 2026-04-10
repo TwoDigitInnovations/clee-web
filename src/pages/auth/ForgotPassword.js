@@ -291,7 +291,7 @@ export default function ForgotPassword(props) {
       {/* Left Image Panel */}
       <div className="hidden md:block md:w-1/2 relative overflow-hidden">
         <img
-          src="/images/women.png"
+          src="/images/Women.png"
           alt="Forgot Password"
           className="min-h-[500px] absolute inset-0 w-full object-cover object-center"
         />

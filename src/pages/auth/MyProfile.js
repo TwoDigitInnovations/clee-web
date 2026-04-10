@@ -106,7 +106,7 @@ function MyProfile(props) {
       phone: form.email,
     };
 
-    Api("put", "auth/updateprofile", data, router).then(
+    Api("post", "auth/updateprofile", data, router).then(
       (res) => {
         props.loader(false);
         if (res?.status) {

@@ -10,8 +10,6 @@ const MenuItem = ({ item, router, level = 0,  }) => {
   const isActive = router.pathname === item.href;
 
   
-  console.log(open);
-  
   useEffect(() => {
     if (
       item.children?.some(
