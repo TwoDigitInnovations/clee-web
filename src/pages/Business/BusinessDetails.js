@@ -17,6 +17,8 @@ import { Api } from "@/services/service"; // adjust import as needed
 import InputField from "@/components/UI/InputField";
 import SelectField from "@/components/UI/SelectField";
 import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { updateCustomerById } from "@/redux/actions/userActions";
 const COUNTRIES = [
   "Australia",
   "India",
@@ -138,51 +140,12 @@ function SectionLabel({ title, description }) {
   );
 }
 
-// function InputField({ label, value, onChange, placeholder, type = "text", error }) {
-//   return (
-//     <div className="flex flex-col gap-1 flex-1">
-//       {label && <label className="text-xs font-medium text-slate-600">{label}</label>}
-//       <input
-//         type={type}
-//         value={value}
-//         onChange={onChange}
-//         placeholder={placeholder}
-//         className={`border rounded-md px-3 py-2 text-sm text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-//           error ? "border-red-400" : "border-slate-300"
-//         }`}
-//       />
-//       {error && <p className="text-xs text-red-500">{error}</p>}
-//     </div>
-//   );
-// }
-
-// function SelectField({ label, value, onChange, options, error }) {
-//   return (
-//     <div className="flex flex-col gap-1 flex-1">
-//       {label && <label className="text-xs font-medium text-slate-600">{label}</label>}
-//       <select
-//         value={value}
-//         onChange={onChange}
-//         className={`border rounded-md px-3 py-2 text-sm text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-//           error ? "border-red-400" : "border-slate-300"
-//         }`}
-//       >
-//         {options.map((o) => (
-//           <option key={o} value={o}>
-//             {o}
-//           </option>
-//         ))}
-//       </select>
-//       {error && <p className="text-xs text-red-500">{error}</p>}
-//     </div>
-//   );
-// }
-
 function Divider() {
   return <hr className="border-slate-200 my-1" />;
 }
 
 function BusinessDetails({ loader, toaster }) {
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     businessName: "",
     websiteProtocol: "https://",
@@ -208,6 +171,7 @@ function BusinessDetails({ loader, toaster }) {
   const router = useRouter();
   const [editId, setEditId] = useState("");
   const [showLogoModal, setShowLogoModal] = useState(false);
+
   console.log(formData);
 
   useEffect(() => {
@@ -312,7 +276,7 @@ function BusinessDetails({ loader, toaster }) {
 
       toaster({
         type: "error",
-        message: errorMessages, // 👈 yaha sab errors aa jayenge
+        message: errorMessages,
       });
 
       setErrors(errs);
@@ -355,12 +319,20 @@ function BusinessDetails({ loader, toaster }) {
         },
       };
 
-      const res = await Api(
-        "post",
-        `auth/updateCustomer/${editId}`,
-        payload,
-        router,
-      );
+      const form = new FormData();
+
+      Object.keys(payload).forEach((key) => {
+        form.append(key, payload[key]);
+      });
+
+      if (logo) {
+        form.append("logo", logo);
+      }
+      let res;
+
+      if (editId) {
+        res = await dispatch(updateCustomerById(editId, form, router));
+      }
       loader(false);
       if (res?.status === true) {
         toaster({
@@ -375,6 +347,8 @@ function BusinessDetails({ loader, toaster }) {
       }
     } catch (err) {
       loader(false);
+      console.log(err.message);
+
       toaster({ type: "error", message: "Server error" });
     }
   };

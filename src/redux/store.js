@@ -14,6 +14,7 @@ import servicesReducer from "./slices/servicesSlice";
 import vouchersReducer from "./slices/vouchersSlice";
 import packagesReducer from "./slices/packagesSlice";
 import ClosedDatesReducer from "./slices/closedDataSlice";
+import locationReducer from "./slices/locationSlice";
 
 export const store = configureStore({
   reducer: {
@@ -32,5 +33,6 @@ export const store = configureStore({
     vouchers: vouchersReducer,
     packages: packagesReducer,
     closedDates: ClosedDatesReducer,
+    location:locationReducer
   },
 });

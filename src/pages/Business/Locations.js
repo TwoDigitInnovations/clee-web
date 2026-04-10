@@ -4,6 +4,8 @@ import { useRouter } from "next/router";
 import { Plus, Home, Edit2, Trash2 } from "lucide-react"; // Assuming you use lucide for icons
 import { ConfirmModal } from "@/components/deleteModel";
 import { Api } from "@/services/service";
+import { fetchLocations } from "@/redux/actions/locationActions";
+import { useSelector } from "react-redux";
 
 const dummyLocations = [
   {
@@ -55,23 +57,29 @@ function Locations(props) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
-  const fetchLocations = async () => {
-    try {
-      props.loader(true);
-      const res = await Api("get", `location/getAll`, "", router);
-      props.loader(false);
-      if (res?.status === true) {
-        setLocations(res.data.data || []);
-      }
-    } catch (err) {
-      props.loader(false);
-      props.toaster({ type: "error", message: "Failed to fetch locations" });
-    }
-  };
+  // const fetchLocations = async () => {
+  //   try {
+  //     props.loader(true);
+  //     const res = await Api("get", `location/getAll`, "", router);
+  //     props.loader(false);
+  //     if (res?.status === true) {
+  //       setLocations(res.data.data || []);
+  //     }
+  //   } catch (err) {
+  //     props.loader(false);
+  //     props.toaster({ type: "error", message: "Failed to fetch locations" });
+  //   }
+  // };
 
   useEffect(() => {
     fetchLocations();
   }, []);
+
+  // const  = useSelector((state) => state.location || []);
+
+  useEffect(() => {
+    dispatch(fetchLocations());
+  }, [dispatch]);
 
   const handleDeleteClick = (id) => {
     setId(id);
@@ -82,7 +90,7 @@ function Locations(props) {
     if (!id) return;
 
     props.loader(true);
-    Api("delete", `auth/deleteLocation/${id}`, "", router)
+    Api("delete", `location/delete/${id}`, "", router)
       .then((res) => {
         props.loader(false);
         if (res?.status === true) {
@@ -102,6 +110,7 @@ function Locations(props) {
       })
       .catch((err) => {
         props.loader(false);
+        console.log(err?.data?.message, err?.message);
         props.toaster({
           type: "error",
           message: err?.data?.message || "An error occurred",
@@ -186,17 +195,18 @@ function Locations(props) {
                   </div>
                 </div>
 
-              
                 <div className="flex gap-2 justify-end sm:justify-normal">
                   <button
-                    onClick={() => router.push(`/Business/AddLocation?id=${loc._id}`)}
+                    onClick={() =>
+                      router.push(`/Business/AddLocation?id=${loc._id}`)
+                    }
                     className="bg-[#0b4d92] text-white px-4 sm:px-6 py-2 rounded-md text-xs sm:text-sm font-semibold"
                   >
                     Edit
                   </button>
 
                   <button
-                    onClick={() => handleDeleteClick(loc.id)}
+                    onClick={() => handleDeleteClick(loc._id)}
                     className="p-2 border border-gray-200 rounded-md hover:bg-red-50 transition-colors"
                   >
                     <Trash2 size={18} className="text-red-500" />

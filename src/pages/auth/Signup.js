@@ -4,6 +4,8 @@ import { Api } from "@/services/service";
 import { useRouter } from "next/router";
 import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
 import { useAppDispatch } from "@/redux/hooks";
+import { useDispatch } from "react-redux";
+import { registerUser } from "@/redux/actions/userActions";
 
 export default function Signup(props) {
   const router = useRouter();
@@ -16,40 +18,7 @@ export default function Signup(props) {
     phone: "",
     password: "",
   });
-
-  const validate = () => {
-    const errors = {};
-
-    if (!userDetail.fullName.trim()) {
-      errors.fullName = "Full name is required";
-    } else if (userDetail.fullName.trim().length < 3) {
-      errors.fullName = "Name must be at least 3 characters";
-    }
-
-    if (!userDetail.email.trim()) {
-      errors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userDetail.email)) {
-      errors.email = "Enter a valid email address";
-    }
-
-    if (!userDetail.phone.trim()) {
-      errors.phone = "Phone number is required";
-    } else if (!/^\+?[0-9\s\-()]{7,15}$/.test(userDetail.phone)) {
-      errors.phone = "Enter a valid phone number";
-    }
-
-    if (!userDetail.password) {
-      errors.password = "Password is required";
-    } else if (userDetail.password.length < 8) {
-      errors.password = "Password must be at least 8 characters";
-    } else if (!/[A-Z]/.test(userDetail.password)) {
-      errors.password = "Password must contain at least one uppercase letter";
-    } else if (!/[0-9]/.test(userDetail.password)) {
-      errors.password = "Password must contain at least one number";
-    }
-
-    return errors;
-  };
+  const dispatch = useDispatch();
 
   const [errors, setErrors] = useState({});
 
@@ -99,56 +68,50 @@ export default function Signup(props) {
 
   const submit = async () => {
     setSubmitted(true);
-    const validationErrors = validate();
-    setErrors(validationErrors);
 
-    if (Object.keys(validationErrors).length > 0) {
-      props.toaster({ type: "error", message: "Please fix the errors below" });
-      return;
+
+    const data = {
+      fullname: userDetail.fullName,
+      email: userDetail.email,
+      phone: userDetail.phone,
+      password: userDetail.password,
+      role: "admin",
+    };
+
+    try {
+      props.loader(true);
+
+      const res = await dispatch(registerUser(data, router));
+
+      if (res?.status || res?.success) {
+        setUserDetail({
+          fullName: "",
+          email: "",
+          phone: "",
+          password: "",
+        });
+
+        props.toaster({
+          type: "success",
+          message: "Account created successfully!",
+        });
+
+        router.push("/auth/login");
+      } else {
+        props.toaster({
+          type: "error",
+          message: res?.message || "Registration failed. Try again.",
+        });
+      }
+    } catch (err) {
+      console.log(err);
+      props.toaster({
+        type: "error",
+        message: err?.message || "Something went wrong",
+      });
+    } finally {
+      props.loader(false);
     }
-
-    props.loader(true);
-
-    Api(
-      "post",
-      "auth/register",
-      {
-        fullname: userDetail.fullName,
-        email: userDetail.email,
-        phone: userDetail.phone,
-        password: userDetail.password,
-        role:"admin"
-      },
-      router,
-    ).then(
-      (res) => {
-        props.loader(false);
-
-        if (res?.status) {
-          setUserDetail({
-            fullName: "",
-            email: "",
-            phone: "",
-            password: "",
-          });
-          props.toaster({
-            type: "success",
-            message: "Account created successfully!",
-          });
-          router.push("/auth/login");
-        } else {
-          props.toaster({
-            type: "error",
-            message: "Registration failed. Try again.",
-          });
-        }
-      },
-      (err) => {
-        props.loader(false);
-        console.log(err);
-        props.toaster({ type: "error", message: err?.message });
-      },
-    );
   };
 
   const inputBox = (hasError) => ({

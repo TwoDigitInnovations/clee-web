@@ -64,7 +64,9 @@ export default function AddStaff(props) {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
-  const { services: services,loading } = useSelector((state) => state.services);
+  const { services: services, loading } = useSelector(
+    (state) => state.services,
+  );
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -122,12 +124,6 @@ export default function AddStaff(props) {
     }));
   };
 
-  const setHour = (day, key, value) =>
-    setFormData((prev) => ({
-      ...prev,
-      hours: { ...prev.hours, [day]: { ...prev.hours[day], [key]: value } },
-    }));
-
   const toggleService = (serviceId) => {
     setFormData((prev) => {
       const exists = prev.service_ids.includes(serviceId);
@@ -170,12 +166,6 @@ export default function AddStaff(props) {
 
     try {
       props.loader(true);
-      // let res;
-      // if (id) {
-      //   res = await Api("put", `staff/update/${id}`, payload, router);
-      // } else {
-      //   res = await Api("post", "staff/create", payload, router);
-      // }
 
       const res = await dispatch(saveTemplate(id, payload, router));
 

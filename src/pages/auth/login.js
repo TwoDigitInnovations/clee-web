@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
 import { useAppDispatch } from "@/redux/hooks";
 import { setUser } from "@/redux/slices/userSlice";
+import { loginUser } from "@/redux/actions/userActions";
 
 export default function Login(props) {
   const router = useRouter();
@@ -17,41 +18,42 @@ export default function Login(props) {
   const dispatch = useAppDispatch();
 
   const submit = async () => {
-    if (userDetail.username && userDetail.password) {
+    if (!userDetail.username || !userDetail.password) {
+      setSubmitted(true);
+      props.toaster({ type: "error", message: "Missing credentials" });
+      return;
+    }
+
+    const data = {
+      email: userDetail.username,
+      password: userDetail.password,
+    };
+
+    try {
       props.loader(true);
 
-      Api(
-        "post",
-        "auth/login",
-        { ...userDetail, email: userDetail.username },
-        router,
-      ).then(
-        (res) => {
-          props.loader(false);
+      const res = await dispatch(loginUser(data, router));
 
-          if (res?.status && res?.data?.user?.role === "admin") {
-            localStorage.setItem("token", res.data.token);
-
-            dispatch(setUser(res.data.user));
-
-            setUserDetail({ username: "", password: "" });
-
-            props.toaster({ type: "success", message: "Login Successful" });
-
-            router.push("/");
-          } else {
-            props.toaster({ type: "error", message: "You are not authorized" });
-          }
-        },
-        (err) => {
-          props.loader(false);
-          console.log(err);
-          props.toaster({ type: "error", message: err?.message });
-        },
-      );
-    } else {
-      setSubmitted(true); // ✅ validation show karega
-      props.toaster({ type: "error", message: "Missing credentials" });
+      if (res?.success) {
+        setUserDetail({ username: "", password: "" });
+        props.toaster({
+          type: "success",
+          message: "Login Successful",
+        });
+      } else {
+        props.toaster({
+          type: "error",
+          message: res?.message || "You are not authorized",
+        });
+      }
+    } catch (err) {
+      console.log(err);
+      props.toaster({
+        type: "error",
+        message: err?.message || "Login failed",
+      });
+    } finally {
+      props.loader(false);
     }
   };
 

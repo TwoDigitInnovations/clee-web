@@ -4,6 +4,11 @@ import DashboardHeader from "@/components/DashboardHeader";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { Api } from "@/services/service";
+import { useDispatch } from "react-redux";
+import {
+  createLocation,
+  updateLocation,
+} from "@/redux/actions/locationActions";
 
 const DAYS = [
   "Monday",
@@ -79,7 +84,7 @@ const TIME_OPTIONS = [
 export default function AddLocation(props) {
   const [formData, setFormData] = useState(getInitialState());
   const [errors, setErrors] = useState({});
-
+  const dispatch = useDispatch();
   const router = useRouter();
 
   const searchParams = useSearchParams();
@@ -171,9 +176,11 @@ export default function AddLocation(props) {
       let res;
 
       if (id) {
-        res = await Api("put", `location/update/${id}`, payload, router);
+        res = await dispatch(updateLocation(id, payload, router));
+        // res = await Api("put", `location/update/${id}`, payload, router);
       } else {
-        res = await Api("post", `location/create`, payload, router);
+        res = await dispatch(createLocation(payload, router));
+        // res = await Api("post", `location/create`, payload, router);
       }
 
       props.loader(false);
@@ -210,7 +217,7 @@ export default function AddLocation(props) {
             <span className="text-gray-700">Add location</span>
           </div>
 
-          <div className="flex items-center justify-between mb-5">
+          <div className="flex md:flex-row flex-col gap-2 md:items-center justify-between mb-5">
             <h1 className="text-2xl font-bold text-gray-900">Add location</h1>
             <div className="flex gap-2">
               <button
@@ -247,7 +254,7 @@ export default function AddLocation(props) {
             </div>
 
             <Label>Location type</Label>
-            <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="grid md:grid-cols-2 gap-3 mb-4">
               <TypeCard
                 selected={isFixed}
                 icon={<MapPin size={16} />}
@@ -296,7 +303,7 @@ export default function AddLocation(props) {
           {/* Address Card — only for Fixed */}
           {isFixed && (
             <Card title="Address">
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="grid md:grid-cols-2 gap-4 mb-4">
                 <div>
                   <Label>Street and number</Label>
                   <input

@@ -17,7 +17,10 @@ export const loginUser = (data, router) => async (dispatch) => {
     const res = await Api("post", "auth/login", data, router);
 
     if (res?.status) {
-      dispatch(setUser(res.data));
+      localStorage.setItem("token", res.data.token);
+
+      dispatch(setUser(res.data.user));
+      router.push("/");
       return { success: true };
     } else {
       dispatch(setError(res?.message));
