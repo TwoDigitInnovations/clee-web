@@ -183,15 +183,11 @@ function SidePannel({ open, setOpen }) {
     },
 
     {
-      href: "/Account",
+      href: "/account",
       title: "Account",
       icon: <User size={20} />,
       access: ["admin"],
-      // children: [
-      //   { title: "View Invoices", href: "/messages/inbox" },
-      //   { title: "Create Invoices", href: "/messages/sent" },
-      //   { title: "Search Gift Vouchers", href: "/messages/draft" },
-      // ],
+     
     },
   ];
 
@@ -216,7 +212,6 @@ function SidePannel({ open, setOpen }) {
         dispatch(logoutUser()); // ✅ Redux state clear
         localStorage.removeItem("userDetail"); // optional (agar alag key use ho rahi hai)
         localStorage.removeItem("token");
-
         router.push("/auth/login");
       }
     });
