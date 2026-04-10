@@ -5,7 +5,7 @@ import { Plus, Home, Edit2, Trash2 } from "lucide-react"; // Assuming you use lu
 import { ConfirmModal } from "@/components/deleteModel";
 import { Api } from "@/services/service";
 import { fetchLocations } from "@/redux/actions/locationActions";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 const dummyLocations = [
   {
@@ -56,7 +56,7 @@ function Locations(props) {
   const [id, setId] = useState(null);
   const [open, setOpen] = useState(false);
   const router = useRouter();
-
+  const dispatch = useDispatch();
   // const fetchLocations = async () => {
   //   try {
   //     props.loader(true);
