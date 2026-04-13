@@ -189,19 +189,19 @@ function Salessettings(props) {
     merchantId: "",
     apiKey: "",
   });
- const router = useRouter();
+  const router = useRouter();
   const [taxes, setTaxes] = useState([
     { id: 1, name: "GST", rate: "10", usage: "250 items" },
   ]);
   const [showAddTax, setShowAddTax] = useState(false);
 
   const systemPayments = [
-    "TimelyPay - Terminal",
-    "TimelyPay - Tap to Pay",
+    "CleePay - Terminal",
+    "CleePay - Tap to Pay",
     "On account",
     "Credit card",
     "Cash",
-    "TimelyPay",
+    "CleePay",
   ];
   const [customPayments, setCustomPayments] = useState(["Afterpay", "Laybuy"]);
   const [showAddPayment, setShowAddPayment] = useState(false);

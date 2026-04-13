@@ -17,6 +17,8 @@ export const fetchLocations = (router) => async (dispatch) => {
 
     if (res?.status) {
       dispatch(setLocations(res.data?.data || []));
+      console.log(res.data?.data);
+      
     } else {
       dispatch(setError(res?.message));
     }

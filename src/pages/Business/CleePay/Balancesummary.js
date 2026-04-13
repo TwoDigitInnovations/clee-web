@@ -95,7 +95,7 @@ export default function Balancesummary(props) {
             <CheckCircle className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
             <div>
               <p className="font-bold text-custom-blue text-sm">
-                Timely Pay balance summary has been successfully generated
+                Clee Pay balance summary has been successfully generated
               </p>
               <p className="text-sm text-slate-500 mt-0.5">
                 Your download should complete shortly.

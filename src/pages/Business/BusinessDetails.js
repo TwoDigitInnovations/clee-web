@@ -17,8 +17,8 @@ import { Api } from "@/services/service"; // adjust import as needed
 import InputField from "@/components/UI/InputField";
 import SelectField from "@/components/UI/SelectField";
 import { useRouter } from "next/navigation";
-import { useDispatch } from "react-redux";
-import { updateCustomerById } from "@/redux/actions/userActions";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchProfile, updateCustomerById } from "@/redux/actions/userActions";
 const COUNTRIES = [
   "Australia",
   "India",
@@ -172,64 +172,46 @@ function BusinessDetails({ loader, toaster }) {
   const [editId, setEditId] = useState("");
   const [showLogoModal, setShowLogoModal] = useState(false);
 
-  console.log(formData);
+  const { user } = useSelector((state) => state.user);
 
   useEffect(() => {
-    const fetchCustomer = async () => {
-      try {
-        loader(true);
-        const res = await Api("get", `auth/profile`, "", router);
-        loader(false);
+    if (user) {
+      setEditId(user._id);
+      const fullName = user.fullname || "";
+      const nameParts = fullName.trim().split(" ");
 
-        if (res?.status === true && res?.data) {
-          const user = res.data;
-          setEditId(user._id);
-          const fullName = user.fullname || "";
-          const nameParts = fullName.trim().split(" ");
+      setFormData((prev) => ({
+        ...prev,
 
-          setFormData((prev) => ({
-            ...prev,
+        firstName: nameParts[0] || "",
+        lastName: nameParts.slice(1).join(" ") || "",
+        phoneNumber: user.phone || "",
+        timezone: user.timezone || "",
 
-            firstName: nameParts[0] || "",
-            lastName: nameParts.slice(1).join(" ") || "",
-            phoneNumber: user.phone || "",
-            timezone: user.timezone || "",
+        // business fields
+        businessName: user.business?.name || "",
+        BusinessLogo: user.business?.logo || "",
+        businessCategory: user.business?.category || "",
+        businessDescription: user.business?.description || "",
 
-            // business fields
-            businessName: user.business?.name || "",
-            BusinessLogo: user.business?.logo || "",
-            businessCategory: user.business?.category || "",
-            businessDescription: user.business?.description || "",
+        // website
+        websiteProtocol: user.business?.website?.protocol || "https://",
+        websiteUrl: user.business?.website?.url || "",
 
-            // website
-            websiteProtocol: user.business?.website?.protocol || "https://",
-            websiteUrl: user.business?.website?.url || "",
+        // social
+        twitter: user.business?.socialLinks?.twitter || "",
+        instagram: user.business?.socialLinks?.instagram || "",
+        facebookPage: user.business?.socialLinks?.facebookPage || "",
 
-            // social
-            twitter: user.business?.socialLinks?.twitter || "",
-            instagram: user.business?.socialLinks?.instagram || "",
-            facebookPage: user.business?.socialLinks?.facebookPage || "",
-
-            // settings
-            updateBilling: user.business?.settings?.updateBilling || false,
-            country: user.business?.settings?.country || "",
-            currency: user.business?.settings?.currency || "",
-            dateFormat: user.business?.settings?.dateFormat || "",
-            timeFormat: user.business?.settings?.timeFormat || "",
-          }));
-        } else {
-          toaster({
-            type: "error",
-            message: res?.message || "Failed to load customer",
-          });
-        }
-      } catch {
-        loader(false);
-        toaster({ type: "error", message: "Server error" });
-      }
-    };
-
-    fetchCustomer();
+        // settings
+        updateBilling: user.business?.settings?.updateBilling || false,
+        country: user.business?.settings?.country || "",
+        currency: user.business?.settings?.currency || "",
+        dateFormat: user.business?.settings?.dateFormat || "",
+        timeFormat: user.business?.settings?.timeFormat || "",
+      }));
+    }
+    dispatch(fetchProfile);
   }, []);
 
   const set = (field) => (e) =>

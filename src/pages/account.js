@@ -293,9 +293,7 @@ export default function Account(props) {
       },
     }).then((result) => {
       if (result.isConfirmed) {
-        dispatch(logoutUser()); // ✅ Redux state clear
-        localStorage.removeItem("userDetail"); // optional (agar alag key use ho rahi hai)
-        localStorage.removeItem("token");
+        dispatch(logoutUser());
         router.push("/auth/login");
       }
     });

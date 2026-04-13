@@ -31,7 +31,6 @@ function ImportCustomer({ onClose, loader, toaster }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="w-full max-w-2xl bg-white rounded-lg shadow-lg max-h-[95Vh] overflow-x-auto no-scrollbar">
-        
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b">
           <h2 className="text-lg font-semibold text-gray-800">
@@ -44,7 +43,6 @@ function ImportCustomer({ onClose, loader, toaster }) {
 
         {/* Body */}
         <div className="p-6 space-y-6">
-
           {/* Step 1 */}
           <div>
             <h3 className="font-semibold text-gray-800">
@@ -77,9 +75,7 @@ function ImportCustomer({ onClose, loader, toaster }) {
 
           {/* Step 3 */}
           <div>
-            <h3 className="font-semibold text-gray-800">
-              3. Test the file
-            </h3>
+            <h3 className="font-semibold text-gray-800">3. Test the file</h3>
             <p className="text-sm text-gray-500 mt-1">
               We will review if all data is in the right format, and send the
               test result to your email within 15 minutes.
@@ -94,9 +90,7 @@ function ImportCustomer({ onClose, loader, toaster }) {
 
           {/* Step 4 */}
           <div>
-            <h3 className="font-semibold text-gray-800">
-              4. Complete import
-            </h3>
+            <h3 className="font-semibold text-gray-800">4. Complete import</h3>
             <p className="text-sm text-gray-500 mt-1">
               Once you receive the confirmation email that there is no error,
               complete the import.
@@ -120,7 +114,7 @@ function ImportCustomer({ onClose, loader, toaster }) {
                 Our team is more than happy to help you import your customers
                 from other systems, so if you'd prefer, email us at{" "}
                 <span className="text-indigo-600 underline cursor-pointer">
-                  success@gettimely.com
+                  success@getClee.com
                 </span>{" "}
                 and we'll help you out!!
               </p>

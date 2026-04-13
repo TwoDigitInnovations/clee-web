@@ -523,7 +523,7 @@ function StepWriteMessage({
           <ul className="space-y-2">
             {[
               "Include your business name so your clients know who the SMS is from.",
-              "Placeholders (used in Timely's automated messages) are not supported in SMS campaign messages.",
+              "Placeholders (used in Clee's automated messages) are not supported in SMS campaign messages.",
               "Messages are charged depending on the length of the message.",
             ].map((tip, i) => (
               <li

@@ -89,7 +89,7 @@ function IntegrationMessages() {
                 href="#"
                 className="text-blue-700 ml-1 hover:underline break-all"
               >
-                https://help.gettimely.com/hc/en-gb/requests/new
+                https://help.getClee.com/hc/en-gb/requests/new
               </a>
             </p>
           </div>

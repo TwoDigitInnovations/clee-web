@@ -4,7 +4,10 @@ import { useRouter } from "next/router";
 import { Plus, Home, Edit2, Trash2 } from "lucide-react"; // Assuming you use lucide for icons
 import { ConfirmModal } from "@/components/deleteModel";
 import { Api } from "@/services/service";
-import { fetchLocations } from "@/redux/actions/locationActions";
+import {
+  deleteLocation,
+  fetchLocations,
+} from "@/redux/actions/locationActions";
 import { useDispatch, useSelector } from "react-redux";
 
 const dummyLocations = [
@@ -52,30 +55,12 @@ const dummyLocations = [
   },
 ];
 function Locations(props) {
-  const [locations, setLocations] = useState(dummyLocations);
   const [id, setId] = useState(null);
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const dispatch = useDispatch();
-  // const fetchLocations = async () => {
-  //   try {
-  //     props.loader(true);
-  //     const res = await Api("get", `location/getAll`, "", router);
-  //     props.loader(false);
-  //     if (res?.status === true) {
-  //       setLocations(res.data.data || []);
-  //     }
-  //   } catch (err) {
-  //     props.loader(false);
-  //     props.toaster({ type: "error", message: "Failed to fetch locations" });
-  //   }
-  // };
 
-  useEffect(() => {
-    fetchLocations();
-  }, []);
-
-  // const  = useSelector((state) => state.location || []);
+  const location = useSelector((state) => state.location?.locations || []);
 
   useEffect(() => {
     dispatch(fetchLocations());
@@ -86,48 +71,43 @@ function Locations(props) {
     setOpen(true);
   };
 
-  const handleDeleteConfirm = () => {
-    if (!id) return;
+  const handleDeleteConfirm = async () => {
+    try {
+      loader(true);
 
-    props.loader(true);
-    Api("delete", `location/delete/${id}`, "", router)
-      .then((res) => {
-        props.loader(false);
-        if (res?.status === true) {
-          props.toaster({
-            type: "success",
-            message: res?.data?.message || "Location deleted successfully",
-          });
-          fetchLocations();
-          setId("");
-          setOpen(false);
-        } else {
-          props.toaster({
-            type: "success",
-            message: res?.data?.message || "Failed to delete Location",
-          });
-        }
-      })
-      .catch((err) => {
-        props.loader(false);
-        console.log(err?.data?.message, err?.message);
+      const res = await dispatch(deleteLocation(id, router));
+
+      loader(false);
+
+      if (res?.success) {
         props.toaster({
-          type: "error",
-          message: err?.data?.message || "An error occurred",
+          type: "success",
+          message: res?.data?.message || "Location deleted successfully",
         });
-      });
+
+        setId("");
+        setOpen(false);
+        setOpen(false);
+      } else {
+        toaster("error", res.message);
+      }
+    } catch {
+      loader(false);
+      toaster("error", "Server error");
+    }
   };
 
   return (
     <>
       <DashboardHeader title="Your Business" />
-
-      <div className="min-h-screen bg-[#f8f9fb] text-slate-800 md:px-8 px-3 py-4">
+      <div className="min-h-screen bg-[#f8f9fb] text-slate-800 md:px-6 px-3 py-4">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold text-[#1e4e8c]">Locations</h2>
+          <h2 className="text-xl md:text-2xl font-semibold text-custom-blue">
+            Locations
+          </h2>
           <button
             onClick={() => router.push("/Business/AddLocation")}
-            className="bg-[#0b4d92] text-white px-4 py-3 rounded-md text-sm font-medium hover:bg-[#083a6f] transition-colors"
+            className="bg-custom-blue text-white px-4 py-3 rounded-md text-sm font-medium hover:bg-[#083a6f] transition-colors"
           >
             Add Locations
           </button>
@@ -136,7 +116,7 @@ function Locations(props) {
         <hr className="border-gray-200 mb-4" />
 
         <div className="space-y-4">
-          {locations.length === 0 ? (
+          {location?.length === 0 ? (
             <div className="flex flex-col items-center justify-center min-h-[550px] text-center bg-white border border-gray-100 rounded-lg shadow-sm">
               <div className="bg-gray-100 p-4 rounded-full mb-3">
                 <Home size={40} className="text-gray-400" />
@@ -149,31 +129,27 @@ function Locations(props) {
               </p>
             </div>
           ) : (
-            locations.map((loc) => (
+            location?.map((loc) => (
               <div
-                key={loc.id}
+                key={loc._id}
                 className="flex flex-col sm:flex-row sm:items-center justify-between bg-white p-4 sm:p-5 rounded-lg border border-gray-100 shadow-sm gap-4"
               >
-                {/* LEFT SIDE */}
                 <div className="flex items-start gap-4">
                   <div className="bg-[#f0f4f8] p-3 rounded-md">
-                    <Home size={20} className="text-[#0b4d92]" />
+                    <Home size={20} className="text-custom-blue" />
                   </div>
 
                   <div>
-                    {/* NAME + TYPE */}
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h4 className="font-bold text-[#0b4d92] text-sm">
+                      <h4 className="font-bold text-custom-blue text-sm">
                         {loc.location_name || "Chebo Clinic"}
                       </h4>
 
-                      {/* TYPE BADGE */}
                       <span className="text-[10px] px-2 py-1 rounded-full bg-blue-100 text-blue-600 capitalize">
                         {loc.location_type}
                       </span>
                     </div>
 
-                    {/* MOBILE OR ADDRESS */}
                     {loc.location_type === "mobile" ? (
                       <p className="text-gray-500 text-xs mt-1">
                         📞 {loc.telephone || "No phone number"}
@@ -200,7 +176,7 @@ function Locations(props) {
                     onClick={() =>
                       router.push(`/Business/AddLocation?id=${loc._id}`)
                     }
-                    className="bg-[#0b4d92] text-white px-4 sm:px-6 py-2 rounded-md text-xs sm:text-sm font-semibold"
+                    className="bg-custom-blue text-white px-4 sm:px-6 py-2 rounded-md text-xs sm:text-sm font-semibold"
                   >
                     Edit
                   </button>

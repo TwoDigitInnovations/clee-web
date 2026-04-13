@@ -21,9 +21,10 @@ import { useRouter } from "next/router";
 import { Api, ApiFormData } from "@/services/service";
 import {
   createCustomer,
+  fetchUserById,
   updateCustomerById,
 } from "@/redux/actions/userActions";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 const Toggle = ({ checked, onChange, label }) => (
   <label className="flex items-center gap-2 cursor-pointer select-none">
@@ -196,37 +197,23 @@ const AddCustomer = ({
   const router = useRouter();
   const dispatch = useDispatch();
 
+  const { users: currentUser } = useSelector((state) => state.user);
   console.log(formData);
 
   useEffect(() => {
     if (!editId) return;
-    const fetchCustomer = async () => {
-      try {
-        loader(true);
-        const res = await Api("get", `auth/getUserInfo/${editId}`, "", router);
-        loader(false);
-        if (res?.status === true && res?.data) {
-          const fullName = res.data.data.fullname || "";
-          const nameParts = fullName.trim().split(" ");
+    if (currentUser) {
+      const fullName = currentUser.fullname || "";
+      const nameParts = fullName.trim().split(" ");
 
-          setFormData((prev) => ({
-            ...prev,
-            ...res.data.data,
-            first_name: nameParts[0] || "",
-            last_name: nameParts.slice(1).join(" ") || "",
-          }));
-        } else {
-          toaster({
-            type: "error",
-            message: res?.message || "Failed to load customer",
-          });
-        }
-      } catch {
-        loader(false);
-        toaster({ type: "error", message: "Server error" });
-      }
-    };
-    fetchCustomer();
+      setFormData((prev) => ({
+        ...prev,
+        ...currentUser,
+        first_name: nameParts[0] || "",
+        last_name: nameParts.slice(1).join(" ") || "",
+      }));
+    }
+    dispatch(fetchUserById(editId, router));
   }, [editId]);
 
   const handleChange = (e) => {

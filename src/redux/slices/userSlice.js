@@ -41,6 +41,7 @@ const userSlice = createSlice({
 
       if (typeof window !== "undefined") {
         localStorage.removeItem("userDetail");
+        localStorage.removeItem("token");
       }
     },
 

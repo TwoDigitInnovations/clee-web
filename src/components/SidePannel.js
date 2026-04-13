@@ -160,7 +160,28 @@ function SidePannel({ open, setOpen }) {
             },
           ],
         },
-        { title: "Promote", href: "/Promote" },
+        {
+          title: "Promote",
+          href: "/Promote",
+          children: [
+            {
+              title: "Booking buttons",
+              href: "/Promote/Bookingbuttons",
+            },
+            {
+              title: "Mini website",
+              href: "/Promote/Miniwebsite",
+            },
+            {
+              title: "Social media",
+              href: "/Promote/Socialmedia",
+            },
+            {
+              title: "Analytics tools",
+              href: "/Promote/Analyticstools",
+            },
+          ],
+        },
         {
           title: "Administration",
           href: "/Administration",
@@ -187,7 +208,6 @@ function SidePannel({ open, setOpen }) {
       title: "Account",
       icon: <User size={20} />,
       access: ["admin"],
-     
     },
   ];
 
