@@ -26,17 +26,46 @@ import {
 
 const CHECKLIST_ITEMS = [
   { key: "cover_image", label: "Cover Image", hasModal: true },
-  { key: "home", label: "Home", hasModal: false },
+  {
+    key: "home",
+    label: "Home",
+    hasModal: false,
+    link: "/Business/BusinessDetails",
+  },
   { key: "logo", label: "Logo", hasModal: true },
-  { key: "photo_carousel", label: "Photo carousel", hasModal: false },
-  { key: "about_us", label: "About Us", hasModal: false },
-  { key: "services", label: "Services", hasModal: false },
-  { key: "gift_vouchers", label: "Gift Vouchers", hasModal: false },
-  { key: "locations_hours", label: "Locations / Hours", hasModal: false },
-  { key: "contact_us", label: "Contact Us", hasModal: false },
+  //   { key: "photo_carousel", label: "Photo carousel", hasModal: false },
+  {
+    key: "about_us",
+    label: "About Us",
+    hasModal: false,
+    link: "/Business/Staff",
+  },
+  {
+    key: "services",
+    label: "Services",
+    hasModal: false,
+    link: "/Business/Services",
+  },
+  {
+    key: "gift_vouchers",
+    label: "Gift Vouchers",
+    hasModal: false,
+    link: "/SalesTools/GiftVouchers",
+  },
+  {
+    key: "locations_hours",
+    label: "Locations / Hours",
+    hasModal: false,
+    link: "/Business/Locations",
+  },
+  {
+    key: "contact_us",
+    label: "Contact Us",
+    hasModal: false,
+    link: "/Business/Locations",
+  },
 ];
 
-// ─── Image Upload Modal (Cover Image / Logo) ──────────────────────────────────
 function ImageUploadModal({ title, aspect, onClose, onSave, existing }) {
   const fileRef = useRef(null);
   const [preview, setPreview] = useState(existing || null);
@@ -167,8 +196,7 @@ function ImageUploadModal({ title, aspect, onClose, onSave, existing }) {
   );
 }
 
-// ─── Checklist Row ────────────────────────────────────────────────────────────
-function ChecklistRow({ label, completed, onEdit }) {
+function ChecklistRow({ completed, onEdit, onPush, item }) {
   return (
     <div className="flex items-center justify-between py-3.5 border-b border-slate-100 last:border-none">
       <div className="flex items-center gap-3">
@@ -177,10 +205,16 @@ function ChecklistRow({ label, completed, onEdit }) {
         ) : (
           <XCircle size={18} className="text-red-400   flex-shrink-0" />
         )}
-        <span className="text-sm text-slate-700">{label}</span>
+        <span className="text-sm text-slate-700">{item.label}</span>
       </div>
       <button
-        onClick={onEdit}
+        onClick={() => {
+          if (item.link) {
+            onPush();
+          } else {
+            onEdit();
+          }
+        }}
         className="text-xs font-semibold text-custom-blue hover:underline px-2 py-1 rounded hover:bg-indigo-50 transition-colors"
       >
         Edit
@@ -200,7 +234,7 @@ export default function Miniwebsite() {
   );
 
   // ── Local state ──
-  const [enabled, setEnabled] = useState(true);
+  const [enabled, setEnabled] = useState(false);
   const [contactForm, setContactForm] = useState(false);
   const [completed, setCompleted] = useState({
     cover_image: false,
@@ -217,11 +251,13 @@ export default function Miniwebsite() {
   const [modal, setModal] = useState(null); // "cover_image" | "logo" | null
   const [saving, setSaving] = useState(false);
 
+  const user = useSelector((state) => state.user.user);
+  console.log(user);
+  
   useEffect(() => {
     // dispatch(fetchMiniWebsite(router));
   }, [dispatch]);
 
-  // Sync redux settings if available
   useEffect(() => {
     if (settings) {
       if (settings.enabled !== undefined) setEnabled(settings.enabled);
@@ -232,7 +268,6 @@ export default function Miniwebsite() {
     }
   }, [settings]);
 
-  // ── Handle Edit click per row ──
   const handleEdit = (key) => {
     if (key === "cover_image" || key === "logo") {
       setModal(key);
@@ -241,9 +276,7 @@ export default function Miniwebsite() {
     // else router.push(`/promote/mini-website/edit/${key}`);
   };
 
-  // ── Image save from modal → formData → dispatch ──
   const handleImageSave = async (key, file, preview) => {
-    // Update local preview
     setImages((prev) => ({ ...prev, [key]: preview }));
     setCompleted((prev) => ({ ...prev, [key]: !!preview }));
 
@@ -269,7 +302,7 @@ export default function Miniwebsite() {
     setSaving(false);
   };
 
-  const websiteUrl = "https://salon-atelier.Clee.com";
+  const websiteUrl = `https://salon-atelier.Clee.com`;
 
   return (
     <>
@@ -301,7 +334,6 @@ export default function Miniwebsite() {
               </span>
             </button>
           </div>
-
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm px-5 py-4 flex gap-4">
             <div className="w-9 h-9 rounded-xl bg-[#e8eef8] flex items-center justify-center flex-shrink-0 mt-0.5">
               <Info size={17} className="text-custom-blue" />
@@ -317,99 +349,101 @@ export default function Miniwebsite() {
               </p>
             </div>
           </div>
-
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm px-5 py-4">
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">
-              Your Current Clee Website Address
-            </p>
-            <div className="flex items-center justify-between">
-              <a
-                href={websiteUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-sm text-custom-blue font-semibold hover:underline flex items-center gap-1.5"
-              >
-                {websiteUrl}
-                <ExternalLink size={13} />
-              </a>
-              <button className="flex items-center gap-1.5 text-xs text-custom-blue font-semibold hover:underline px-2 py-1 rounded hover:bg-indigo-50 transition-colors">
-                <Pencil size={12} /> Edit
-              </button>
-            </div>
-          </div>
-
-          {/* ── Website Content Checklist ── */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="px-5 pt-5 pb-3 border-b border-slate-100">
-              <p className="text-sm font-bold text-slate-800">
-                Website Content Checklist
-              </p>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Complete these items to make your website look its best.
-              </p>
-            </div>
-            <div className="px-5">
-              {CHECKLIST_ITEMS.map((item) => (
-                <ChecklistRow
-                  key={item.key}
-                  label={item.label}
-                  completed={completed[item.key]}
-                  onEdit={() => handleEdit(item.key)}
-                />
-              ))}
-            </div>
-
-            {/* Contact form checkbox */}
-            <div className="px-5 py-4 border-t border-slate-100">
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <div
-                  onClick={() => setContactForm((v) => !v)}
-                  className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors
-                    ${contactForm ? "bg-custom-blue border-custom-blue" : "border-slate-300 group-hover:border-custom-blue"}`}
-                >
-                  {contactForm && (
-                    <svg
-                      viewBox="0 0 10 10"
-                      className="w-2.5 h-2.5"
-                      fill="none"
-                    >
-                      <path
-                        d="M1.5 5l2.5 2.5 4.5-4.5"
-                        stroke="white"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  )}
+          {enabled && (
+            <>
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm px-5 py-4">
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">
+                  Your Current Clee Website Address
+                </p>
+                <div className="flex items-center justify-between">
+                  <a
+                    href={websiteUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sm text-custom-blue font-semibold hover:underline flex items-center gap-1.5"
+                  >
+                    {websiteUrl}
+                    <ExternalLink size={13} />
+                  </a>
+                  <button className="flex items-center gap-1.5 text-xs text-custom-blue font-semibold hover:underline px-2 py-1 rounded hover:bg-indigo-50 transition-colors">
+                    <Pencil size={12} /> Edit
+                  </button>
                 </div>
-                <span className="text-sm text-slate-700">
-                  Add a contact form for customer enquiries
-                </span>
-              </label>
-            </div>
-          </div>
+              </div>
 
-          {/* ── Custom domain banner ── */}
-          <div className="bg-[#e8eef8] rounded-2xl border border-[#c5d4ea] px-5 py-4 flex items-center gap-4">
-            <div className="w-9 h-9 rounded-xl bg-custom-blue/10 flex items-center justify-center flex-shrink-0">
-              <Globe size={18} className="text-custom-blue" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-custom-blue">
-                Looking to use your own website domain?
-              </p>
-              <p className="text-xs text-custom-blue/70 mt-0.5 leading-relaxed">
-                Elevate your brand by connecting your personal domain (e.g.,
-                www.your-salon.com) to your mini website.
-              </p>
-            </div>
-            <button className="flex-shrink-0 px-4 py-2 bg-custom-blue text-white text-xs font-bold rounded-xl hover:bg-[#0a3d75] transition-all">
-              Learn More
-            </button>
-          </div>
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div className="px-5 pt-5 pb-3 border-b border-slate-100">
+                  <p className="text-sm font-bold text-slate-800">
+                    Website Content Checklist
+                  </p>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Complete these items to make your website look its best.
+                  </p>
+                </div>
+                <div className="px-5">
+                  {CHECKLIST_ITEMS.map((item) => (
+                    <ChecklistRow
+                      //   key={item.key}
+                      //   label={item.label}
+                      item={item}
+                      completed={completed[item.key]}
+                      onEdit={() => handleEdit(item.key)}
+                      onPush={() => router.push(item.link)}
+                    />
+                  ))}
+                </div>
 
-          {/* ── Footer actions ── */}
+                {/* Contact form checkbox */}
+                <div className="px-5 py-4 border-t border-slate-100">
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <div
+                      onClick={() => setContactForm((v) => !v)}
+                      className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors
+                    ${contactForm ? "bg-custom-blue border-custom-blue" : "border-slate-300 group-hover:border-custom-blue"}`}
+                    >
+                      {contactForm && (
+                        <svg
+                          viewBox="0 0 10 10"
+                          className="w-2.5 h-2.5"
+                          fill="none"
+                        >
+                          <path
+                            d="M1.5 5l2.5 2.5 4.5-4.5"
+                            stroke="white"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      )}
+                    </div>
+                    <span className="text-sm text-slate-700">
+                      Add a contact form for customer enquiries
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="bg-[#e8eef8] rounded-2xl border border-[#c5d4ea] px-5 py-4 flex items-center gap-4">
+                <div className="w-9 h-9 rounded-xl bg-custom-blue/10 flex items-center justify-center flex-shrink-0">
+                  <Globe size={18} className="text-custom-blue" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-custom-blue">
+                    Looking to use your own website domain?
+                  </p>
+                  <p className="text-xs text-custom-blue/70 mt-0.5 leading-relaxed">
+                    Elevate your brand by connecting your personal domain (e.g.,
+                    www.your-salon.com) to your mini website.
+                  </p>
+                </div>
+                <button className="flex-shrink-0 px-4 py-2 bg-custom-blue text-white text-xs font-bold rounded-xl hover:bg-[#0a3d75] transition-all">
+                  Learn More
+                </button>
+              </div>
+            </>
+          )}
+
           <div className="flex justify-end gap-3 pt-2">
             <button
               onClick={() => router.back()}

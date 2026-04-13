@@ -251,7 +251,6 @@ function Reports() {
             </div>
           </section>
 
-          {/* ── Staff Section ── */}
           <section>
             <SectionHeader icon={SECTION_ICONS.Staff} title="Staff" />
             <div className="border-2 border-dashed border-slate-200 rounded-xl py-12 flex flex-col items-center justify-center text-center">
