@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import DashboardHeader from "@/components/DashboardHeader";
 import { useRouter } from "next/router";
-import { Plus, Trash2, Search, UserPlus, CreditCard } from "lucide-react";
+import { Plus, Trash2, Search, UserPlus, CreditCard, User, CircleUserRound } from "lucide-react";
 import { ConfirmModal } from "@/components/deleteModel";
 import { Api } from "@/services/service";
 import PriceTierModal from "@/components/Pricetier";
@@ -222,14 +222,14 @@ function Staff(props) {
           ))}
 
           <div
-            onClick={() => router.push("/Business/AddStaffs")}
+            onClick={() => router.push("/Business/StaffAnalytics")}
             className="border-2 border-dashed border-[#d1dbe5] rounded-2xl p-10 flex flex-col items-center justify-center cursor-pointer hover:bg-blue-50/30 transition-colors"
           >
             <div className="bg-white p-3 rounded-xl shadow-sm mb-4 border border-gray-100">
-              <UserPlus className="text-custom-blue" size={24} />
+              <CircleUserRound className="text-custom-blue" size={24} />
             </div>
-            <h3 className="font-bold text-custom-blue">
-              Add another staff member
+            <h3 className="font-bold text-custom-blue max-w-xs text-center">
+              Analytics for staff achievements/commissions
             </h3>
             <p className="text-gray-500 text-xs mt-1 text-center max-w-xs">
               Expanding your team? Invite new editors, writers, or managers to
