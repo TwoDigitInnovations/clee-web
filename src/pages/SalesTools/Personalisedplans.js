@@ -25,11 +25,9 @@ function Personalisedplans() {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  // States for Modal and Selection
   const [open, setOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
 
-  // Stats Data based on Screenshot
   const stats = [
     {
       title: "Active Custom Plans",
@@ -122,13 +120,16 @@ function Personalisedplans() {
     <div className="bg-[#f8f9fc] min-h-screen font-sans text-slate-700">
       <DashboardHeader title="Sales Tools" />
 
-      <div className="md:p-8 p-4 max-w-7xl mx-auto space-y-8">
+      <div className="md:p-6 p-4 max-w-7xl mx-auto space-y-6">
         {/* Top Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <h1 className="text-2xl font-bold text-[#104e92]">
+          <h1 className="text-xl md:text-2xl font-bold text-custom-blue">
             Custom Personalised Plans
           </h1>
-          <button className="bg-[#104e92] hover:bg-[#0d3d73] text-white px-5 py-2.5 rounded-md flex items-center gap-2 text-sm font-semibold transition-all shadow-md">
+          <button
+            className="bg-custom-blue hover:bg-custom-blue/90 text-white px-5 py-2.5 rounded-md flex items-center gap-2 w-fit text-sm font-semibold transition-all shadow-md"
+            onClick={() => router.push("/SalesTools/AddPersonalisedplans")}
+          >
             <Plus size={18} /> Add New Plan
           </button>
         </div>
@@ -151,7 +152,7 @@ function Personalisedplans() {
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                 {stat.title}
               </p>
-              <h3 className="text-2xl font-bold text-[#104e92]">
+              <h3 className="text-2xl font-bold text-custom-blue">
                 {stat.value}
                 <span className="text-sm text-gray-400 ml-1">{stat.sub}</span>
               </h3>
@@ -163,7 +164,7 @@ function Personalisedplans() {
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h2 className="text-lg font-bold text-[#104e92]">
+              <h2 className="text-lg font-bold text-custom-blue">
                 Active Client Records
               </h2>
               <p className="text-sm text-gray-500">
@@ -201,7 +202,7 @@ function Personalisedplans() {
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-slate-200 flex-shrink-0" />
                         <div>
-                          <p className="text-sm font-bold text-[#104e92]">
+                          <p className="text-sm font-bold text-custom-blue">
                             {row.name}
                           </p>
                           <p className="text-xs text-gray-400">{row.email}</p>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Check, Search } from "lucide-react";
+import { Check, MapPinHouse, Search, Settings } from "lucide-react";
 import DashboardHeader from "@/components/DashboardHeader";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
@@ -20,7 +20,7 @@ function getInitialState() {
     telephone: "",
     staff_type: "fixed",
     employment_status: "contract",
-    employee_type: "self_employed",
+    employee_type: "employee",
     book_online: false,
     profile_booking: false,
     notification: false,
@@ -200,6 +200,35 @@ export default function AddStaff(props) {
     acc[cat].push(svc);
     return acc;
   }, {});
+  const [commissions, setCommissions] = useState([
+    {
+      id: 1,
+      name: "Aether Global",
+      desc: "Enterprise Cloud Solutions",
+      value: 12.5,
+      icon: <Settings size={20} color="black" />,
+    },
+    {
+      id: 2,
+      name: "Solstice Real Estate",
+      desc: "Commercial Portfolio Management",
+      value: 5.0,
+      icon: <MapPinHouse size={20} color="black" />,
+    },
+    {
+      id: 3,
+      name: "Vanguard Holdings",
+      desc: "Asset & Equity Trusts",
+      value: 18.2,
+      icon: <Settings size={20} color="black" />,
+    },
+  ]);
+
+  const handleChange1 = (id, val) => {
+    setCommissions((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, value: val } : item)),
+    );
+  };
 
   return (
     <>
@@ -321,49 +350,42 @@ export default function AddStaff(props) {
           <div className="px-0 py-6 flex  grid md:grid-cols-3 grid-cols-1">
             <SectionLabel
               title="Employment status"
-              description="Define the contractual nature of the staff
-member's relationship."
+              description="Define the contractual nature of the staff member's relationship."
             />
             <div className="bg-white md:p-6 p-4 col-span-2 flex-1 flex flex-col gap-4 max-w-full">
               <div className="grid grid-cols-2 gap-3">
-                {["self_employed", "employee", "Renter", "other"].map(
-                  (type) => {
-                    const isSelected = formData.employee_type === type;
+                {["employee", "Renter", "manager", "other"].map((type) => {
+                  const isSelected = formData.employee_type === type;
 
-                    return (
-                      <button
-                        key={type}
-                        type="button"
-                        onClick={() => set("employee_type", type)}
-                        className={`w-full px-4 py-3 rounded-lg text-sm font-medium transition border flex items-center gap-3 ${
+                  return (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => set("employee_type", type)}
+                      className={`w-full px-4 py-3 rounded-lg text-sm font-medium transition border flex items-center gap-3 ${
+                        isSelected
+                          ? "bg-custom-blue text-white border-custom-blue"
+                          : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"
+                      }`}
+                    >
+                      <div
+                        className={`w-4 h-4 flex items-center justify-center rounded border ${
                           isSelected
-                            ? "bg-custom-blue text-white border-custom-blue"
-                            : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"
+                            ? "bg-white border-white"
+                            : "border-gray-400 bg-white"
                         }`}
                       >
-                        {/* Checkbox */}
-                        <div
-                          className={`w-4 h-4 flex items-center justify-center rounded border ${
-                            isSelected
-                              ? "bg-white border-white"
-                              : "border-gray-400 bg-white"
-                          }`}
-                        >
-                          {isSelected && (
-                            <div className="w-2 h-2 bg-custom-blue rounded-sm" />
-                          )}
-                        </div>
+                        {isSelected && (
+                          <div className="w-2 h-2 bg-custom-blue rounded-sm" />
+                        )}
+                      </div>
 
-                        {/* Text */}
-                        <span>
-                          {type === "self_employed"
-                            ? "Self-employed"
-                            : type.charAt(0).toUpperCase() + type.slice(1)}
-                        </span>
-                      </button>
-                    );
-                  },
-                )}
+                      <span>
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -594,6 +616,68 @@ member's relationship."
             </div>
           </div>
 
+          <div className="px-0 py-6 flex  grid md:grid-cols-3 grid-cols-1">
+            <SectionLabel
+              title="% Product Commission"
+              description="Boost your income with commission on every product you promote."
+            />
+            <div className="bg-white col-span-2 flex-1 flex flex-col gap-4 max-w-full">
+              <div className="md:col-span-2 flex flex-col gap-4">
+                {commissions.map((item) => (
+                  <div
+                    key={item.id}
+                    className="bg-white rounded-xl border border-gray-200 p-4 flex items-center justify-between shadow-sm"
+                  >
+                    {/* Left Info */}
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500">
+                        {item.icon}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-800 text-sm">
+                          {item.name}
+                        </p>
+                        <p className="text-xs text-gray-400">{item.desc}</p>
+                      </div>
+                    </div>
+
+                    {/* Right Controls */}
+                    <div className="flex items-center gap-4">
+                      {/* Range */}
+                      <div className="flex items-center gap-2 text-xs text-gray-400">
+                        <span>0%</span>
+                        <input
+                          type="range"
+                          min="0"
+                          max="25"
+                          value={item.value}
+                          onChange={(e) =>
+                            handleChange1(item.id, e.target.value)
+                          }
+                          className="w-28 accent-custom-blue"
+                        />
+                        <span>25%</span>
+                      </div>
+
+                      {/* Input Box */}
+                      <div className="flex items-center border rounded-lg px-3 py-1 bg-gray-50">
+                        <span className="text-gray-400 text-sm mr-1">%</span>
+                        <input
+                          type="number"
+                          value={item.value}
+                          onChange={(e) =>
+                            handleChange(item.id, e.target.value)
+                          }
+                          className="w-12 bg-transparent outline-none text-sm font-semibold text-gray-800"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
           <div className="max-w-7xl mx-auto">
             <div className="mb-6">
               <h2 className="text-xl  font-semibold text-gray-900">
@@ -713,7 +797,6 @@ member's relationship."
                 </div>
               </div>
 
-              {/* Right Side: Photo Upload */}
               <div className="w-full md:w-[420px] bg-gray-100/50  rounded-xl border border-gray-100 flex flex-col items-center">
                 <h3 className="text-gray-800 font-medium mb-1 text-lg">
                   Staff Photo

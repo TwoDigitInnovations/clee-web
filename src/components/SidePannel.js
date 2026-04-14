@@ -125,7 +125,7 @@ function SidePannel({ open, setOpen }) {
             { title: "Discounts", href: "/SalesTools/Discounts" },
             { title: "Promo code", href: "/SalesTools/Promocode" },
             { title: "Packages", href: "/SalesTools/Packages" },
-            {title:"Personalised plans", href : "/Salestools/Personalisedplans"},
+            {title:"Personalised plans", href : "/SalesTools/Personalisedplans"},
             { title: "Gift Vouchers", href: "/SalesTools/GiftVouchers" },
             { title: "Rewards", href: "/SalesTools/Rewards" },
             { title: "Sales settings", href: "/SalesTools/Salessettings" },
