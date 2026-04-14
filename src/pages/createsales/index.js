@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchProducts, fetchCustomers } from "@/redux/actions/productActions";
 import { useRouter } from "next/router";
 import isAuth from "@/components/isAuth";
+import { fetchUsers } from "@/redux/actions/userActions";
 
 function CreateSale() {
   const router = useRouter();
@@ -18,7 +19,7 @@ function CreateSale() {
   const { products: productsList } = useSelector((state) => state.product);
 
   const [activeTab, setActiveTab] = useState("products");
-  const [selectedItems, setSelectedItems] = useState([]); 
+  const [selectedItems, setSelectedItems] = useState([]);
   const [selectedClient, setSelectedClient] = useState(null);
   const [showMobileCart, setShowMobileCart] = useState(false);
   const [selectedProductDetail, setSelectedProductDetail] = useState(null);
@@ -41,9 +42,9 @@ function CreateSale() {
     dispatch(fetchProducts(router));
     loadCustomers();
   }, []);
-
+  const role = "user";
   const loadCustomers = async () => {
-    const customersList = await dispatch(fetchCustomers(router));
+    const customersList = await dispatch(fetchUsers(role));
     setCustomers(customersList);
   };
 
@@ -81,7 +82,10 @@ function CreateSale() {
         ),
       );
     } else {
-      setSelectedItems([...selectedItems, { ...item, type: 'product', quantity: 1 }]);
+      setSelectedItems([
+        ...selectedItems,
+        { ...item, type: "product", quantity: 1 },
+      ]);
     }
   };
 
