@@ -16,13 +16,4 @@ export const fetchProducts = (router) => async (dispatch) => {
   }
 };
 
-export const fetchCustomers = (router) => async (dispatch) => {
-  try {
-    const res = await Api("get", "auth/getAllUser", "", router);
-    console.log("Customers API Response:", res);
-    return res?.data?.data || res?.data?.data || [];
-  } catch (error) {
-    console.error("Error fetching customers:", error);
-    return [];
-  }
-};
+
