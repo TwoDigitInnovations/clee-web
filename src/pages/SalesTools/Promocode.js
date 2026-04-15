@@ -4,56 +4,47 @@ import React, { useEffect, useState } from "react";
 import { Plus, Trash2, Info, RefreshCcw } from "lucide-react"; // Using lucide-react for icons
 import { useRouter } from "next/navigation";
 import { ConfirmModal } from "@/components/deleteModel";
+import {
+  deletePromoCode,
+  fetchPromoCodes,
+} from "@/redux/actions/PromoCodeActions";
+import { useDispatch, useSelector } from "react-redux";
 
 function Promocode(props) {
-  const [loading, setLoading] = useState(false);
-  const [promocodes, setPromocodes] = useState([]);
   const [open, setOpen] = useState(false);
   const [id, setId] = useState(null);
   const router = useRouter();
-  const dummyData = [
-    {
-      id: 1,
-      code: "SUMMER2027",
-      discount: "2.00%",
-      usageCount: 0,
-      status: "Active",
-    },
-  ];
+  const dispatch = useDispatch();
 
-  const fetchPromocode = async () => {
-    try {
-      props.loader(true);
-      const res = await Api("get", "promo-codes", "", router);
-      props.loader(false);
+  const promocodes = useSelector((state) => state?.promoCode.promoCodes);
 
-      if (res?.status === true) {
-        setPromocodes(res.data.data.promoCodes || []);
-      } else {
-        setPromocodes(dummyData);
-      }
-    } catch {
-      props.loader(false);
-    }
-  };
+
 
   useEffect(() => {
     fetchPromocode();
-  }, []);
+  }, [dispatch]);
 
-  const handleDeleteConfirm = () => {
+  const fetchPromocode = () => {
+    dispatch(fetchPromoCodes(router));
+  };
+
+  const handleDeleteConfirm = async () => {
     try {
       props.loader(true);
-      Api("delete", `promo-codes/${id}`, "", router).then((res) => {
-        props.loader(false);
-        if (res?.status === true) {
-          props.toaster({ type: "success", message: "Promo code deleted" });
-          fetchPromocode();
-          setOpen(false);
-        }
-      });
+
+      const res = await dispatch(deletePromoCode(id, router));
+
+      loader(false);
+
+      if (res?.success) {
+        props.toaster({ type: "success", message: "Promo code deleted" });
+        setOpen(false);
+      } else {
+        props.toaster({ type: "error", message: res.message });
+      }
     } catch {
       props.loader(false);
+      props.toaster({ type: "error", message: "Server error" });
     }
   };
 
@@ -121,8 +112,8 @@ function Promocode(props) {
           </div>
         </div>
 
-        {/* Conditional Content: Table or Empty State */}
-        {promocodes.length > 0 ? (
+      
+        {promocodes?.promoCodes?.length > 0 ? (
           <div className="bg-white border border-gray-200 rounded shadow-sm overflow-hidden">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -143,7 +134,7 @@ function Promocode(props) {
                 </tr>
               </thead>
               <tbody>
-                {promocodes.map((promo, key) => (
+                {promocodes?.promoCodes?.map((promo, key) => (
                   <tr key={key} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 text-sm font-medium text-gray-800">
                       {promo.voucher_code}

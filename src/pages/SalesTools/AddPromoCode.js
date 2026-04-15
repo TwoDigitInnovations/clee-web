@@ -4,6 +4,12 @@ import DashboardHeader from "@/components/DashboardHeader";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { Api } from "@/services/service";
+import {
+  createPromoCode,
+  fetchPromoCodeById,
+  updatePromoCode,
+} from "@/redux/actions/PromoCodeActions";
+import { useDispatch, useSelector } from "react-redux";
 
 function getInitialState() {
   return {
@@ -41,52 +47,46 @@ function validate(formData) {
 export default function AddPromoCode(props) {
   const [formData, setFormData] = useState(getInitialState());
   const [errors, setErrors] = useState({});
+  const dispatch = useDispatch();
 
   const router = useRouter();
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
+  const { currentPromoCode } = useSelector((state) => state.promoCode);
+  console.log(currentPromoCode);
+
+  useEffect(() => {
+    dispatch(fetchPromoCodeById(id, router));
+  }, [dispatch]);
+
   useEffect(() => {
     if (!id) return;
+    if (currentPromoCode) {
+      const data = currentPromoCode;
+      console.log("d", data);
 
-    const fetchPromoCode = async () => {
-      try {
-        props.loader(true);
-        const res = await Api("get", `promo-codes/${id}`, "", router);
-        props.loader(false);
-
-        if (res?.status === true) {
-          const data = res.data.data;
-          setFormData({
-            promo_name: data.promo_name || "",
-            voucher_code: data.voucher_code || "",
-            discount_type: data.discount_type || "percentage",
-            discount_value: data.discount_value || "",
-            tax_treatment: data.tax_treatment || "before",
-            limit_per_customer: data.limit_per_customer || "1",
-            total_uses: data.total_uses || "",
-            min_spend: data.min_spend || "",
-            validity_start: data.validity_start || "",
-            validity_end: data.validity_end || "",
-            appointment_date_start: data.appointment_date_start || "",
-            appointment_date_end: data.appointment_date_end || "",
-            applies_to_staff: data.applies_to_staff || "all",
-            applies_to_customers: data.applies_to_customers || "vip",
-            selected_services: data.selected_services || [],
-            combine_with_promos: data.combine_with_promos || false,
-            status: data.status ?? true,
-          });
-        } else {
-          props.toaster("error", res?.message || "Failed to fetch promo code");
-        }
-      } catch (err) {
-        props.loader(false);
-        props.toaster("error", "Server error");
-      }
-    };
-
-    fetchPromoCode();
-  }, [id]);
+      setFormData({
+        promo_name: data.promo_name || "",
+        voucher_code: data.voucher_code || "",
+        discount_type: data.discount_type || "percentage",
+        discount_value: data.discount_value || "",
+        tax_treatment: data.tax_treatment || "before",
+        limit_per_customer: data.limit_per_customer || "1",
+        total_uses: data.total_uses || "",
+        min_spend: data.min_spend || "",
+        validity_start: data.validity_start || "",
+        validity_end: data.validity_end || "",
+        appointment_date_start: data.appointment_date_start || "",
+        appointment_date_end: data.appointment_date_end || "",
+        applies_to_staff: data.applies_to_staff || "all",
+        applies_to_customers: data.applies_to_customers || "vip",
+        selected_services: data.selected_services || [],
+        combine_with_promos: data.combine_with_promos || false,
+        status: data.status ?? true,
+      });
+    }
+  }, [currentPromoCode]);
 
   const set = (field, value) =>
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -133,10 +133,11 @@ export default function AddPromoCode(props) {
       props.loader(true);
       let res;
       if (id) {
-        res = await Api("put", `promo-codes/${id}`, payload, router);
+        res = await dispatch(updatePromoCode(id, payload, router));
       } else {
-        res = await Api("post", `promo-codes`, payload, router);
+        res = await dispatch(createPromoCode(payload, router));
       }
+
       props.loader(false);
 
       if (res?.status === true) {
@@ -226,9 +227,7 @@ export default function AddPromoCode(props) {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          
             <div className="lg:col-span-2 space-y-4">
-           
               <Card title="Promo Code Name" icon={<Tag size={16} />}>
                 <div>
                   <Label required>Voucher code</Label>
@@ -293,7 +292,6 @@ export default function AddPromoCode(props) {
                 </div>
               </Card>
 
-             
               <Card
                 title="Discount Details"
                 icon={
@@ -354,7 +352,6 @@ export default function AddPromoCode(props) {
                 </div>
               </Card>
 
-            
               <Card title="Usage Settings" icon={<Settings size={16} />}>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
@@ -600,7 +597,6 @@ export default function AddPromoCode(props) {
             </div>
           </div>
 
-         
           <div className="flex justify-end gap-2 mt-4">
             <button
               onClick={() => router.push("/SalesTools/Promocode")}
@@ -620,8 +616,6 @@ export default function AddPromoCode(props) {
     </>
   );
 }
-
-
 
 function Card({ title, subtitle, icon, children }) {
   return (
