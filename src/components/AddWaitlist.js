@@ -21,6 +21,7 @@ const AddWaitlist = ({ onClose, loader, toaster, editId }) => {
 
   // const [customers, setCustomers] = useState([]);
   const [selectedServices, setSelectedServices] = useState([]);
+  const [errors, setErrors] = useState({});
 
   const [formData, setFormData] = useState({
     customer: "",
@@ -104,6 +105,12 @@ const AddWaitlist = ({ onClose, loader, toaster, editId }) => {
       }
     } else {
       setFormData({ ...formData, [name]: value });
+      const error = validateField(name, value);
+
+      setErrors((prev) => ({
+        ...prev,
+        [name]: error,
+      }));
     }
   };
 
@@ -178,6 +185,33 @@ const AddWaitlist = ({ onClose, loader, toaster, editId }) => {
     }
   };
 
+  const validateField = (name, value) => {
+    let error = "";
+
+    if (name === "mobile" || name === "phone") {
+      if (!/^[0-9]*$/.test(value)) {
+        return (error = "Only Number are Allowed");
+      }
+    }
+
+    if (name === "mobile" || name === "phone") {
+      const cleaned = value.replace(/\D/g, ""); // sirf digits
+
+      if (cleaned.length < 7 || cleaned.length > 10) {
+        error = "Number must be between 7 to 10 digits";
+      }
+    }
+
+    if (name === "email") {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(value)) {
+        error = "Invalid email format";
+      }
+    }
+
+    return error;
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
@@ -218,6 +252,7 @@ const AddWaitlist = ({ onClose, loader, toaster, editId }) => {
               value={formData.mobile}
               onChange={handleChange}
               placeholder="(555) 000-0000"
+              error={errors.mobile}
             />
 
             <InputField
@@ -226,6 +261,7 @@ const AddWaitlist = ({ onClose, loader, toaster, editId }) => {
               value={formData.phone}
               onChange={handleChange}
               placeholder="(555) 000-0000"
+              error={errors.phone}
             />
 
             <InputField
@@ -233,6 +269,7 @@ const AddWaitlist = ({ onClose, loader, toaster, editId }) => {
               name="email"
               value={formData.email}
               onChange={handleChange}
+              error={errors.email}
               placeholder="customer@example.com"
             />
 

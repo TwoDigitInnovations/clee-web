@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   TrendingUp,
   TrendingDown,
@@ -17,6 +17,8 @@ import StaffDashboard from "@/components/satafDashboard";
 import TargetsDashboard from "@/components/TargetDashboard";
 import ActvityDashboard from "@/components/ActvityDashboard";
 import isAuth from "@/components/isAuth";
+import { fetchStaff } from "@/redux/actions/staffActions";
+import { useDispatch, useSelector } from "react-redux";
 
 const TABS = ["Business", "Staff", "Targets", "Activity"];
 
@@ -268,6 +270,39 @@ function TxRow({ initials, name, date, amount, status, avatarBg }) {
 function Dashboard() {
   const [activeTab, setActiveTab] = useState("Business");
   const [chartToggle, setChartToggle] = useState("Days");
+  const dispatch = useDispatch();
+  const [staffOpen, setStaffOpen] = useState(false);
+  const [viewOpen, setViewOpen] = useState(false);
+
+  const [selectedStaff, setSelectedStaff] = useState([]);
+  const [viewType, setViewType] = useState("week");
+
+  const { staff } = useSelector((state) => state.staff || { staff: [] });
+
+  useEffect(() => {
+    dispatch(fetchStaff());
+  }, [dispatch]);
+  
+  const toggleStaff = (member) => {
+    const exists = selectedStaff.find((s) => s._id === member._id);
+
+    if (exists) {
+      setSelectedStaff((prev) => prev.filter((s) => s._id !== member._id));
+    } else {
+      setSelectedStaff((prev) => [...prev, member]);
+    }
+  };
+
+
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setStaffOpen(false);
+      setViewOpen(false);
+    };
+
+    window.addEventListener("click", handleClickOutside);
+    return () => window.removeEventListener("click", handleClickOutside);
+  }, []);
 
   return (
     <>
@@ -295,13 +330,97 @@ function Dashboard() {
             ))}
           </div>
 
-          <div className="flex gap-2.5">
-            <button className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border-[1.5px] bg-custom-blue text-white text-sm font-semibold  hover:opacity-80 transition">
-              All Staff <ChevronDown size={15} />
-            </button>
-            <button className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-custom-blue text-white text-sm font-semibold hover:opacity-80 transition">
-              View Week <ChevronDown size={15} />
-            </button>
+          <div className="flex gap-2.5 relative">
+            {/* STAFF DROPDOWN */}
+            <div className="relative">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setStaffOpen(!staffOpen);
+                  setViewOpen(false);
+                }}
+                className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border-[1.5px] bg-custom-blue text-white text-sm font-semibold"
+              >
+                {selectedStaff.length > 0
+                  ? `${selectedStaff.length} Selected`
+                  : "All Staff"}
+                <ChevronDown size={15} />
+              </button>
+
+              {staffOpen && (
+                <div className="absolute mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-20 max-h-60 overflow-auto">
+                  {/* All option */}
+                  <div
+                    onClick={() => setSelectedStaff([])}
+                    className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+                  >
+                    All Staff
+                  </div>
+
+                  {staff.map((member) => {
+                    const isSelected = selectedStaff.some(
+                      (s) => s._id === member._id,
+                    );
+
+                    return (
+                      <div
+                        key={member._id}
+                        onClick={() => toggleStaff(member)}
+                        className={`px-3 py-2 text-sm flex justify-between items-center cursor-pointer hover:bg-gray-100 ${
+                          isSelected ? "bg-blue-50 text-blue-700" : ""
+                        }`}
+                      >
+                        {member.fullname}
+                        {isSelected && "✔"}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* VIEW DROPDOWN */}
+            <div className="relative">
+              <button
+                onClick={(e) => {
+                   e.stopPropagation();
+                  setViewOpen(!viewOpen);
+                  setStaffOpen(false);
+                }}
+                className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-custom-blue text-white text-sm font-semibold"
+              >
+                {viewType === "week" ? "View Week" : "View Month"}
+                <ChevronDown size={15} />
+              </button>
+
+              {viewOpen && (
+                <div className="absolute mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
+                  <div
+                    onClick={() => {
+                      setViewType("week");
+                      setViewOpen(false);
+                    }}
+                    className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 ${
+                      viewType === "week" ? "bg-blue-50 text-blue-700" : ""
+                    }`}
+                  >
+                    Weekly View
+                  </div>
+
+                  <div
+                    onClick={() => {
+                      setViewType("month");
+                      setViewOpen(false);
+                    }}
+                    className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 ${
+                      viewType === "month" ? "bg-blue-50 text-blue-700" : ""
+                    }`}
+                  >
+                    Monthly View
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

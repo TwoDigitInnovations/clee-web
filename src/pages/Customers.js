@@ -15,6 +15,7 @@ import {
 import { useRouter } from "next/router";
 import React, { useEffect, useRef } from "react";
 import { useState } from "react";
+import { useDispatch } from "react-redux";
 
 const TABS = [
   "Summary",
@@ -157,7 +158,7 @@ function Customers(props) {
     }
   };
 
-
+const dispatch = useDispatch();
   
 
   const handleDeleteConfirm = async () => {

@@ -18,13 +18,11 @@ import {
   fetchBookings,
   fetchUpcomingBookings,
 } from "@/redux/actions/bookingActions";
-import {
-  fetchWaitlist,
-  deleteWaitlist,
-} from "@/redux/actions/waitlistActions";
+import { fetchWaitlist, deleteWaitlist } from "@/redux/actions/waitlistActions";
 import { Api } from "@/services/service";
 import { useRouter } from "next/router";
 import isAuth from "@/components/isAuth";
+import { fetchStaff } from "@/redux/actions/staffActions";
 
 const STAFF = [
   {
@@ -73,16 +71,17 @@ function Avatar({ src, name, size = 8 }) {
 function BookingBlock({ booking, pixelsPerHour, onBookingClick }) {
   const top = (booking.startHour - 8) * pixelsPerHour;
   const height = (booking.durationMins / 60) * pixelsPerHour;
-  
+
   const colorMap = {
     Confirmed: "bg-amber-100 border-amber-400 text-amber-900",
     Pending: "bg-blue-100 border-blue-400 text-blue-900",
     Completed: "bg-emerald-100 border-emerald-400 text-emerald-900",
     Cancelled: "bg-red-100 border-red-400 text-red-900",
   };
-  
-  const color = colorMap[booking.status] || "bg-gray-100 border-gray-400 text-gray-900";
-  
+
+  const color =
+    colorMap[booking.status] || "bg-gray-100 border-gray-400 text-gray-900";
+
   return (
     <div
       className={`absolute left-1 right-1 rounded-lg border-l-4 px-2 py-2 shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-shadow ${color}`}
@@ -118,8 +117,7 @@ function Calender(props) {
 
   useEffect(() => {
     const handleClickOutside = (e) => {
- 
-      if (!e.target.closest('.waitlist-menu-container')) {
+      if (!e.target.closest(".waitlist-menu-container")) {
         setOpenMenuId(null);
       }
     };
@@ -138,15 +136,41 @@ function Calender(props) {
     loadWaitlist();
   }, [currentDate]);
 
+  const { staff } = useSelector((state) => state.staff || { staff: [] });
+  const [open2, setOpen2] = useState(false);
+  const [selectedStaff, setSelectedStaff] = useState([]);
+  useEffect(() => {
+    dispatch(fetchStaff());
+  }, [dispatch]);
+  useEffect(() => {
+    const close = () => setOpen2(false);
+    window.addEventListener("click", close);
+    return () => window.removeEventListener("click", close);
+  }, []);
+
+  const toggleStaff = (member) => {
+    const exists = selectedStaff.some((s) => s._id === member._id);
+
+    if (exists) {
+      setSelectedStaff((prev) => prev.filter((s) => s._id !== member._id));
+    } else {
+      setSelectedStaff((prev) => [...prev, member]);
+    }
+  };
+
   const loadStaff = async () => {
     try {
       const res = await Api("get", "auth/getAllUser?role=staff", "", router);
       if (res?.status && res.data) {
-        const staffArray = Array.isArray(res.data) ? res.data : res.data.data || [];
+        const staffArray = Array.isArray(res.data)
+          ? res.data
+          : res.data.data || [];
         const staffData = staffArray.map((s) => ({
           id: s._id,
           name: s.fullname,
-          avatar: s.image || `https://api.dicebear.com/7.x/micah/svg?seed=${s.fullname}&backgroundColor=b6e3f4`,
+          avatar:
+            s.image ||
+            `https://api.dicebear.com/7.x/micah/svg?seed=${s.fullname}&backgroundColor=b6e3f4`,
         }));
         setStaffList(staffData.length > 0 ? staffData : STAFF);
       } else {
@@ -197,7 +221,10 @@ function Calender(props) {
       setOpenMenuId(null);
     } catch (err) {
       props.loader(false);
-      props.toaster({ type: "error", message: "Failed to remove from waitlist" });
+      props.toaster({
+        type: "error",
+        message: "Failed to remove from waitlist",
+      });
     }
   };
 
@@ -216,6 +243,15 @@ function Calender(props) {
   }
 
   const isToday = currentDate.toDateString() === new Date().toDateString();
+  const [sortType, setSortType] = useState("oldest"); // default
+
+  const sortedWaitlist = [...waitlist].sort((a, b) => {
+    if (sortType === "oldest") {
+      return new Date(a.createdAt) - new Date(b.createdAt);
+    } else {
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    }
+  });
 
   return (
     <>
@@ -243,7 +279,7 @@ function Calender(props) {
               </svg>
               <input
                 className="bg-transparent text-sm text-slate-600 placeholder-slate-400 outline-none w-full"
-                placeholder="Find customer"
+                placeholder="Find Booking using Customer Name"
               />
             </div>
           </div>
@@ -263,7 +299,8 @@ function Calender(props) {
           <div className="flex-1 overflow-y-auto">
             {tab === "upcoming" ? (
               <div className="divide-y divide-slate-50">
-                {Array.isArray(upcomingBookings) && upcomingBookings.length > 0 ? (
+                {Array.isArray(upcomingBookings) &&
+                upcomingBookings.length > 0 ? (
                   upcomingBookings.map((u) => {
                     const hour = u.startHour;
                     const timeStr =
@@ -272,7 +309,7 @@ function Calender(props) {
                         : hour < 12
                           ? `${hour}:00 AM`
                           : `${hour - 12}:00 PM`;
-                    
+
                     return (
                       <div
                         key={u._id}
@@ -282,10 +319,13 @@ function Calender(props) {
                           setOpen1(true);
                         }}
                       >
-                        <Avatar 
-                          src={u.customer?.image || `https://api.dicebear.com/7.x/micah/svg?seed=${u.customer?.fullname}&backgroundColor=b6e3f4`} 
-                          name={u.customer?.fullname || "Unknown"} 
-                          size={10} 
+                        <Avatar
+                          src={
+                            u.customer?.image ||
+                            `https://api.dicebear.com/7.x/micah/svg?seed=${u.customer?.fullname}&backgroundColor=b6e3f4`
+                          }
+                          name={u.customer?.fullname || "Unknown"}
+                          size={10}
                         />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-semibold text-slate-800 truncate">
@@ -326,25 +366,29 @@ function Calender(props) {
                   <UserRoundPlus />
                   Add to waitlist
                 </button>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">
-                    Current Waitlist
+                <div className="flex items-center justify-between px-2">
+                  <span className="text-xs font-bold uppercase tracking-widest text-slate-500">
+                     Waitlist ({waitlist.length})
                   </span>
-                  <button className="text-xs text-slate-500 hover:text-slate-700">
-                    Sort: Oldest first ▾
-                  </button>
+                  <select
+                    value={sortType}
+                    onChange={(e) => setSortType(e.target.value)}
+                    className="text-xs font-medium border border-slate-200 rounded-lg px-2 py-1 bg-white cursor-pointer hover:border-custom-blue focus:outline-none focus:ring-2 focus:ring-custom-blue transition-all"
+                  >
+                    <option value="oldest">Oldest First</option>
+                    <option value="newest">Newest First</option>
+                  </select>
                 </div>
                 <div className="space-y-3">
-                  {Array.isArray(waitlist) && waitlist.length > 0 ? (
-                    waitlist.map((w) => {
-                      const addedTime = new Date(w.createdAt).toLocaleTimeString(
-                        "en-US",
-                        {
-                          hour: "numeric",
-                          minute: "2-digit",
-                          hour12: true,
-                        }
-                      );
+                  {Array.isArray(sortedWaitlist) && sortedWaitlist.length > 0 ? (
+                    sortedWaitlist.map((w) => {
+                      const addedTime = new Date(
+                        w.createdAt,
+                      ).toLocaleTimeString("en-US", {
+                        hour: "numeric",
+                        minute: "2-digit",
+                        hour12: true,
+                      });
 
                       return (
                         <div
@@ -366,7 +410,7 @@ function Calender(props) {
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setOpenMenuId(
-                                    openMenuId === w._id ? null : w._id
+                                    openMenuId === w._id ? null : w._id,
                                   );
                                 }}
                                 className="text-slate-400 hover:text-slate-600 p-1 rounded-md"
@@ -448,12 +492,59 @@ function Calender(props) {
         <main className="flex flex-col overflow-hidden">
           <header className="flex flex-col sm:flex-row sm:items-center justify-between px-4 sm:px-8 py-3 bg-white border-b border-slate-100 shadow-sm gap-3 sm:gap-6">
             <div className="flex items-center justify-between w-full sm:w-auto gap-2">
-              {/* Staff Button */}
-              <button className="flex items-center gap-2 bg-custom-blue text-white text-xs sm:text-sm font-semibold px-3 py-2 rounded-xl shadow hover:bg-custom-blue/90 transition-colors">
-                <UserCheck size={16} />
-                <span className="hidden md:inline">All Rostered Staff</span>
-                <ChevronDown size={16} />
-              </button>
+              <div className="relative inline-block">
+                {/* Button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOpen2(!open2);
+                  }}
+                  className="flex items-center gap-2 bg-custom-blue text-white text-xs sm:text-sm font-semibold px-3 py-2 rounded-xl shadow hover:bg-custom-blue/90 transition-colors"
+                >
+                  <UserCheck size={16} />
+
+                  <span className="hidden md:inline">
+                    {selectedStaff.length > 0
+                      ? `${selectedStaff.length} Selected`
+                      : "All Rostered Staff"}
+                  </span>
+
+                  <ChevronDown size={16} />
+                </button>
+
+                {/* Dropdown */}
+                {open2 && (
+                  <div className="absolute mt-2 w-64 bg-white border border-gray-200 rounded-xl shadow-lg z-20 max-h-64 overflow-auto">
+                    {/* All option */}
+                    <div
+                      onClick={() => setSelectedStaff([])}
+                      className="px-4 py-2 text-sm cursor-pointer hover:bg-gray-100 font-medium"
+                    >
+                      All Staff
+                    </div>
+
+                    {/* Staff List */}
+                    {staff.map((member) => {
+                      const isSelected = selectedStaff.some(
+                        (s) => s._id === member._id,
+                      );
+
+                      return (
+                        <div
+                          key={member._id}
+                          onClick={() => toggleStaff(member)}
+                          className={`px-4 py-2 text-sm flex justify-between items-center cursor-pointer hover:bg-gray-100 ${
+                            isSelected ? "bg-blue-50 text-blue-700" : ""
+                          }`}
+                        >
+                          <span>{member.fullname}</span>
+                          {isSelected && <span>✔</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
 
               {/* Right Side (mobile) */}
               <div className="flex items-center gap-2 sm:hidden">
@@ -502,9 +593,7 @@ function Calender(props) {
               </button>
             </div>
 
-       
             <div className="hidden sm:flex items-center gap-2 ml-auto">
-              
               <div className="relative">
                 <button
                   onClick={() => setShowViewMenu((v) => !v)}
@@ -568,51 +657,51 @@ function Calender(props) {
               </div>
 
               {staffList.map((staff, idx) => {
-                const staffBookings = Array.isArray(bookings) 
+                const staffBookings = Array.isArray(bookings)
                   ? bookings.filter((b) => b.staff?._id === staff.id)
                   : [];
-                
+
                 return (
                   <div
-                  key={staff.id}
-                  className="flex-1 min-w-[200px]"
-                  style={{
-                    borderLeft: idx === 0 ? "1px solid #e2e8f0" : "none",
-                  }}
-                >
-                  <div className="flex flex-col items-center justify-center h-14 border-b border-r border-slate-100 sticky top-0 bg-white z-10 gap-1">
-                    <Avatar src={staff.avatar} name={staff.name} size={8} />
-                    <span className="text-xs font-semibold text-slate-700">
-                      {staff.name}
-                    </span>
-                  </div>
-
-                  <div
-                    className="relative border-r border-slate-100"
-                    style={{ height: HOURS.length * pixelsPerHour + "px" }}
+                    key={staff.id}
+                    className="flex-1 md:min-w-[200px] min-w-[165px]"
+                    style={{
+                      borderLeft: idx === 0 ? "1px solid #e2e8f0" : "none",
+                    }}
                   >
-                    {HOURS.map((h) => (
-                      <div
-                        key={h}
-                        className="border-b border-slate-100 hover:bg-blue-50/30 transition-colors cursor-pointer"
-                        style={{ height: pixelsPerHour + "px" }}
-                      />
-                    ))}
-                    {staffBookings.map((b) => (
-                      <BookingBlock
-                        key={b._id}
-                        booking={b}
-                        pixelsPerHour={pixelsPerHour}
-                        onBookingClick={(booking) => {
-                          setSelectedBooking(booking);
-                          setOpen1(true);
-                        }}
-                      />
-                    ))}
+                    <div className="flex flex-col items-center justify-center h-14 border-b border-r border-slate-100 sticky top-0 bg-white z-10 gap-1">
+                      <Avatar src={staff.avatar} name={staff.name} size={8} />
+                      <span className="text-xs font-semibold text-slate-700">
+                        {staff.name}
+                      </span>
+                    </div>
+
+                    <div
+                      className="relative border-r border-slate-100"
+                      style={{ height: HOURS.length * pixelsPerHour + "px" }}
+                    >
+                      {HOURS.map((h) => (
+                        <div
+                          key={h}
+                          className="border-b border-slate-100 hover:bg-blue-50/30 transition-colors cursor-pointer"
+                          style={{ height: pixelsPerHour + "px" }}
+                        />
+                      ))}
+                      {staffBookings.map((b) => (
+                        <BookingBlock
+                          key={b._id}
+                          booking={b}
+                          pixelsPerHour={pixelsPerHour}
+                          onBookingClick={(booking) => {
+                            setSelectedBooking(booking);
+                            setOpen1(true);
+                          }}
+                        />
+                      ))}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
             </div>
           </div>
 
@@ -645,21 +734,28 @@ function Calender(props) {
                 service: selectedBooking.service,
                 staff: selectedBooking.staff?.fullname || "Unknown",
                 resource: null,
-                date: new Date(selectedBooking.date).toLocaleDateString("en-GB", {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                }),
-                time: selectedBooking.startHour === 12 
-                  ? "12:00PM" 
-                  : selectedBooking.startHour < 12 
-                    ? `${selectedBooking.startHour}:00AM` 
-                    : `${selectedBooking.startHour - 12}:00PM`,
+                date: new Date(selectedBooking.date).toLocaleDateString(
+                  "en-GB",
+                  {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  },
+                ),
+                time:
+                  selectedBooking.startHour === 12
+                    ? "12:00PM"
+                    : selectedBooking.startHour < 12
+                      ? `${selectedBooking.startHour}:00AM`
+                      : `${selectedBooking.startHour - 12}:00PM`,
                 duration: `${selectedBooking.durationMins} mins`,
                 price: selectedBooking.price || 0,
                 customer: {
                   name: selectedBooking.customer?.fullname || "Unknown",
-                  phone: selectedBooking.customer?.phone || selectedBooking.customer?.mobile || "N/A",
+                  phone:
+                    selectedBooking.customer?.phone ||
+                    selectedBooking.customer?.mobile ||
+                    "N/A",
                   email: selectedBooking.customer?.email || "N/A",
                 },
                 history: [],

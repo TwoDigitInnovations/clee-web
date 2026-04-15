@@ -172,6 +172,10 @@ const validateCustomerForm = (form) => {
   if (!form.email?.trim()) {
     errors.email = "Email is required";
   }
+  if (!form.photo) {
+    errors.photo = "Photo is required";
+  }
+  
 
   if (form.email && !/\S+@\S+\.\S+/.test(form.email)) {
     errors.email = "Invalid email format";
@@ -197,8 +201,8 @@ const AddCustomer = ({
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const { users: currentUser } = useSelector((state) => state.user);
-  console.log(formData);
+  const { currentUser } = useSelector((state) => state.user);
+
 
   useEffect(() => {
     if (!editId) return;
@@ -206,15 +210,20 @@ const AddCustomer = ({
       const fullName = currentUser.fullname || "";
       const nameParts = fullName.trim().split(" ");
 
+
       setFormData((prev) => ({
         ...prev,
         ...currentUser,
         first_name: nameParts[0] || "",
         last_name: nameParts.slice(1).join(" ") || "",
+        SalonManager:currentUser.SalonManager._id
       }));
     }
+  }, [currentUser]);
+
+  useEffect(() => {
     dispatch(fetchUserById(editId, router));
-  }, [editId]);
+  }, [dispatch]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;

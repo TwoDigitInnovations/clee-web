@@ -44,7 +44,7 @@ export default function AddPersonalisedplans() {
   const [search, setSearch] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [open, setOpen] = useState(false);
-console.log(users);
+  console.log(users);
 
   const [planName, setPlanName] = useState("");
   const [targetClient, setTargetClient] = useState("");
@@ -82,7 +82,7 @@ console.log(users);
   let role = "user";
 
   useEffect(() => {
-    dispatch(fetchUsers(router,role));
+    dispatch(fetchUsers(router, role));
   }, [dispatch]);
 
   useEffect(() => {
@@ -120,6 +120,11 @@ console.log(users);
   const filteredUsers = users.filter((u) =>
     u.fullname.toLowerCase().includes(search.toLowerCase()),
   );
+  useEffect(() => {
+    const handleClickOutside = () => setOpen(false);
+    window.addEventListener("click", handleClickOutside);
+    return () => window.removeEventListener("click", handleClickOutside);
+  }, []);
 
   return (
     <div className="bg-custom-gray min-h-screen">
