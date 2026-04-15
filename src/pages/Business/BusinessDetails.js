@@ -19,6 +19,7 @@ import SelectField from "@/components/UI/SelectField";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProfile, updateCustomerById } from "@/redux/actions/userActions";
+import { fetchCategories } from "@/redux/actions/categoryActions";
 const COUNTRIES = [
   "Australia",
   "India",
@@ -45,6 +46,7 @@ const TIMEZONES = [
 
 const DATE_FORMATS = ["18 Mar 2026", "03/18/2026", "2026-03-18"];
 const TIME_FORMATS = ["6:39PM", "18:39", "6:39 PM"];
+
 const CATEGORIES = [
   "Beauty",
   "Health & Wellness",
@@ -153,7 +155,7 @@ function BusinessDetails({ loader, toaster }) {
     phoneNumber: "",
     firstName: "",
     lastName: "",
-    businessCategory: "Beauty",
+    businessCategory: "",
     updateBilling: false,
     country: "",
     currency: "",
@@ -176,10 +178,9 @@ function BusinessDetails({ loader, toaster }) {
 
   useEffect(() => {
     if (user) {
-      setEditId(user._id);
       const fullName = user.fullname || "";
       const nameParts = fullName.trim().split(" ");
-
+      setEditId(user.id);
       setFormData((prev) => ({
         ...prev,
 
@@ -211,9 +212,18 @@ function BusinessDetails({ loader, toaster }) {
         timeFormat: user.business?.settings?.timeFormat || "",
       }));
     }
-    dispatch(fetchProfile);
-  }, []);
+  }, [user]);
 
+  useEffect(() => {
+    dispatch(fetchProfile);
+  }, [dispatch]);
+
+  console.log("f", editId, user);
+  const AllCategory = useSelector((state) => state.category?.categories);
+
+  useEffect(() => {
+    dispatch(fetchCategories(router));
+  }, [dispatch]);
   const set = (field) => (e) =>
     setFormData((prev) => ({ ...prev, [field]: e.target.value }));
 
@@ -266,6 +276,8 @@ function BusinessDetails({ loader, toaster }) {
     }
 
     setErrors({});
+    console.log(errors);
+
     try {
       loader(true);
       const payload = {
@@ -311,6 +323,7 @@ function BusinessDetails({ loader, toaster }) {
         form.append("logo", logo);
       }
       let res;
+      console.log(editId);
 
       if (editId) {
         res = await dispatch(updateCustomerById(editId, form, router));
@@ -430,8 +443,19 @@ function BusinessDetails({ loader, toaster }) {
                 <SelectField
                   label="Business category"
                   value={formData.businessCategory}
-                  onChange={set("businessCategory")}
-                  options={CATEGORIES}
+                  onChange={(val) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      businessCategory: val,
+                    }))
+                  }
+                  options={[
+                    { label: "Select a category", value: "", disabled: true }, // placeholder
+                    ...AllCategory.map((cat) => ({
+                      label: cat.name, 
+                      value: cat._id || cat.name, 
+                    })),
+                  ]}
                   error={errors.businessCategory}
                 />
 

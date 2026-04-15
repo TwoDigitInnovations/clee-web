@@ -36,11 +36,14 @@ const AddWaitlist = ({ onClose, loader, toaster, editId }) => {
     (state) => state.services,
   );
   const { users: customers } = useSelector((state) => state.user);
+  let role = "user";
+
+  console.log(customers);
 
   useEffect(() => {
     dispatch(fetchServices(router));
-    dispatch(fetchUsers(router));
-  }, []);
+    dispatch(fetchUsers(router, role));
+  }, [dispatch]);
 
   useEffect(() => {
     if (editId) {
@@ -120,6 +123,23 @@ const AddWaitlist = ({ onClose, loader, toaster, editId }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+  
+    const newErrors = {};
+
+    Object.keys(formData).forEach((key) => {
+      const error = validateField(key, formData[key]);
+      if (error) newErrors[key] = error;
+    });
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      toaster({
+        type: "error",
+        message: Object.values(newErrors)[0],
+      });
+      return;
+    }
 
     if (!formData.customer) {
       toaster({ type: "error", message: "Customer is required" });
@@ -273,7 +293,7 @@ const AddWaitlist = ({ onClose, loader, toaster, editId }) => {
               placeholder="customer@example.com"
             />
 
-            {/* Service Section */}
+        
             <div className="col-span-2 text-sm font-semibold text-custom-blue mt-2">
               SERVICE SELECTION
             </div>
@@ -312,17 +332,7 @@ const AddWaitlist = ({ onClose, loader, toaster, editId }) => {
               </div>
             )}
 
-            <button
-              type="button"
-              onClick={() =>
-                document.querySelector('select[name="service"]')?.focus()
-              }
-              className="col-span-2 text-custom-blue text-sm text-left hover:underline"
-            >
-              + Add another service
-            </button>
-
-            {/* Additional Details */}
+          
             <div className="flex gap-2 col-span-2 text-sm font-semibold text-custom-blue mt-2">
               <TextAlignStart size={18} /> ADDITIONAL DETAILS
             </div>

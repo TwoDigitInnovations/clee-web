@@ -18,7 +18,6 @@ import InputField from "./UI/InputField";
 import SelectField from "./UI/SelectField";
 import TextareaField from "./UI/TextAreaField";
 import { useRouter } from "next/router";
-import { Api, ApiFormData } from "@/services/service";
 import {
   createCustomer,
   fetchUserById,
@@ -161,25 +160,57 @@ const getInitialState = () => ({
 const validateCustomerForm = (form) => {
   const errors = {};
 
+  // ✅ First Name
   if (!form.first_name?.trim()) {
     errors.first_name = "First name is required";
   }
 
+  // ✅ Mobile
   if (!form.mobile?.trim()) {
     errors.mobile = "Mobile number is required";
+  } else {
+    const cleaned = form.mobile.replace(/\D/g, "");
+
+    if (!/^[0-9]+$/.test(cleaned)) {
+      errors.mobile = "Only numbers are allowed";
+    } else if (cleaned.length < 7 || cleaned.length > 10) {
+      errors.mobile = "Number must be between 7 to 10 digits";
+    }
   }
 
+  // ✅ Email
   if (!form.email?.trim()) {
     errors.email = "Email is required";
+  } else {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(form.email)) {
+      errors.email = "Invalid email format";
+    }
   }
+
+  // ✅ Photo
   if (!form.photo) {
     errors.photo = "Photo is required";
   }
-  
 
-  if (form.email && !/\S+@\S+\.\S+/.test(form.email)) {
-    errors.email = "Invalid email format";
-  }
+  // if (form?.postal_address?.postal_postcode) {
+  //   if (form.postal_address.postal_postcode.length !== 6) {
+  //     errors.postal_address = {
+  //       ...(errors.postal_address || {}),
+  //       postal_postcode: "Postal postcode must be 6 digits",
+  //     };
+  //   }
+  // }
+
+  // if (form?.physical_address?.physical_postcode) {
+  //   if (form.physical_address.physical_postcode.length !== 6) {
+  //     errors.physical_address = {
+  //       ...(errors.physical_address || {}),
+  //       physical_postcode: "Physical postcode must be 6 digits",
+  //     };
+  //   }
+  // }
 
   return {
     isValid: Object.keys(errors).length === 0,
@@ -199,10 +230,11 @@ const AddCustomer = ({
   const [activeTab, setActiveTab] = useState("details");
   const [formData, setFormData] = useState(getInitialState());
   const router = useRouter();
+  const [errors, setErrors] = useState({});
+
   const dispatch = useDispatch();
 
   const { currentUser } = useSelector((state) => state.user);
-
 
   useEffect(() => {
     if (!editId) return;
@@ -210,13 +242,12 @@ const AddCustomer = ({
       const fullName = currentUser.fullname || "";
       const nameParts = fullName.trim().split(" ");
 
-
       setFormData((prev) => ({
         ...prev,
         ...currentUser,
         first_name: nameParts[0] || "",
         last_name: nameParts.slice(1).join(" ") || "",
-        SalonManager:currentUser.SalonManager._id
+        SalonManager: currentUser.SalonManager._id,
       }));
     }
   }, [currentUser]);
@@ -227,10 +258,20 @@ const AddCustomer = ({
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+
+    const newValue = type === "checkbox" ? checked : value;
+
+    const updatedForm = {
+      ...formData,
+      [name]: newValue,
+    };
+
+    setFormData(updatedForm);
+
+    // ✅ full form validate karo
+    const { errors } = validateCustomerForm(updatedForm);
+
+    setErrors(errors);
   };
 
   const handleToggle = (name) => {
@@ -250,26 +291,52 @@ const AddCustomer = ({
     reader.readAsDataURL(file);
   };
 
-  const copyPhysicalToPostal = () => {
-    setFormData((prev) => ({
-      ...prev,
-      postal_address: prev.physical_address,
-      postal_suburb: prev.physical_suburb,
-      postal_city: prev.physical_city,
-      postal_state: prev.physical_state,
-      postal_postcode: prev.physical_postcode,
-    }));
+  const copyPhysicalToClipboard = async () => {
+    try {
+      const text = `
+      Address: ${formData.physical_address?.physical_address || ""}
+      Suburb: ${formData.physical_address?.physical_suburb || ""}
+      City: ${formData.physical_address?.physical_city || ""}
+      State: ${formData.physical_address?.physical_state || ""}
+      Postcode: ${formData.physical_address?.physical_postcode || ""}
+    `;
+
+      await navigator.clipboard.writeText(text.trim());
+
+      toaster({
+        type: "success",
+        message: "Physical address copied to clipboard",
+      });
+    } catch (err) {
+      toaster({
+        type: "error",
+        message: "Failed to copy",
+      });
+    }
   };
 
-  const copyPostalToPhysical = () => {
-    setFormData((prev) => ({
-      ...prev,
-      physical_address: prev.postal_address,
-      physical_suburb: prev.postal_suburb,
-      physical_city: prev.postal_city,
-      physical_state: prev.postal_state,
-      physical_postcode: prev.postal_postcode,
-    }));
+  const copyPostalToClipboard = async () => {
+    try {
+      const text = `
+      Address: ${formData.postal_address?.postal_address || ""}
+      Suburb: ${formData.postal_address.postal_suburb || ""}
+      City: ${formData.postal_address.postal_city || ""}
+      State: ${formData.postal_address.postal_state || ""}
+      Postcode: ${formData.postal_address.postal_postcode || ""}
+    `;
+
+      await navigator.clipboard.writeText(text.trim());
+
+      toaster({
+        type: "success",
+        message: "Postal address copied to clipboard",
+      });
+    } catch (err) {
+      toaster({
+        type: "error",
+        message: "Failed to copy",
+      });
+    }
   };
 
   const handleAddressChange = (e, section) => {
@@ -283,6 +350,7 @@ const AddCustomer = ({
       },
     }));
   };
+  console.log(errors);
 
   const handleSubmit = async () => {
     const { isValid, errors } = validateCustomerForm(formData);
@@ -295,17 +363,29 @@ const AddCustomer = ({
       return;
     }
 
-    const data = { ...formData, photo_preview: null, role: "user" };
+    const data = {
+      ...formData,
+      photo_preview: null,
+      role: "user",
+    };
 
     const form = new FormData();
 
     Object.keys(data).forEach((key) => {
-      form.append(key, data[key]);
-    });
+      const value = data[key];
 
-    if (formData.photo) {
-      form.append("photo", formData.photo);
-    }
+      if (value === undefined || value === null || value === "") return;
+
+      if (value instanceof File) {
+        form.append(key, value);
+      } else if (typeof value === "object") {
+        form.append(key, JSON.stringify(value));
+      } else if (typeof value === "boolean") {
+        form.append(key, value ? "true" : "false");
+      } else {
+        form.append(key, value);
+      }
+    });
 
     try {
       loader(true);
@@ -331,7 +411,6 @@ const AddCustomer = ({
         setFormData(getInitialState());
         onClose();
         getCustomer?.();
-        setEditId("");
       } else {
         toaster({
           type: "error",
@@ -345,7 +424,7 @@ const AddCustomer = ({
 
       toaster({
         type: "error",
-        message: error?.response?.data?.message || "Server error",
+        message: error?.message || "Server error",
       });
     }
   };
@@ -358,6 +437,7 @@ const AddCustomer = ({
         value={formData.first_name}
         onChange={handleChange}
         placeholder="Enter first name"
+        error={errors.first_name}
       />
       <InputField
         label="Last name"
@@ -379,6 +459,7 @@ const AddCustomer = ({
         value={formData.mobile}
         onChange={handleChange}
         placeholder="+61"
+        error={errors.mobile}
       />
       <InputField
         label="Email address"
@@ -387,6 +468,7 @@ const AddCustomer = ({
         value={formData.email}
         onChange={handleChange}
         placeholder="example@domain.com"
+        error={errors.email}
       />
       <InputField
         label="Occupation"
@@ -420,7 +502,7 @@ const AddCustomer = ({
           postcode: formData.physical_address?.physical_postcode,
         }}
         onChange={(e) => handleAddressChange(e, "physical_address")}
-        onCopy={copyPhysicalToPostal}
+        onCopy={copyPhysicalToClipboard}
         copyLabel="Copy postal address"
       />
       <AddressBlock
@@ -434,7 +516,7 @@ const AddCustomer = ({
           postcode: formData.postal_address?.postal_postcode,
         }}
         onChange={(e) => handleAddressChange(e, "postal_address")}
-        onCopy={copyPostalToPhysical}
+        onCopy={copyPostalToClipboard}
         copyLabel="Copy physical address"
       />
     </div>
@@ -715,6 +797,9 @@ const AddCustomer = ({
       <p className="text-xs text-gray-400 mt-3">
         Accepted formats: JPG, PNG, GIF. Maximum file size: 5MB.
       </p>
+      {errors.photo && (
+        <p className="text-red-400 text-sm mt-1">{errors.photo}</p>
+      )}
     </div>
   );
 

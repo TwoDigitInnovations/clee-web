@@ -10,7 +10,9 @@ import {
   EllipsisVertical,
   MessageSquareText,
   Pencil,
+  Search,
   Trash,
+  Users2,
 } from "lucide-react";
 import { useRouter } from "next/router";
 import React, { useEffect, useRef } from "react";
@@ -137,13 +139,13 @@ function Customers(props) {
     props?.loader(true);
 
     try {
-      const params = {
+      const params = new URLSearchParams({
         role: "user",
-        SalonManager: true,
-        ...(filterText && { key: filterText }),
-      };
 
-      const res = await Api("get", `auth/getAllUser`, params, router);
+        ...(filterText && { key: filterText }),
+      }).toString();
+
+      const res = await Api("get", `auth/getAllUser?${params}`, null, router);
 
       props.loader(false);
 
@@ -158,8 +160,7 @@ function Customers(props) {
     }
   };
 
-const dispatch = useDispatch();
-  
+  const dispatch = useDispatch();
 
   const handleDeleteConfirm = async () => {
     if (!editId) return;
@@ -209,54 +210,85 @@ const dispatch = useDispatch();
             </div>
 
             <div className="flex items-center gap-2 border border-slate-200 rounded-lg px-2.5 py-1.5 bg-slate-50">
-              <svg
-                className="w-3.5 h-3.5 text-slate-400 shrink-0"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"
-                />
-              </svg>
+              <Search size={18} className="text-slate-600" />
               <input
                 className="bg-transparent text-xs text-slate-600 placeholder-slate-400 outline-none w-full"
-                placeholder="Filter customers..."
+                placeholder="Search customers..."
                 value={filterText}
                 onChange={(e) => setFilterText(e.target.value)}
               />
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto">
-            {customerData.map((c) => (
-              <button
-                key={c.id}
-                onClick={() => setSelected(c)}
-                className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors border-l-4 ${
-                  selected?._id === c?._id
-                    ? "bg-orange-50 border-orange-400"
-                    : "border-transparent hover:bg-slate-50"
-                }`}
+          <div className="flex flex-col md:flex-row h-full">
+            {/* 🔽 Mobile Dropdown */}
+            <div className="md:hidden p-3 border-b border-slate-200">
+              <select
+                value={selected?._id || ""}
+                onChange={(e) => {
+                  const user = customerData.find(
+                    (c) => c._id === e.target.value,
+                  );
+                  setSelected(user);
+                }}
+                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-custom-blue"
               >
-                <Avatar src={c?.photo} name={c?.fullname} size="sm" />
-                <div className="min-w-0">
-                  <p
-                    className={`text-xs font-bold truncate ${selected?._id === c?._id ? "text-slate-900" : "text-slate-700"}`}
+                <option value="">Select Customer</option>
+
+                {customerData.length > 0 ? (
+                  customerData.map((c) => (
+                    <option key={c._id} value={c._id}>
+                      {c.fullname}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>No customers found</option>
+                )}
+              </select>
+            </div>
+
+            {/* 🖥 Desktop Sidebar List */}
+            <div className="flex-1 overflow-y-auto hidden md:block">
+              {customerData.length > 0 ? (
+                customerData.map((c) => (
+                  <button
+                    key={c._id}
+                    onClick={() => setSelected(c)}
+                    className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors border-l-4 ${
+                      selected?._id === c?._id
+                        ? "bg-orange-50 border-orange-400"
+                        : "border-transparent hover:bg-slate-50"
+                    }`}
                   >
-                    {c?.fullname}
-                  </p>
-                  <p className="text-xs text-slate-400 truncate mt-0.5">
-                    {c.lastVisit
-                      ? `Last visit: ${c.lastVisit}`
-                      : c.status || ""}
-                  </p>
+                    <Avatar src={c?.photo} name={c?.fullname} size="sm" />
+
+                    <div className="min-w-0">
+                      <p
+                        className={`text-xs font-bold truncate ${
+                          selected?._id === c?._id
+                            ? "text-slate-900"
+                            : "text-slate-700"
+                        }`}
+                      >
+                        {c?.fullname}
+                      </p>
+
+                      <p className="text-xs text-slate-400 truncate mt-0.5">
+                        {c.lastVisit
+                          ? `Last visit: ${c.lastVisit}`
+                          : c.status || ""}
+                      </p>
+                    </div>
+                  </button>
+                ))
+              ) : (
+                // ❌ Empty State (Desktop)
+                <div className="flex flex-col gap-2  items-center justify-center h-full py-10 text-center">
+                  <div className="bg-gray-100 p-3 rounded-md"> <Users2 /> </div>
+                  <p className="text-sm text-slate-400">No customers found</p>
                 </div>
-              </button>
-            ))}
+              )}
+            </div>
           </div>
         </aside>
 
@@ -289,7 +321,6 @@ const dispatch = useDispatch();
               Import Customers
             </button>
 
-            {/* Email */}
             <button
               className="border border-slate-200 text-slate-700 text-xs sm:text-sm font-semibold px-3 py-2 sm:px-4 rounded-xl hover:bg-slate-50 transition-colors w-full sm:w-auto"
               onClick={() => router.push("/message/EmailMarketing")}
