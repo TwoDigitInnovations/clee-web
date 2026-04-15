@@ -13,9 +13,40 @@ const AddServicesGroup = (props) => {
     description: "",
     allowOnlineBooking: true,
     selectedService: "",
-    paymentPolicy: "default", // 'default' or 'different'
+    paymentPolicy: "default",
     differentPolicyType: "Do not accept online payments",
   });
+  const validateServiceGroup = (formData, addedServices) => {
+    const errors = {};
+
+    if (!formData.name?.trim()) {
+      errors.name = "Service group name is required";
+    }
+
+    if (!formData.category) {
+      errors.category = "Category is required";
+    }
+
+    if (!formData.description?.trim()) {
+      errors.description = "Description is required";
+    }
+
+    if (addedServices.length === 0) {
+      errors.services = "At least one service is required";
+    }
+
+    if (formData.paymentPolicy === "different") {
+      if (!formData.differentPolicyType) {
+        errors.differentPolicyType = "Select payment policy type";
+      }
+    }
+
+    return {
+      isValid: Object.keys(errors).length === 0,
+      errors,
+    };
+  };
+
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
@@ -50,15 +81,35 @@ const AddServicesGroup = (props) => {
     }
   };
 
+  const [errors, setErrors] = useState({});
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+
+    const newValue = type === "checkbox" ? checked : value;
+
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: newValue,
+    }));
+
+  
+    setErrors((prev) => ({
+      ...prev,
+      [name]: !newValue ? `${name} is required` : "",
     }));
   };
 
   const handleSubmit = async () => {
+    const { isValid, errors } = validateServiceGroup(formData, addedServices);
+
+    if (!isValid) {
+      props.toaster({ type: "error", message: Object.values(errors)[0] }); // first error show
+      return;
+    }
+
+    console.log(errors);
+
     const payload = {
       ...formData,
       services: addedServices,
@@ -105,12 +156,21 @@ const AddServicesGroup = (props) => {
       props.toaster("error", err?.message || "Server error");
     }
   };
-
+  function ErrMsg({ msg }) {
+    return <p className="text-xs text-red-500 mt-1">{msg}</p>;
+  }
   const handleAddService = () => {
     const selected = services.find((s) => s._id === formData.selectedService);
 
     if (!selected) return;
-    console.log(selected);
+    if (!selected) return;
+
+    const alreadyExists = addedServices.some((s) => s.service === selected._id);
+
+    if (alreadyExists) {
+      props.toaster({ type: "error", message: "Service already added" });
+      return;
+    }
 
     const newService = {
       service: selected._id,
@@ -183,6 +243,7 @@ const AddServicesGroup = (props) => {
                     placeholder="Enter service group name..."
                     className="w-full text-sm p-2 border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 outline-none"
                   />
+                 
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">

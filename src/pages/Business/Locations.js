@@ -73,13 +73,13 @@ function Locations(props) {
 
   const handleDeleteConfirm = async () => {
     try {
-      loader(true);
+      props.loader(true);
 
       const res = await dispatch(deleteLocation(id, router));
 
-      loader(false);
+      props.loader(false);
 
-      if (res?.success) {
+      if (res?.status) {
         props.toaster({
           type: "success",
           message: res?.data?.message || "Location deleted successfully",
@@ -89,11 +89,11 @@ function Locations(props) {
         setOpen(false);
         setOpen(false);
       } else {
-        toaster("error", res.message);
+        props.toaster("error", res.message);
       }
     } catch {
-      loader(false);
-      toaster("error", "Server error");
+      props.loader(false);
+      props.toaster({ type: "error", message: "Server error" });
     }
   };
 

@@ -180,7 +180,7 @@ function BusinessDetails({ loader, toaster }) {
     if (user) {
       const fullName = user.fullname || "";
       const nameParts = fullName.trim().split(" ");
-      setEditId(user.id);
+      setEditId(user._id);
       setFormData((prev) => ({
         ...prev,
 

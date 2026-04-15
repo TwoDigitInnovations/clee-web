@@ -46,12 +46,54 @@ function getInitialState() {
 
 function validate(formData) {
   const errors = {};
-  if (!formData.location_name.trim())
+
+  // ✅ Location Name
+  if (!formData.location_name?.trim()) {
     errors.location_name = "Location name is required.";
-  if (formData.location_type === "fixed") {
-    if (!formData.city.trim()) errors.city = "City is required.";
   }
-  return { isValid: Object.keys(errors).length === 0, errors };
+
+  // ✅ Fixed Location Validation
+  if (formData.location_type === "fixed") {
+    if (!formData.city?.trim()) {
+      errors.city = "City is required.";
+    }
+
+    if (!formData.street?.trim()) {
+      errors.street = "Street is required.";
+    }
+
+    if (!formData.apartment?.trim()) {
+      errors.apartment = "Apartment is required.";
+    }
+
+    if (!formData.state?.trim()) {
+      errors.state = "State is required.";
+    }
+
+    if (!formData.postal_code?.trim()) {
+      errors.postal_code = "Postal code is required.";
+    } else if (!/^\d{5,6}$/.test(formData.postal_code)) {
+      errors.postal_code = "Postal code must be 5-6 digits.";
+    }
+
+    if (!formData.suburb?.trim()) {
+      errors.suburb = "Suburb is required.";
+    }
+  }
+
+  // ✅ Mobile Location Validation
+  if (formData.location_type === "mobile") {
+    if (!formData.telephone?.trim()) {
+      errors.telephone = "Telephone number is required.";
+    } else if (!/^\+?[\d\s\-()]{7,15}$/.test(formData.telephone)) {
+      errors.telephone = "Invalid telephone number.";
+    }
+  }
+
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors,
+  };
 }
 
 const TIME_OPTIONS = [
@@ -146,7 +188,7 @@ export default function AddLocation(props) {
 
     if (!isValid) {
       setErrors(errs);
-      props.toaster("error", Object.values(errs)[0]);
+      props.toaster("error", Object.values(errs));
       return;
     }
 
@@ -285,6 +327,7 @@ export default function AddLocation(props) {
                     onChange={(e) => set("telephone", e.target.value)}
                     className={`${inputCls()} pl-8`}
                   />
+                  {errors.telephone && <ErrMsg msg={errors.telephone} />}
                 </div>
               </div>
             )}
@@ -313,6 +356,7 @@ export default function AddLocation(props) {
                     className={inputCls()}
                     placeholder="Street and number"
                   />
+                  {errors.street && <ErrMsg msg={errors.street} />}
                 </div>
                 <div>
                   <Label>Apartment, suite, unit, etc.</Label>
@@ -323,6 +367,7 @@ export default function AddLocation(props) {
                     className={inputCls()}
                     placeholder="Apartment, suite, unit"
                   />
+                  {errors.apartment && <ErrMsg msg={errors.apartment} />}
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4 mb-4">
@@ -335,6 +380,7 @@ export default function AddLocation(props) {
                     className={inputCls()}
                     placeholder="Suburb"
                   />
+                  {errors.suburb && <ErrMsg msg={errors.suburb} />}
                 </div>
                 <div>
                   <Label required>City</Label>
@@ -356,6 +402,7 @@ export default function AddLocation(props) {
                     className={inputCls()}
                     placeholder="State / region"
                   />
+                  {errors.state && <ErrMsg msg={errors.state} />}
                 </div>
                 <div>
                   <Label>Postal code</Label>
@@ -366,6 +413,7 @@ export default function AddLocation(props) {
                     className={inputCls()}
                     placeholder="Postal code"
                   />
+                  {errors.postal_code && <ErrMsg msg={errors.postal_code} />}
                 </div>
               </div>
             </Card>
