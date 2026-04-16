@@ -16,16 +16,13 @@ function Promocode(props) {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const promocodes = useSelector((state) => state?.promoCode.promoCodes);
-   const PromoCode  = useSelector((state) => state.promoCode);
+  const promocodes = useSelector((state) => state?.promoCode);
+  const PromoCode = useSelector((state) => state.promoCode);
   console.log(PromoCode);
-  useEffect(() => {
-    fetchPromocode();
-  }, [dispatch]);
 
-  const fetchPromocode = () => {
+  useEffect(() => {
     dispatch(fetchPromoCodes(router));
-  };
+  }, [dispatch]);
 
   const handleDeleteConfirm = async () => {
     try {
@@ -33,15 +30,16 @@ function Promocode(props) {
 
       const res = await dispatch(deletePromoCode(id, router));
 
-      loader(false);
+      props.loader(false);
+      console.log(res);
 
-      if (res?.status) {
+      if (res?.success) {
         props.toaster({ type: "success", message: "Promo code deleted" });
         setOpen(false);
       } else {
         props.toaster({ type: "error", message: res.message });
       }
-    } catch(err) {
+    } catch (err) {
       props.loader(false);
       props.toaster({
         type: "error",
@@ -263,12 +261,6 @@ function Promocode(props) {
                 launch your first promotional campaign.
               </p>
             </div>
-            <button
-              onClick={fetchPromocode}
-              className="text-xs flex items-center gap-1 text-gray-500 font-bold uppercase tracking-wider hover:text-blue-600"
-            >
-              <RefreshCcw size={12} /> REFRESH
-            </button>
           </div>
         )}
       </div>
@@ -276,8 +268,8 @@ function Promocode(props) {
       <ConfirmModal
         isOpen={open}
         setIsOpen={setOpen}
-        title="Delete Staff"
-        message="Are you sure you want to delete this staff member?"
+        title="Delete Promo Codes "
+        message="Are you sure you want to delete this Promo Codes ?"
         onConfirm={handleDeleteConfirm}
         yesText="Yes, Delete"
         noText="Cancel"

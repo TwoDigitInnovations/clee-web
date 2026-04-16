@@ -10,14 +10,13 @@ import {
   setError,
 } from "../slices/PromoCodeSlice";
 
-
 export const fetchPromoCodes = (router) => async (dispatch) => {
   try {
     dispatch(setLoading(true));
     const res = await Api("get", "promo-codes", "", router);
 
     if (res?.status) {
-      dispatch(setPromoCodes(res.data?.data || []));
+      dispatch(setPromoCodes(res.data?.data.promoCodes || []));
     }
 
     dispatch(setLoading(false));
@@ -79,7 +78,7 @@ export const deletePromoCode = (id, router) => async (dispatch) => {
 
     if (res?.status) {
       dispatch(removePromoCode(id));
-      return { success: true, message: res.message };
+      return { success: true, message: res.data.message };
     }
 
     return { success: false, message: res.message };

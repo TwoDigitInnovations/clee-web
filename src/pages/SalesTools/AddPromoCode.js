@@ -54,7 +54,7 @@ export default function AddPromoCode(props) {
   const id = searchParams.get("id");
 
   const { currentPromoCode } = useSelector((state) => state.promoCode);
-   const PromoCode  = useSelector((state) => state.promoCode);
+  const PromoCode = useSelector((state) => state.promoCode);
   console.log(PromoCode);
 
   useEffect(() => {
@@ -140,15 +140,15 @@ export default function AddPromoCode(props) {
 
       props.loader(false);
 
-      console.log(res?.status);
+      console.log(res);
 
-      if (res?.status) {
-        props.toaster(
-          "success",
-          id
+      if (res?.success) {
+        props.toaster({
+          type: "success",
+          message: id
             ? "Promo code updated successfully"
             : "Promo code created successfully",
-        );
+        });
         if (!id) setFormData(getInitialState());
         router.push("/SalesTools/Promocode");
       } else {
@@ -408,14 +408,14 @@ export default function AddPromoCode(props) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label>Validity range</Label>
-                    <div className="flex items-center gap-1">
+                    <div className="flex flex-wrap items-center gap-1">
                       <input
                         type="date"
                         value={formData.validity_start}
                         onChange={(e) => set("validity_start", e.target.value)}
                         className={inputCls()}
                       />
-                      <span className="text-gray-400 text-sm">–</span>
+                      {/* <span className="text-gray-400 text-sm">–</span> */}
                       <input
                         type="date"
                         value={formData.validity_end}
@@ -426,7 +426,7 @@ export default function AddPromoCode(props) {
                   </div>
                   <div>
                     <Label>Appointment date range</Label>
-                    <div className="flex items-center gap-1">
+                    <div className="flex flex-wrap items-center gap-1">
                       <input
                         type="date"
                         value={formData.appointment_date_start}
@@ -436,7 +436,7 @@ export default function AddPromoCode(props) {
                         className={inputCls()}
                         placeholder="No restriction on booking dates"
                       />
-                      <span className="text-gray-400 text-sm">–</span>
+                      {/* <span className="text-gray-400 text-sm">–</span> */}
                       <input
                         type="date"
                         value={formData.appointment_date_end}

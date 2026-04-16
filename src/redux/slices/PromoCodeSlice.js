@@ -29,7 +29,7 @@ const promoCodeSlice = createSlice({
       }
     },
     removePromoCode: (state, action) => {
-      state.promoCodes = state.promoCodes?.promoCodes.filter(
+      state.promoCodes = state.promoCodes?.filter(
         (p) => p._id !== action.payload,
       );
     },

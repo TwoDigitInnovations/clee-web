@@ -49,8 +49,6 @@ function Packages(props) {
     },
   ];
 
-
-
   const fetchPackages = async () => {
     try {
       props.loader(true);
@@ -136,39 +134,42 @@ function Packages(props) {
                 <table className="w-full text-left">
                   <thead className="bg-[#fcfcfc] border-b border-gray-100">
                     <tr>
-                      <th className="px-6 py-4 text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-[12px] font-bold text-gray-500 uppercase tracking-wider">
                         Photo
                       </th>
-                      <th className="px-6 py-4 text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-[12px] font-bold text-gray-500 uppercase tracking-wider">
                         Name
                       </th>
-                      <th className="px-6 py-4 text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-[12px] font-bold text-gray-500 uppercase tracking-wider">
                         SKU / Services
                       </th>
-                      <th className="px-6 py-4 text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-[12px] font-bold text-gray-500 uppercase tracking-wider">
                         Pricing
                       </th>
-                      <th className="px-6 py-4 text-[10px] font-bold text-gray-500 uppercase tracking-wider text-right">
+                      <th className="px-6 py-4 text-[12px] font-bold text-gray-500 uppercase tracking-wider text-right">
                         Actions
                       </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
-                    {packages.map((pkg) => (
+                    {packages.map((pkg, key) => (
                       <tr
-                        key={pkg.id}
+                        key={key}
                         className="hover:bg-gray-50 transition-colors"
                       >
                         <td className="px-6 py-5">
-                          <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center text-gray-300">
-                            <img src={pkg.photo} alt={pkg.name} />{" "}
-                            <ImageIcon size={20} />
+                          <div className="w-16 h-14  rounded flex items-center justify-center text-gray-300">
+                            {pkg.photo ? (
+                              <img src={pkg.photo} alt={pkg.package_name} />
+                            ) : (
+                              <ImageIcon size={20} />
+                            )}
                           </div>
                         </td>
                         <td className="px-6 py-5">
                           <div className="flex flex-col">
-                            <span className="text-sm font-semibold text-gray-800 leading-tight">
-                              {pkg.name}
+                            <span className="text-sm font-semibold text-black leading-tight">
+                              {pkg.package_name}
                             </span>
                             <span
                               className={`text-xs mt-1 ${pkg.isPromo ? "text-[#a38a00] font-medium" : "text-gray-400"}`}
