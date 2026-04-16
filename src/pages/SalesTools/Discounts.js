@@ -148,7 +148,6 @@ export default function Discounts(props) {
   const router = useRouter();
 
   const [discounts, setDiscounts] = useState([]);
-
   const [loading, setLoading] = useState(false);
   const [addModal, setAddModal] = useState(false);
   const [editModal, setEditModal] = useState(false);
@@ -163,8 +162,7 @@ export default function Discounts(props) {
       setLoading(true);
       const res = await Api("get", "discounts", "", router);
       setLoading(false);
-      if (res?.status === true && res.data?.data?.length > 0)
-        setDiscounts(res.data.data);
+      if (res?.status === true) setDiscounts(res.data.data);
     } catch {
       setLoading(false);
     }
@@ -213,7 +211,7 @@ export default function Discounts(props) {
       discountType: d.discountType,
       value: d.value,
     });
-    setEditId(d.id);
+    setEditId(d._id);
     setEditModal(true);
     setErrors({});
   };

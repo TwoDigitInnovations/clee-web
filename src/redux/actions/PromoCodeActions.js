@@ -10,7 +10,7 @@ import {
   setError,
 } from "../slices/PromoCodeSlice";
 
-// ✅ GET ALL
+
 export const fetchPromoCodes = (router) => async (dispatch) => {
   try {
     dispatch(setLoading(true));
@@ -27,7 +27,6 @@ export const fetchPromoCodes = (router) => async (dispatch) => {
   }
 };
 
-// ✅ GET BY ID
 export const fetchPromoCodeById = (id, router) => async (dispatch) => {
   try {
     dispatch(setLoading(true));
@@ -44,7 +43,6 @@ export const fetchPromoCodeById = (id, router) => async (dispatch) => {
   }
 };
 
-// ✅ CREATE
 export const createPromoCode = (data, router) => async (dispatch) => {
   try {
     const res = await Api("post", "promo-codes", data, router);
@@ -60,7 +58,6 @@ export const createPromoCode = (data, router) => async (dispatch) => {
   }
 };
 
-// ✅ UPDATE
 export const updatePromoCode = (id, data, router) => async (dispatch) => {
   try {
     const res = await Api("put", `promo-codes/${id}`, data, router);
@@ -76,7 +73,6 @@ export const updatePromoCode = (id, data, router) => async (dispatch) => {
   }
 };
 
-// ✅ DELETE
 export const deletePromoCode = (id, router) => async (dispatch) => {
   try {
     const res = await Api("delete", `promo-codes/${id}`, "", router);
@@ -92,7 +88,6 @@ export const deletePromoCode = (id, router) => async (dispatch) => {
   }
 };
 
-// ✅ TOGGLE STATUS
 export const togglePromoCodeStatus = (id, router) => async (dispatch) => {
   try {
     const res = await Api(

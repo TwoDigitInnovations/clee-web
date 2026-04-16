@@ -54,6 +54,8 @@ export default function AddPromoCode(props) {
   const id = searchParams.get("id");
 
   const { currentPromoCode } = useSelector((state) => state.promoCode);
+   const PromoCode  = useSelector((state) => state.promoCode);
+  console.log(PromoCode);
 
   useEffect(() => {
     dispatch(fetchPromoCodeById(id, router));
@@ -63,7 +65,7 @@ export default function AddPromoCode(props) {
     if (!id) return;
     if (currentPromoCode) {
       const data = currentPromoCode;
- 
+
       setFormData({
         promo_name: data.promo_name || "",
         voucher_code: data.voucher_code || "",
@@ -138,7 +140,9 @@ export default function AddPromoCode(props) {
 
       props.loader(false);
 
-      if (res?.status === true) {
+      console.log(res?.status);
+
+      if (res?.status) {
         props.toaster(
           "success",
           id
@@ -148,11 +152,16 @@ export default function AddPromoCode(props) {
         if (!id) setFormData(getInitialState());
         router.push("/SalesTools/Promocode");
       } else {
-        props.toaster("error", res?.message || "Something went wrong");
+        props.toaster({
+          type: "error",
+          message: res?.message || "Something went wrong",
+        });
       }
     } catch (err) {
       props.loader(false);
-      props.toaster("error", "Server error");
+      console.log(err.message);
+
+      props.toaster({ type: "error", message: err.message || "Server error" });
     }
   };
 

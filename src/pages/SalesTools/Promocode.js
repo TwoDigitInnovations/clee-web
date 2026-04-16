@@ -17,9 +17,8 @@ function Promocode(props) {
   const dispatch = useDispatch();
 
   const promocodes = useSelector((state) => state?.promoCode.promoCodes);
-
-
-
+   const PromoCode  = useSelector((state) => state.promoCode);
+  console.log(PromoCode);
   useEffect(() => {
     fetchPromocode();
   }, [dispatch]);
@@ -36,15 +35,22 @@ function Promocode(props) {
 
       loader(false);
 
-      if (res?.success) {
+      if (res?.status) {
         props.toaster({ type: "success", message: "Promo code deleted" });
         setOpen(false);
       } else {
         props.toaster({ type: "error", message: res.message });
       }
-    } catch {
+    } catch(err) {
       props.loader(false);
-      props.toaster({ type: "error", message: "Server error" });
+      props.toaster({
+        type: "error",
+        message:
+          err.message ||
+          err.data.message ||
+          err.data.data.message ||
+          "Server error",
+      });
     }
   };
 
@@ -83,7 +89,10 @@ function Promocode(props) {
               </a>
             </p>
             <div className="mt-6 flex gap-4 items-center">
-              <button className="bg-custom-blue text-white px-6 py-2 rounded text-sm font-medium">
+              <button
+                className="bg-custom-blue text-white px-6 py-2 rounded text-sm font-medium"
+                onClick={() => router.push("/SalesTools/AddPromoCode")}
+              >
                 Give it a try
               </button>
               <button className="text-gray-500 text-sm font-medium hover:text-gray-700">
@@ -112,69 +121,136 @@ function Promocode(props) {
           </div>
         </div>
 
-      
         {promocodes?.promoCodes?.length > 0 ? (
-          <div className="bg-white border border-gray-200 rounded shadow-sm overflow-hidden">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-gray-100">
-                  <th className="px-6 py-4 text-sm font-semibold text-gray-600">
-                    Promo code
-                  </th>
-                  <th className="px-6 py-4 text-sm font-semibold text-gray-600">
-                    Discount
-                  </th>
-                  <th className="px-6 py-4 text-sm font-semibold text-gray-600">
-                    Usage count
-                  </th>
-                  <th className="px-6 py-4 text-sm font-semibold text-gray-600">
-                    Status
-                  </th>
-                  <th className="px-6 py-4"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {promocodes?.promoCodes?.map((promo, key) => (
-                  <tr key={key} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 text-sm font-medium text-gray-800">
-                      {promo.voucher_code}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-700">
-                      {promo.discount_value}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-700">
-                      {promo.total_uses | 0}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="bg-[#2e7d32] text-white text-[11px] font-bold px-2 py-0.5 rounded">
-                        {promo.status ? "Active" : "Inactive"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right flex justify-end gap-2">
-                      <button
-                        className="border text-black border-gray-300 px-4 py-1 rounded text-sm hover:bg-gray-50"
-                        onClick={() =>
-                          router.push(
-                            `/SalesTools/AddPromoCode?id=${promo._id}`,
-                          )
-                        }
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="border border-gray-300 p-1.5 rounded text-gray-500 hover:text-red-600"
-                        onClick={() => {
-                          setOpen(true);
-                          setId(promo._id);
-                        }}
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </td>
+          <div>
+            {/* Desktop Table View (Visible on sm and above) */}
+            <div className="hidden sm:block bg-white border border-gray-200 rounded shadow-sm overflow-hidden">
+              <table className="w-full text-left border-collapse">
+                <thead className="bg-gray-50">
+                  <tr className="border-b border-gray-100">
+                    <th className="px-6 py-4 text-sm font-semibold text-gray-600">
+                      Promo code
+                    </th>
+                    <th className="px-6 py-4 text-sm font-semibold text-gray-600">
+                      Discount
+                    </th>
+                    <th className="px-6 py-4 text-sm font-semibold text-gray-600">
+                      Usage count
+                    </th>
+                    <th className="px-6 py-4 text-sm font-semibold text-gray-600">
+                      Status
+                    </th>
+                    <th className="px-6 py-4"></th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {promocodes?.promoCodes?.map((promo, key) => (
+                    <tr
+                      key={key}
+                      className="hover:bg-gray-50 transition-colors border-b border-gray-50"
+                    >
+                      <td className="px-6 py-4 text-sm font-medium text-gray-800">
+                        {promo.voucher_code}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700">
+                        {promo.discount_value}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700">
+                        {promo.total_uses || 0}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="bg-[#2e7d32] text-white text-[11px] font-bold px-2 py-0.5 rounded">
+                          {promo.status ? "Active" : "Inactive"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 flex justify-end gap-2">
+                        {/* Desktop Buttons */}
+                        <button
+                          className="border border-gray-300 text-gray-600 px-4 py-1 rounded text-sm"
+                          onClick={() =>
+                            router.push(
+                              `/SalesTools/AddPromoCode?id=${promo._id}`,
+                            )
+                          }
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="border border-gray-300 text-gray-600 p-1.5 rounded"
+                          onClick={() => {
+                            setOpen(true);
+                            setId(promo._id);
+                          }}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View (Visible only on small screens) */}
+            <div className="sm:hidden space-y-3">
+              {promocodes?.promoCodes?.map((promo, key) => (
+                <div
+                  key={key}
+                  className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm"
+                >
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <div className="text-xs text-gray-500 font-bold uppercase tracking-wider">
+                        Promo Code
+                      </div>
+                      <div className="text-sm font-bold text-gray-900">
+                        {promo.voucher_code}
+                      </div>
+                    </div>
+                    <span
+                      className={`${promo.status ? "bg-green-600" : "bg-gray-400"} text-white text-[10px] font-bold px-2 py-0.5 rounded`}
+                    >
+                      {promo.status ? "Active" : "Inactive"}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <div className="text-xs text-gray-500">Discount</div>
+                      <div className="text-sm font-medium text-gray-600">
+                        {promo.discount_value}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500">Usage</div>
+                      <div className="text-sm font-medium text-gray-600">
+                        {promo.total_uses || 0}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 pt-3 border-t border-gray-100">
+                    <button
+                      className="flex-1 border border-gray-300 text-gray-600 py-2 rounded text-sm font-semibold"
+                      onClick={() =>
+                        router.push(`/SalesTools/AddPromoCode?id=${promo._id}`)
+                      }
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="px-4 border border-gray-300 rounded text-gray-500"
+                      onClick={() => {
+                        setOpen(true);
+                        setId(promo._id);
+                      }}
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         ) : (
           <div className="bg-white border border-gray-200 rounded-lg p-4 flex flex-col md:flex-row gap-4 justify-between items-center shadow-sm">

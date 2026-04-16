@@ -22,21 +22,19 @@ const promoCodeSlice = createSlice({
     },
     updatePromoCodeItem: (state, action) => {
       const index = state.promoCodes.findIndex(
-        (p) => p._id === action.payload._id
+        (p) => p._id === action.payload._id,
       );
       if (index !== -1) {
         state.promoCodes[index] = action.payload;
       }
     },
     removePromoCode: (state, action) => {
-      state.promoCodes = state.promoCodes.filter(
-        (p) => p._id !== action.payload
+      state.promoCodes = state.promoCodes?.promoCodes.filter(
+        (p) => p._id !== action.payload,
       );
     },
     togglePromoStatus: (state, action) => {
-      const item = state.promoCodes.find(
-        (p) => p._id === action.payload
-      );
+      const item = state.promoCodes.find((p) => p._id === action.payload);
       if (item) {
         item.status = item.status === "active" ? "inactive" : "active";
       }

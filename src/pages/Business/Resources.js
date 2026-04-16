@@ -6,30 +6,15 @@ import { ConfirmModal } from "@/components/deleteModel";
 import { Api } from "@/services/service";
 import ResourceSettingsModal from "@/components/ResourceSettingsModal";
 
-// Dummy data updated to match the screenshot structure
-const dummyResources = [
-  {
-    _id: "1",
-    name: "RESOURCE",
-    items: [
-      { name: "RESOURCE 1", location: "Chebo Clinic" },
-      { name: "RESOURCE 2", location: "Chebo Clinic" },
-      { name: "RESOURCE 3", location: "Chebo Clinic" },
-      { name: "RESOURCE 4", location: "Chebo Clinic" },
-    ],
-  },
-];
-
 function Resources(props) {
   const [resources, setResources] = useState([]);
   const [id, setId] = useState(null);
   const [open, setOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activePopover, setActivePopover] = useState(null); // Track which row's popover is open
+  const [activePopover, setActivePopover] = useState(null); 
   const router = useRouter();
 
   const handleSave = (data) => {
-    console.log("Setting Saved:", data);
     setIsModalOpen(false);
   };
 
@@ -40,12 +25,10 @@ function Resources(props) {
       props.loader(false);
       if (res?.status === true && res.data.data.length > 0) {
         setResources(res.data.data);
-      } else {
-        setResources(dummyResources); 
       }
     } catch (err) {
       props.loader(false);
-      setResources(dummyResources); 
+
       props.toaster({ type: "error", message: "Failed to fetch Resources" });
     }
   };
@@ -169,7 +152,9 @@ function Resources(props) {
                             {item.items.map((sub, i) => (
                               <tr key={i} className="border-t border-gray-50">
                                 <td className="px-3 py-2">{sub}</td>
-                                <td className="px-3 py-2">{sub.location || "-"}</td>
+                                <td className="px-3 py-2">
+                                  {sub.location || "-"}
+                                </td>
                               </tr>
                             ))}
                           </tbody>
