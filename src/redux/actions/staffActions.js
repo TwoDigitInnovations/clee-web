@@ -1,4 +1,4 @@
-import { Api } from "@/services/service";
+import { Api, ApiFormData } from "@/services/service";
 import {
   setStaff,
   setStaffStats,
@@ -59,7 +59,7 @@ export const saveStaff = (id, payload, router) => async (dispatch) => {
     const method = id ? "put" : "post";
     const url = id ? `staff/update/${id}` : "staff/create";
 
-    const res = await Api(method, url, payload, router);
+    const res = await ApiFormData(method, url, payload, router);
 
     if (res?.status) {
       if (id) {

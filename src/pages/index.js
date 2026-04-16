@@ -282,7 +282,7 @@ function Dashboard() {
   useEffect(() => {
     dispatch(fetchStaff());
   }, [dispatch]);
-  
+
   const toggleStaff = (member) => {
     const exists = selectedStaff.find((s) => s._id === member._id);
 
@@ -292,7 +292,6 @@ function Dashboard() {
       setSelectedStaff((prev) => [...prev, member]);
     }
   };
-
 
   useEffect(() => {
     const handleClickOutside = () => {

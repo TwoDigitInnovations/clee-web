@@ -148,9 +148,9 @@ function Staff(props) {
               {/* Top Section */}
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-lg bg-gray-100 overflow-hidden flex items-center justify-center shrink-0">
-                  {item.image ? (
+                  {item.photo ? (
                     <img
-                      src={item.image}
+                      src={item.photo}
                       alt={item.fullname}
                       className="w-full h-full object-cover"
                     />

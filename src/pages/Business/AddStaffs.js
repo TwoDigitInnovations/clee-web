@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Check, MapPinHouse, Search, Settings } from "lucide-react";
 import DashboardHeader from "@/components/DashboardHeader";
 import { useRouter } from "next/navigation";
@@ -7,8 +7,7 @@ import { Api } from "@/services/service";
 import { Globe, Eye, Lock } from "lucide-react";
 import { Camera, Plus, ChevronDown, Upload } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchStaff } from "@/redux/actions/staffActions";
-import { saveTemplate } from "@/redux/actions/templateActions";
+import { saveStaff } from "@/redux/actions/staffActions";
 import { fetchServices } from "@/redux/actions/servicesActions";
 
 function getInitialState() {
@@ -17,16 +16,13 @@ function getInitialState() {
     last_name: "",
     mobile: "",
     email: "",
-    telephone: "",
-    staff_type: "fixed",
-    employment_status: "contract",
     employee_type: "employee",
     book_online: false,
     profile_booking: false,
     notification: false,
     street: "",
     city: "",
-    state: "",
+
     service_ids: [],
     hours: {
       Monday: { enabled: true, open: "9:00 am", close: "5:00 pm" },
@@ -37,7 +33,7 @@ function getInitialState() {
       Saturday: { enabled: false, open: "9:00 am", close: "5:00 pm" },
       Sunday: { enabled: false, open: "9:00 am", close: "5:00 pm" },
     },
-    nickName: "Jules",
+    nickName: "",
     jobTitle: "",
     referenceType: "Employee ID",
     referenceNumber: "",
@@ -45,14 +41,80 @@ function getInitialState() {
     customMessage: "",
     syncCalendar: true,
     photo: null,
+    photoPreview: "",
+    AetherGlobalCommision: 12.5,
+    VanguardHoldingsCommision: 18.2,
+    SolsticeRealEstateCommision: 5.0,
   };
 }
 
 function validate(formData) {
   const errors = {};
-  if (!formData.staff_name.trim())
+
+  if (!formData.staff_name?.trim()) {
     errors.staff_name = "First name is required.";
-  return { isValid: Object.keys(errors).length === 0, errors };
+  }
+
+  if (!formData.last_name?.trim()) {
+    errors.last_name = "Last name is required.";
+  }
+
+  if (!formData.mobile?.trim()) {
+    errors.mobile = "Mobile number is required.";
+  } else {
+    const cleaned = formData.mobile.replace(/\D/g, "");
+
+    if (!/^[0-9]+$/.test(cleaned)) {
+      errors.mobile = "Only numbers are allowed";
+    } else if (cleaned.length < 7 || cleaned.length > 10) {
+      errors.mobile = "Number must be between 7 to 10 digits";
+    }
+  }
+
+  if (formData.email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      errors.email = "Invalid email format";
+    }
+  }
+
+  if (formData.telephone) {
+    if (!/^\+?[\d\s\-()]{7,15}$/.test(formData.telephone)) {
+      errors.telephone = "Invalid telephone number";
+    }
+  }
+
+  if (formData.staff_type === "fixed") {
+    if (!formData.street?.trim()) {
+      errors.street = "Street is required";
+    }
+
+    if (!formData.city?.trim()) {
+      errors.city = "City is required";
+    }
+  }
+
+  if (!formData.service_ids || formData.service_ids.length === 0) {
+    errors.service_ids = "Please assign at least one service";
+  }
+
+  const hasValidDay = Object.values(formData.hours || {}).some(
+    (day) => day.enabled,
+  );
+
+  if (!hasValidDay) {
+    errors.hours = "At least one working day must be enabled";
+  }
+
+  // ✅ Reference Number (if provided)
+  if (formData.referenceNumber && formData.referenceNumber.length < 3) {
+    errors.referenceNumber = "Reference number too short";
+  }
+
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors,
+  };
 }
 
 export default function AddStaff(props) {
@@ -136,13 +198,35 @@ export default function AddStaff(props) {
     });
   };
 
-  const handleSubmit = async () => {
-    const { isValid, errors: errs } = validate(formData);
-    if (!isValid) {
-      setErrors(errs);
-      props.toaster("error", Object.values(errs)[0]);
+  const fileInputRef = useRef(null);
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      props.toaster({ type: "error", message: "Max file size is 2MB" });
       return;
     }
+
+    const preview = URL.createObjectURL(file);
+
+    setFormData((prev) => ({
+      ...prev,
+      photo: file,
+      photoPreview: preview,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    const { isValid, errors: errs } = validate(formData);
+
+    if (!isValid) {
+      setErrors(errs);
+      props.toaster({ type: "error", message: Object.values(errs)[0] });
+      return;
+    }
+
     setErrors({});
 
     const payload = {
@@ -162,44 +246,75 @@ export default function AddStaff(props) {
       },
       service_ids: formData.service_ids,
       hours: formData.hours,
+      AetherGlobalCommision: formData.AetherGlobalCommision,
+      VanguardHoldingsCommision: formData.VanguardHoldingsCommision,
+      SolsticeRealEstateCommision: formData.SolsticeRealEstateCommision,
+      nickName: formData.nickName,
+      jobTitle: formData.jobTitle || "",
+      referenceType: formData.referenceType ||  "Employee ID",
+      referenceNumber: "",
+      bio: "",
+      customMessage: "",
+      syncCalendar: true,
     };
+
+    const form = new FormData();
+
+    Object.keys(payload).forEach((key) => {
+      if (typeof payload[key] === "object") {
+        form.append(key, JSON.stringify(payload[key]));
+      } else {
+        form.append(key, payload[key]);
+      }
+    });
+
+    if (formData.photo) {
+      form.append("photo", formData.photo);
+    }
 
     try {
       props.loader(true);
-
-      const res = await dispatch(saveTemplate(id, payload, router));
-
+      const res = await dispatch(saveStaff(id, form, router));
       props.loader(false);
-      if (res?.status === true) {
+
+      if (res?.status) {
         props.toaster(
           "success",
           id ? "Staff updated successfully" : "Staff created successfully",
         );
+
         if (!id) setFormData(getInitialState());
+
         router.push("/Business/Staff");
+        console.log("qawsedf");
+        
       } else {
         props.toaster("error", res?.message || "Something went wrong");
       }
-    } catch {
+    } catch (err) {
       props.loader(false);
-      props.toaster("error", "Server error");
+      console.log(err);
+
+      props.toaster({
+        type: "error",
+        message: err?.message || "Server error",
+      });
     }
   };
-
-  const isFixed = formData.staff_type === "fixed";
 
   const filteredServices = services.filter(
     (s) =>
       s.name.toLowerCase().includes(serviceSearch.toLowerCase()) ||
-      s.category?.toLowerCase().includes(serviceSearch.toLowerCase()),
+      s.category?.name?.toLowerCase().includes(serviceSearch.toLowerCase()),
   );
 
   const groupedServices = filteredServices.reduce((acc, svc) => {
-    const cat = svc.category || "Other";
+    const cat = svc.category.name || "Other";
     if (!acc[cat]) acc[cat] = [];
     acc[cat].push(svc);
     return acc;
   }, {});
+
   const [commissions, setCommissions] = useState([
     {
       id: 1,
@@ -224,11 +339,24 @@ export default function AddStaff(props) {
     },
   ]);
 
+  const commissionMap = {
+    1: "AetherGlobalCommision",
+    3: "VanguardHoldingsCommision",
+    2: "SolsticeRealEstateCommision",
+  };
+
   const handleChange1 = (id, val) => {
     setCommissions((prev) =>
       prev.map((item) => (item.id === id ? { ...item, value: val } : item)),
     );
+
+    setFormData((prev) => ({
+      ...prev,
+      [commissionMap[id]]: Number(val),
+    }));
   };
+
+  console.log(formData);
 
   return (
     <>
@@ -239,7 +367,7 @@ export default function AddStaff(props) {
           <div className="text-sm text-gray-500 mb-1">
             <span
               className="hover:underline cursor-pointer"
-              onClick={() => router.push("/Business/staffs")}
+              onClick={() => router.push("/Business/Staff")}
             >
               Staff
             </span>
@@ -295,6 +423,7 @@ export default function AddStaff(props) {
                     onChange={(e) => set("last_name", e.target.value)}
                     className={inputCls()}
                   />
+                  {errors.last_name && <ErrMsg msg={errors.last_name} />}
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4 mb-4">
@@ -307,6 +436,7 @@ export default function AddStaff(props) {
                     onChange={(e) => set("mobile", e.target.value)}
                     className={inputCls()}
                   />
+                  {errors.mobile && <ErrMsg msg={errors.mobile} />}
                 </div>
                 <div>
                   <Label>Email</Label>
@@ -340,11 +470,21 @@ export default function AddStaff(props) {
               <Label>Address</Label>
               <input
                 type="text"
+                name="street"
                 placeholder="Street name and number"
                 className={inputCls()}
+                value={formData.street}
+                onChange={(e) => set("street", e.target.value)}
               />
               <Label>City</Label>
-              <input type="text" placeholder="City" className={inputCls()} />
+              <input
+                type="text"
+                placeholder="city"
+                name="city"
+                className={inputCls()}
+                value={formData.city}
+                onChange={(e) => set("city", e.target.value)}
+              />
             </div>
           </div>
           <div className="px-0 py-6 flex  grid md:grid-cols-3 grid-cols-1">
@@ -476,13 +616,13 @@ export default function AddStaff(props) {
             </div>
           </div>
 
-          <div className="px-0 py-6 flex  grid md:grid-cols-3 grid-cols-1">
+          {/* <div className="px-0 py-6 flex  grid md:grid-cols-3 grid-cols-1">
             <SectionLabel
               title="Price tier"
               description="Charge for services based on a staff members level of experience."
             />
             <div className="bg-white col-span-2 flex-1 flex flex-col gap-4 max-w-full"></div>
-          </div>
+          </div> */}
           <div className="px-0 py-6 flex  grid md:grid-cols-3 grid-cols-1">
             <SectionLabel
               title="Services"
@@ -641,7 +781,6 @@ export default function AddStaff(props) {
                       </div>
                     </div>
 
-                    {/* Right Controls */}
                     <div className="flex items-center gap-4">
                       {/* Range */}
                       <div className="flex items-center gap-2 text-xs text-gray-400">
@@ -666,7 +805,7 @@ export default function AddStaff(props) {
                           type="number"
                           value={item.value}
                           onChange={(e) =>
-                            handleChange(item.id, e.target.value)
+                            handleChange1(item.id, e.target.value)
                           }
                           className="w-12 bg-transparent outline-none text-sm font-semibold text-gray-800"
                         />
@@ -701,7 +840,7 @@ export default function AddStaff(props) {
                       type="text"
                       name="nickName"
                       value={formData.nickName}
-                      onChange={handleChange}
+                      onChange={(e) => set("nickName", e.target.value)}
                       className="w-full text-[14px] bg-gray-100 border-none rounded-lg p-3 text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none"
                     />
                   </div>
@@ -714,7 +853,7 @@ export default function AddStaff(props) {
                       name="jobTitle"
                       placeholder="e.g. Senior Designer"
                       value={formData.jobTitle}
-                      onChange={handleChange}
+                      onChange={(e) => set("jobTitle", e.target.value)}
                       className="w-full text-[14px] bg-gray-100 border-none rounded-lg p-3 text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none"
                     />
                   </div>
@@ -728,7 +867,7 @@ export default function AddStaff(props) {
                     <select
                       name="referenceType"
                       value={formData.referenceType}
-                      onChange={handleChange}
+                      onChange={(e) => set("referenceType", e.target.value)}
                       className="w-full text-[14px] bg-gray-100 border-none rounded-lg p-3 text-gray-700 appearance-none focus:ring-2 focus:ring-blue-500 outline-none"
                     >
                       <option>Employee ID</option>
@@ -745,7 +884,7 @@ export default function AddStaff(props) {
                       name="referenceNumber"
                       placeholder="Enter number"
                       value={formData.referenceNumber}
-                      onChange={handleChange}
+                      onChange={(e) => set("referenceNumber", e.target.value)}
                       className="w-full text-[14px] bg-gray-100 border-none rounded-lg p-3 text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none"
                     />
                   </div>
@@ -765,7 +904,7 @@ export default function AddStaff(props) {
                     rows="4"
                     placeholder="Tell us about your professional background..."
                     value={formData.bio}
-                    onChange={handleChange}
+                    onChange={(e) => set("bio", e.target.value)}
                     className="w-full text-[14px] bg-gray-100 border-none rounded-lg p-3 text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none resize-none"
                   />
                 </div>
@@ -784,7 +923,7 @@ export default function AddStaff(props) {
                     rows="4"
                     placeholder="Custom message for client communications..."
                     value={formData.customMessage}
-                    onChange={handleChange}
+                    onChange={(e) => set("customMessage", e.target.value)}
                     className="w-full text-[14px] bg-gray-100 border-none rounded-lg p-3 text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none resize-none"
                   />
                 </div>
@@ -805,20 +944,48 @@ export default function AddStaff(props) {
                   This image will be visible to clients.
                 </p>
 
-                <div className="md:w-[320px] w-full aspect-square border-2 border-dashed border-gray-300 rounded-xl bg-white flex flex-col items-center justify-center mb-6 p-4">
-                  <div className="bg-blue-50 p-4 rounded-xl mb-4">
-                    <Camera className="text-blue-600" size={32} />
-                  </div>
-                  <p className="md:text-[12px] text-sm text-gray-500 text-center leading-relaxed">
-                    Accepted formats:{" "}
-                    <span className="font-bold">PNG, GIF or JPG.</span>
-                    <br />
-                    Maximum file size is{" "}
-                    <span className="font-bold">2.0MB.</span>
-                  </p>
+                <div
+                  className="md:w-[320px] w-full aspect-square border-2 border-dashed border-gray-300 rounded-xl bg-white flex flex-col items-center justify-center mb-6 p-4 cursor-pointer overflow-hidden"
+                  onClick={() => fileInputRef.current.click()}
+                >
+                  {formData.photoPreview ? (
+                    <img
+                      src={formData.photoPreview}
+                      alt="preview"
+                      className="w-full h-full object-cover rounded-xl"
+                    />
+                  ) : (
+                    <>
+                      <div className="bg-blue-50 p-4 rounded-xl mb-4">
+                        <Camera className="text-blue-600" size={32} />
+                      </div>
+
+                      <p className="md:text-[12px] text-sm text-gray-500 text-center leading-relaxed">
+                        Accepted formats:{" "}
+                        <span className="font-bold">PNG, GIF or JPG.</span>
+                        <br />
+                        Maximum file size is{" "}
+                        <span className="font-bold">2.0MB.</span>
+                      </p>
+                    </>
+                  )}
                 </div>
 
-                <button className="w-full bg-[#00478F] text-white py-3 px-4 rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-blue-900 transition-colors">
+                {/* Hidden Input */}
+                <input
+                  type="file"
+                  accept="image/png, image/jpeg, image/jpg, image/gif"
+                  ref={fileInputRef}
+                  onChange={handlePhotoChange}
+                  className="hidden"
+                />
+
+                {/* Button */}
+                <button
+                  type="button"
+                  className="w-full bg-[#00478F] text-white py-3 px-4 rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-blue-900 transition-colors"
+                  onClick={() => fileInputRef.current.click()}
+                >
                   <Upload size={18} />
                   Upload new photo
                 </button>
