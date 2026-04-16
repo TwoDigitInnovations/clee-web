@@ -26,7 +26,7 @@ function SidePannel({ open, setOpen }) {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.user.user);
 
-  console.log(user);
+
   
   const managementMenu = [
     {

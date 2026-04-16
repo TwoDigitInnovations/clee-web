@@ -61,9 +61,6 @@ const AddAutomationRules = ({ loader, toaster }) => {
     label: s.name,
   }));
 
-  console.log(serviceOptions);
-  console.log(services);
-
   const selectedOptions = formData?.selectedServices?.map((s) => ({
     value: s._id,
     label: s.name,

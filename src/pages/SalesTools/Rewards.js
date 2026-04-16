@@ -184,7 +184,6 @@ function Rewards({ loader, toaster }) {
         applyExisting: formData.applyExisting,
         showToCustomers: formData.showToCustomers,
       };
-      console.log(payload);
 
       const res = await Api("post", "rewards/Save", payload, router);
       loader?.(false);

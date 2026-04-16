@@ -184,7 +184,6 @@ export default function AddLocation(props) {
 
   const handleSubmit = async () => {
     const { isValid, errors: errs } = validate(formData);
-    console.log(isValid, errors);
 
     if (!isValid) {
       setErrors(errs);

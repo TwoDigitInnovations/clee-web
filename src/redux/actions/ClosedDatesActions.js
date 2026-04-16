@@ -18,8 +18,7 @@ export const fetchClosedDates = (router) => async (dispatch) => {
       const data = Array.isArray(res.data?.data)
         ? res.data.data
         : res.data?.data || [];
-      console.log(data);
-
+ 
       dispatch(setClosedDates(data));
     }
 

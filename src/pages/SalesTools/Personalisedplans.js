@@ -107,7 +107,7 @@ function Personalisedplans() {
 
   const handleDeleteConfirm = async () => {
     try {
-      console.log("Deleting Plan ID:", selectedId);
+    
       // Actual API call yahan aayegi:
       // await dispatch(deletePlanAction(selectedId));
       setOpen(false);

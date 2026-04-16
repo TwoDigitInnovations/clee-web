@@ -105,7 +105,7 @@ export function StatusPill({ value }) {
 }
 
 export function indexID({ row }) {
-  // console.log(row);
+
   return (
     <div className="text-center">
       <p>{parseInt(row.id) + 1}</p>

@@ -170,7 +170,6 @@ export default function Services(props) {
       setLoading(false);
     }
   };
-  console.log("Active Category:", activeCategory);
 
   useEffect(() => {
     if (categories.length > 0 && !activeCategory) {

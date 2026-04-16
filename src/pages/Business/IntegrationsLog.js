@@ -49,7 +49,6 @@ function IntegrationMessages() {
           setMessages(dummyMessages); // ✅ fallback
         }
       } catch (error) {
-        console.log("API Error:", error);
         setMessages(dummyMessages); // ✅ fallback on error
       } finally {
         setLoading(false);

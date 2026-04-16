@@ -88,10 +88,8 @@ function ClosedDates({ toaster, loader }) {
   const handleDeleteConfirm = async () => {
     try {
       loader(true);
-      console.log(selectedId);
 
       const res = await dispatch(deleteClosedDate(selectedId, router));
-      console.log(res);
 
       loader(false);
 
@@ -152,7 +150,7 @@ function ClosedDates({ toaster, loader }) {
     );
   };
 
-  console.log(selectedId, open);
+
 
   return (
     <>

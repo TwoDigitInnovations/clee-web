@@ -286,7 +286,7 @@ export default function AddStaff(props) {
         if (!id) setFormData(getInitialState());
 
         router.push("/Business/Staff");
-        console.log("qawsedf");
+   
         
       } else {
         props.toaster("error", res?.message || "Something went wrong");

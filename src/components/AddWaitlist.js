@@ -38,7 +38,7 @@ const AddWaitlist = ({ onClose, loader, toaster, editId }) => {
   const { users: customers } = useSelector((state) => state.user);
   let role = "user";
 
-  console.log(customers);
+
 
   useEffect(() => {
     dispatch(fetchServices(router));

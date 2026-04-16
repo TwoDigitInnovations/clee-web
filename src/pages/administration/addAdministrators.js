@@ -85,7 +85,7 @@ export default function Administrators() {
   };
 
   const handleSubmit = async () => {
-    console.log("Submit", form);
+    // console.log("Submit", form);
   };
 
   return (

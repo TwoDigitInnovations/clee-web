@@ -93,7 +93,6 @@ const AddServicesGroup = (props) => {
       [name]: newValue,
     }));
 
-  
     setErrors((prev) => ({
       ...prev,
       [name]: !newValue ? `${name} is required` : "",
@@ -108,8 +107,6 @@ const AddServicesGroup = (props) => {
       return;
     }
 
-    console.log(errors);
-
     const payload = {
       ...formData,
       services: addedServices,
@@ -117,14 +114,13 @@ const AddServicesGroup = (props) => {
 
     try {
       props.loader(true);
-      console.log(payload);
+
       let res;
       if (id) {
         res = await Api("put", `service-groups/update/${id}`, payload, router);
       } else {
         res = await Api("post", `service-groups/create`, payload, router);
       }
-      console.log(res);
 
       props.loader(false);
 
@@ -152,7 +148,7 @@ const AddServicesGroup = (props) => {
       }
     } catch (err) {
       props.loader(false);
-      console.log("FINAL ERROR 👉", err);
+
       props.toaster("error", err?.message || "Server error");
     }
   };
@@ -243,7 +239,6 @@ const AddServicesGroup = (props) => {
                     placeholder="Enter service group name..."
                     className="w-full text-sm p-2 border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 outline-none"
                   />
-                 
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">

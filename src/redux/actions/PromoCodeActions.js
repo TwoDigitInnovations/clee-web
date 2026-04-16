@@ -34,8 +34,6 @@ export const fetchPromoCodeById = (id, router) => async (dispatch) => {
     const res = await Api("get", `promo-codes/${id}`, "", router);
 
     if (res?.status) {
-        console.log(res.data.data);
-        
       dispatch(setCurrentPromoCode(res.data.data));
     }
 
@@ -97,7 +95,12 @@ export const deletePromoCode = (id, router) => async (dispatch) => {
 // ✅ TOGGLE STATUS
 export const togglePromoCodeStatus = (id, router) => async (dispatch) => {
   try {
-    const res = await Api("patch", `promo-codes/${id}/toggle-status`, "", router);
+    const res = await Api(
+      "patch",
+      `promo-codes/${id}/toggle-status`,
+      "",
+      router,
+    );
 
     if (res?.status) {
       dispatch(togglePromoStatus(id));
@@ -109,7 +112,6 @@ export const togglePromoCodeStatus = (id, router) => async (dispatch) => {
     throw err;
   }
 };
-
 
 export const validatePromoCode = (data, router) => async () => {
   try {

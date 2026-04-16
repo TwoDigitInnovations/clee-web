@@ -218,7 +218,7 @@ function BusinessDetails({ loader, toaster }) {
     dispatch(fetchProfile);
   }, [dispatch]);
 
-  console.log("f", editId, user);
+
   const AllCategory = useSelector((state) => state.category?.categories);
 
   useEffect(() => {
@@ -276,7 +276,6 @@ function BusinessDetails({ loader, toaster }) {
     }
 
     setErrors({});
-    console.log(errors);
 
     try {
       loader(true);

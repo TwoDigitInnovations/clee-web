@@ -350,7 +350,7 @@ const AddCustomer = ({
       },
     }));
   };
-  console.log(errors);
+ 
 
   const handleSubmit = async () => {
     const { isValid, errors } = validateCustomerForm(formData);
@@ -419,9 +419,6 @@ const AddCustomer = ({
       }
     } catch (error) {
       loader(false);
-
-      console.log("ERROR:", error);
-
       toaster({
         type: "error",
         message: error?.message || "Server error",

@@ -252,7 +252,7 @@ export default function Miniwebsite() {
   const [saving, setSaving] = useState(false);
 
   const user = useSelector((state) => state.user.user);
-  console.log(user);
+ 
   
   useEffect(() => {
     // dispatch(fetchMiniWebsite(router));

@@ -49,7 +49,7 @@ function Packages(props) {
     },
   ];
 
-  console.log(packages);
+
 
   const fetchPackages = async () => {
     try {

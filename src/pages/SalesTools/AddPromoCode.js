@@ -54,7 +54,6 @@ export default function AddPromoCode(props) {
   const id = searchParams.get("id");
 
   const { currentPromoCode } = useSelector((state) => state.promoCode);
-  console.log(currentPromoCode);
 
   useEffect(() => {
     dispatch(fetchPromoCodeById(id, router));
@@ -64,8 +63,7 @@ export default function AddPromoCode(props) {
     if (!id) return;
     if (currentPromoCode) {
       const data = currentPromoCode;
-      console.log("d", data);
-
+ 
       setFormData({
         promo_name: data.promo_name || "",
         voucher_code: data.voucher_code || "",

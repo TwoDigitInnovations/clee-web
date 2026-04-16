@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// const ConstantsUrl = "http://localhost:8001/";
-const ConstantsUrl = "https://api.cleverclee.com/";
+const ConstantsUrl = "http://localhost:8001/";
+// const ConstantsUrl = "https://api.cleverclee.com/";
 
 function Api(method, url, data, router) {
   return new Promise(function (resolve, reject) {
@@ -43,7 +43,7 @@ function ApiFormData(method, url, data, router) {
     if (typeof window !== "undefined") {
       token = localStorage?.getItem("token") || "";
     }
-    console.log(token);
+ 
     axios({
       method,
       url: ConstantsUrl + url,

@@ -273,8 +273,7 @@ export default function AddServices({ loader, toaster }) {
 
   const handlePriceTierSave = async (data) => {
     try {
-      //   loader(true);
-      console.log(data);
+ 
 
       const res = await Api("post", `price-tiers/save`, data, router);
       loader(false);
@@ -419,7 +418,7 @@ export default function AddServices({ loader, toaster }) {
                       <Select
                         value={form.category}
                         onChange={(e) => {
-                          console.log("VALUE:", e.target.value); // should be id
+                         
                           set("category")(e);
                         }}
                         options={categories.map((c) => ({
