@@ -368,7 +368,7 @@ function Calender(props) {
                 </button>
                 <div className="flex items-center justify-between px-2">
                   <span className="text-xs font-bold uppercase tracking-widest text-slate-500">
-                     Waitlist ({waitlist.length})
+                    Waitlist ({waitlist.length})
                   </span>
                   <select
                     value={sortType}
@@ -380,7 +380,8 @@ function Calender(props) {
                   </select>
                 </div>
                 <div className="space-y-3">
-                  {Array.isArray(sortedWaitlist) && sortedWaitlist.length > 0 ? (
+                  {Array.isArray(sortedWaitlist) &&
+                  sortedWaitlist.length > 0 ? (
                     sortedWaitlist.map((w) => {
                       const addedTime = new Date(
                         w.createdAt,
@@ -493,7 +494,6 @@ function Calender(props) {
           <header className="flex flex-col sm:flex-row sm:items-center justify-between px-4 sm:px-8 py-3 bg-white border-b border-slate-100 shadow-sm gap-3 sm:gap-6">
             <div className="flex items-center justify-between w-full sm:w-auto gap-2">
               <div className="relative inline-block">
-                {/* Button */}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -512,10 +512,8 @@ function Calender(props) {
                   <ChevronDown size={16} />
                 </button>
 
-                {/* Dropdown */}
                 {open2 && (
                   <div className="absolute mt-2 w-64 bg-white border border-gray-200 rounded-xl shadow-lg z-20 max-h-64 overflow-auto">
-                    {/* All option */}
                     <div
                       onClick={() => setSelectedStaff([])}
                       className="px-4 py-2 text-sm cursor-pointer hover:bg-gray-100 font-medium"
@@ -523,7 +521,6 @@ function Calender(props) {
                       All Staff
                     </div>
 
-                    {/* Staff List */}
                     {staff.map((member) => {
                       const isSelected = selectedStaff.some(
                         (s) => s._id === member._id,
@@ -546,7 +543,6 @@ function Calender(props) {
                 )}
               </div>
 
-              {/* Right Side (mobile) */}
               <div className="flex items-center gap-2 sm:hidden">
                 <button
                   onClick={() => setIsOpen(true)}

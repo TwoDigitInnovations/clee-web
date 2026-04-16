@@ -38,8 +38,6 @@ const AddWaitlist = ({ onClose, loader, toaster, editId }) => {
   const { users: customers } = useSelector((state) => state.user);
   let role = "user";
 
-
-
   useEffect(() => {
     dispatch(fetchServices(router));
     dispatch(fetchUsers(router, role));
@@ -123,7 +121,7 @@ const AddWaitlist = ({ onClose, loader, toaster, editId }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     const newErrors = {};
 
     Object.keys(formData).forEach((key) => {
@@ -293,7 +291,6 @@ const AddWaitlist = ({ onClose, loader, toaster, editId }) => {
               placeholder="customer@example.com"
             />
 
-        
             <div className="col-span-2 text-sm font-semibold text-custom-blue mt-2">
               SERVICE SELECTION
             </div>
@@ -332,13 +329,12 @@ const AddWaitlist = ({ onClose, loader, toaster, editId }) => {
               </div>
             )}
 
-          
             <div className="flex gap-2 col-span-2 text-sm font-semibold text-custom-blue mt-2">
               <TextAlignStart size={18} /> ADDITIONAL DETAILS
             </div>
 
             <TextareaField
-              label="Appointment preferences (staff, day of the week, time of day etc)"
+              label="Appointment preferences (staff, day of the week, time of day, etc)"
               name="notes"
               value={formData.notes}
               onChange={handleChange}

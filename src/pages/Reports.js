@@ -160,13 +160,13 @@ function Reports() {
       <DashboardHeader title="Reports" />
 
       <div className="min-h-screen bg-custom-gray text-slate-800 ">
-        <div className="flex items-center justify-end gap-3 px-6 py-3">
+        <div className="flex flex-col md:flex-row md:items-center justify-end gap-3 px-6 py-3">
           {/* Report Selector */}
           <div className="relative">
             <select
               value={selectedReport}
               onChange={(e) => setSelectedReport(e.target.value)}
-              className="appearance-none border border-slate-300 rounded-lg pl-3 pr-8 py-1.5 text-sm text-slate-600 bg-white cursor-pointer outline-none hover:border-slate-400 transition-colors"
+              className="appearance-none w-full border border-slate-300 rounded-lg pl-3 pr-8 py-1.5 text-sm text-slate-600 bg-white cursor-pointer outline-none hover:border-slate-400 transition-colors"
             >
               <option value="">Choose a report</option>
               {Object.entries(REPORTS).flatMap(([section, items]) =>
@@ -224,7 +224,7 @@ function Reports() {
         <div className="max-w-7xl mx-auto px-6 py-6 space-y-8">
           <section>
             <SectionHeader icon={SECTION_ICONS.Stock} title="Stock" />
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {stockCols.map((col, ci) => (
                 <div key={ci}>
                   {col.map((item) => (
@@ -240,7 +240,7 @@ function Reports() {
               icon={SECTION_ICONS.Appointments}
               title="Appointments"
             />
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {appointmentCols.map((col, ci) => (
                 <div key={ci}>
                   {col.map((item) => (
