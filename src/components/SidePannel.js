@@ -35,7 +35,7 @@ function SidePannel({ open, setOpen }) {
     },
     {
       href: "/Calender",
-      title: "Calender",
+      title: "Calendar",
       icon: <Calendar size={20} />,
       access: ["admin"],
     },
@@ -101,7 +101,7 @@ function SidePannel({ open, setOpen }) {
             { title: "Services", href: "/Business/Services" },
             { title: "Staff", href: "/Business/Staff" },
             { title: "Resources", href: "/Business/Resources" },
-            { title: "Calender settings", href: "/Business/Calendersettings" },
+            { title: "Calendar settings", href: "/Business/Calendersettings" },
             { title: "Online bookings", href: "/Business/Onlinebookings" },
             { title: "Clee pay", href: "/Business/Cleepay" },
             { title: "Online payments", href: "/Business/Onlinepayments" },
