@@ -223,6 +223,17 @@ export default function Services(props) {
   const activeLabel =
     categories.find((c) => c._id === activeCategory)?.name ?? "";
 
+  // if (loading) {
+  //   return (
+  //     <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+  //       <div className="flex flex-col items-center gap-3">
+  //         <div className="w-10 h-10 border-4 border-custom-blue  border-t-transparent rounded-full animate-spin" />
+  //         <p className="text-slate-500 text-sm">Loading Services</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
+  
   return (
     <>
       <style>{`

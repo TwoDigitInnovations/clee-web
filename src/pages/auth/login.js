@@ -129,7 +129,10 @@ export default function Login(props) {
               className="bg-transparent outline-none w-full text-white text-sm placeholder-blue-400 pr-8"
               value={userDetail.password}
               onChange={(e) =>
-                setUserDetail({ ...userDetail, password: e.target.value })
+                setUserDetail({
+                  ...userDetail,
+                  password: e.target.value.trim(),
+                })
               }
             />
             <div className="absolute right-4 cursor-pointer">

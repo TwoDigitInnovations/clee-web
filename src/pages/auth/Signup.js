@@ -23,7 +23,14 @@ export default function Signup(props) {
   const [errors, setErrors] = useState({});
 
   const handleChange = (field, value) => {
-    const updated = { ...userDetail, [field]: value };
+    let updatedValue = value;
+
+    // 👇 password ke liye trim
+    if (field === "password") {
+      updatedValue = value.trim();
+    }
+
+    const updated = { ...userDetail, [field]: updatedValue };
     setUserDetail(updated);
 
     if (submitted) {
@@ -68,7 +75,6 @@ export default function Signup(props) {
 
   const submit = async () => {
     setSubmitted(true);
-
 
     const data = {
       fullname: userDetail.fullName,

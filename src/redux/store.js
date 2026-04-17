@@ -17,7 +17,8 @@ import ClosedDatesReducer from "./slices/closedDataSlice";
 import locationReducer from "./slices/locationSlice";
 import categoryReducer from "./slices/categorySlice";
 import giftVoucherReducer from "./slices/giftVoucherSlice";
-import promoCodeReducer from "./slices/PromoCodeSlice"
+import promoCodeReducer from "./slices/PromoCodeSlice";
+import referralsReducer from "./slices/RefralsSlice";
 
 export const store = configureStore({
   reducer: {
@@ -36,9 +37,10 @@ export const store = configureStore({
     vouchers: vouchersReducer,
     packages: packagesReducer,
     closedDates: ClosedDatesReducer,
-    location:locationReducer,
-    category:categoryReducer,
-    giftVoucher:giftVoucherReducer,
-    promoCode:promoCodeReducer
+    location: locationReducer,
+    category: categoryReducer,
+    giftVoucher: giftVoucherReducer,
+    promoCode: promoCodeReducer,
+    referrals: referralsReducer,
   },
 });

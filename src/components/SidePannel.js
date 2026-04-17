@@ -58,6 +58,12 @@ function SidePannel({ open, setOpen }) {
       icon: <ChartNoAxesColumn size={20} />,
       access: ["admin"],
     },
+    {
+      href: "/Referrals",
+      title: "Referrals",
+      icon: <ChartNoAxesColumn size={20} />,
+      access: ["admin"],
+    },
 
     {
       href: "/Messages",

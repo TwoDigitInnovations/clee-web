@@ -140,9 +140,14 @@ export default function AddServices({ loader, toaster }) {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
-  const set = (field) => (e) => {
-    const value = e.target.value;
-    setForm((prev) => ({ ...prev, [field]: value }));
+  const set = (field) => (eOrValue) => {
+    const value =
+      eOrValue && eOrValue.target ? eOrValue.target.value : eOrValue;
+
+    setForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
   };
 
   const setCheck = (field) => (e) =>
@@ -273,8 +278,6 @@ export default function AddServices({ loader, toaster }) {
 
   const handlePriceTierSave = async (data) => {
     try {
- 
-
       const res = await Api("post", `price-tiers/save`, data, router);
       loader(false);
       if (res?.status === true) {
@@ -294,6 +297,11 @@ export default function AddServices({ loader, toaster }) {
 
     if (!form.serviceName.trim()) {
       toaster({ type: "error", message: "Service name is required" });
+      return;
+    }
+
+    if (!form.category.trim()) {
+      toaster({ type: "error", message: "category is required" });
       return;
     }
 
@@ -416,15 +424,19 @@ export default function AddServices({ loader, toaster }) {
                     <div>
                       <Label>Category</Label>
                       <Select
-                        value={form.category}
-                        onChange={(e) => {
-                         
-                          set("category")(e);
-                        }}
-                        options={categories.map((c) => ({
-                          value: c.id,
-                          label: c.label,
-                        }))}
+                        value={form.category || ""}
+                        onChange={(e) => set("category")(e.target.value)}
+                        options={[
+                          {
+                            label: "Select your category",
+                            value: "",
+                            disabled: true,
+                          },
+                          ...categories.map((c) => ({
+                            value: c.id,
+                            label: c.label,
+                          })),
+                        ]}
                       />
                     </div>
                   </div>
