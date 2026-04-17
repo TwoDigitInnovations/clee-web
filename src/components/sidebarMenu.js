@@ -4,18 +4,17 @@ import { useRouter } from "next/router";
 import { ChevronRight } from "lucide-react";
 
 // 🔁 Recursive Component
-const MenuItem = ({ item, router, level = 0,  }) => {
+const MenuItem = ({ item, router, level = 0, setOpen1, open1 }) => {
   const [open, setOpen] = useState(false);
 
   const isActive = router.pathname === item.href;
 
-  
   useEffect(() => {
     if (
       item.children?.some(
         (child) =>
           child.href === router.pathname ||
-          child.children?.some((c) => c.href === router.pathname)
+          child.children?.some((c) => c.href === router.pathname),
       )
     ) {
       setOpen(true);
@@ -26,16 +25,14 @@ const MenuItem = ({ item, router, level = 0,  }) => {
     <div>
       {/* Parent Item */}
       <div
-        onClick={() =>
+        onClick={() => {
           item.children
             ? setOpen(!open)
-            : item.href && router.push(item.href)
-        }
+            : item.href && <>setOpen1(!open1); router.push(item.href);</>;
+        }}
         className={`flex items-center justify-between px-4 py-2 rounded-md mb-1 cursor-pointer
         ${
-          isActive
-            ? "bg-white text-black"
-            : "text-gray-300 hover:bg-white/10"
+          isActive ? "bg-white text-black" : "text-gray-300 hover:bg-white/10"
         }`}
         style={{ paddingLeft: `${level * 16 + 16}px` }} // 🔥 dynamic indent
       >
@@ -48,14 +45,11 @@ const MenuItem = ({ item, router, level = 0,  }) => {
         {item.children && (
           <ChevronRight
             size={18}
-            className={`transition-transform ${
-              open ? "rotate-90" : ""
-            }`}
+            className={`transition-transform ${open ? "rotate-90" : ""}`}
           />
         )}
       </div>
 
-      {/* 🔁 Recursive Children */}
       {item.children && open && (
         <div className="space-y-1 mb-2">
           {item.children.map((child, idx) => (
@@ -72,15 +66,21 @@ const MenuItem = ({ item, router, level = 0,  }) => {
   );
 };
 
-export default function SidebarMenu({ menu, user,setOpen, open }) {
+export default function SidebarMenu({ menu, user, setOpen, open }) {
   const router = useRouter();
 
   return (
     <div>
       {menu.map((item, i) =>
         item.access.includes(user?.role) ? (
-          <MenuItem key={i} item={item} router={router} setOpen={setOpen} open={open} />
-        ) : null
+          <MenuItem
+            key={i}
+            item={item}
+            router={router}
+            setOpen1={setOpen}
+            open1={open}
+          />
+        ) : null,
       )}
     </div>
   );

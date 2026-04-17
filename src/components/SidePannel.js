@@ -82,7 +82,7 @@ function SidePannel({ open, setOpen }) {
       children: [
         { title: "View Invoices", href: "/sales/ViewInvoices" },
         { title: "Create Invoices", href: "/sales/CreateInvoices" },
-        { title: "Search Gift Vouchers", href: "/sales/SearchGiftVouchers" },
+        { title: "Search Gift Vouchers", href: "/SalesTools/SearchVouchers" },
       ],
     },
   ];

@@ -8,9 +8,11 @@ import { deleteCustomer } from "@/redux/slices/userSlice";
 import { Api } from "@/services/service";
 import {
   EllipsisVertical,
+  Merge,
   MessageSquareText,
   Pencil,
   Search,
+  ShieldAlert,
   Trash,
   Users2,
 } from "lucide-react";
@@ -388,13 +390,13 @@ function Customers(props) {
                     <div className="absolute right-0 mt-2 w-44 bg-white border border-slate-200 rounded-xl shadow-lg z-50 overflow-hidden">
                       <button
                         onClick={() => {
-                          setOpen(true);
-                          setEditId(selected?._id);
+                          // setOpen(true);
+                          // setEditId(selected?._id);
                         }}
                         className="flex items-center gap-2 w-full px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
                       >
-                        <Pencil size={16} />
-                        Edit
+                        <Merge size={16} />
+                        Merge
                       </button>
 
                       <button
@@ -404,8 +406,8 @@ function Customers(props) {
                         }}
                         className="flex items-center gap-2 w-full px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
                       >
-                        <MessageSquareText size={16} />
-                        Message
+                        <ShieldAlert size={16} />
+                        Block
                       </button>
 
                       <button

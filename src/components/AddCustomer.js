@@ -350,7 +350,6 @@ const AddCustomer = ({
       },
     }));
   };
- 
 
   const handleSubmit = async () => {
     const { isValid, errors } = validateCustomerForm(formData);
@@ -376,13 +375,31 @@ const AddCustomer = ({
 
       if (value === undefined || value === null || value === "") return;
 
+      // ✅ File
       if (value instanceof File) {
         form.append(key, value);
-      } else if (typeof value === "object") {
+      }
+
+      // ✅ Array (IMPORTANT FIX)
+      else if (Array.isArray(value)) {
+        if (value.length === 0) return; // empty skip
+        value.forEach((item) => {
+          form.append(`${key}[]`, item); // 👈 सही तरीका
+        });
+      }
+
+      // ✅ Object
+      else if (typeof value === "object") {
         form.append(key, JSON.stringify(value));
-      } else if (typeof value === "boolean") {
+      }
+
+      // ✅ Boolean
+      else if (typeof value === "boolean") {
         form.append(key, value ? "true" : "false");
-      } else {
+      }
+
+      // ✅ Normal
+      else {
         form.append(key, value);
       }
     });
