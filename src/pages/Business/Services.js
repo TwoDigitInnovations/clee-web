@@ -195,21 +195,24 @@ export default function Services(props) {
 
   const handleDeleteService = async () => {
     try {
-      loader(true);
+      props.loader(true);
 
       const res = await dispatch(deleteService(serviceToDelete, router));
 
-      loader(false);
+      props.loader(false);
 
       if (res?.success) {
-        toaster("success", "Services deleted successfully");
+        props.toaster({
+          type: "success",
+          message: "Services deleted successfully",
+        });
         setOpen(false);
       } else {
-        toaster("error", res.message);
+        toaster({ type: "error", message: res.message });
       }
     } catch {
       loader(false);
-      toaster("error", "Server error");
+      toaster({ type: "error", message: "Server error" });
     }
   };
 

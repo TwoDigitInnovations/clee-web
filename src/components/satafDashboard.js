@@ -37,13 +37,22 @@ const Delta = ({ value, suffix = "" }) => {
 const Avatar = ({ initials, color }) => {
   // Generate color from initials if not provided
   const colors = [
-    "#6C8EBF", "#E07A5F", "#81B29A", "#F2CC8F", "#9B8EA8",
-    "#E9C46A", "#264653", "#2A9D8F", "#E76F51", "#A8DADC",
-    "#457B9D", "#1D3557"
+    "#6C8EBF",
+    "#E07A5F",
+    "#81B29A",
+    "#F2CC8F",
+    "#9B8EA8",
+    "#E9C46A",
+    "#264653",
+    "#2A9D8F",
+    "#E76F51",
+    "#A8DADC",
+    "#457B9D",
+    "#1D3557",
   ];
   const colorIndex = initials.charCodeAt(0) % colors.length;
   const bgColor = color || colors[colorIndex];
-  
+
   return (
     <div
       className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-md"
@@ -70,8 +79,7 @@ const StaffRow = ({ member, isLast }) => (
       !isLast ? "border-b border-slate-100" : ""
     }`}
   >
-    
-    <div className="flex items-center gap-3 w-44 flex-shrink-0">
+    <div className="flex items-center gap-3 md:w-44 flex-shrink-0">
       <Avatar initials={member.initials} color={member.color} />
       <div>
         <p className="font-bold text-slate-800 text-sm leading-tight">
@@ -99,7 +107,7 @@ const StaffRow = ({ member, isLast }) => (
       </div>
     </div>
 
-    <div className="flex-1">
+    <div className="w-40 flex-shrink-0">
       <StatCell
         label="Services"
         main={fmt(member.services)}
@@ -146,14 +154,16 @@ const StaffRow = ({ member, isLast }) => (
 
 const Pagination = ({ current, total, onChange, totalStaff }) => {
   if (total === 0) return null;
-  
+
   const pages = Array.from({ length: total }, (_, i) => i + 1);
   return (
     <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100">
       <span className="text-sm text-slate-400">
-        Showing <span className="font-semibold text-slate-600">{Math.min(PER_PAGE, totalStaff)}</span>{" "}
-        of{" "}
-        <span className="font-semibold text-slate-600">{totalStaff}</span>{" "}
+        Showing{" "}
+        <span className="font-semibold text-slate-600">
+          {Math.min(PER_PAGE, totalStaff)}
+        </span>{" "}
+        of <span className="font-semibold text-slate-600">{totalStaff}</span>{" "}
         staff members
       </span>
 
@@ -217,7 +227,7 @@ const Pagination = ({ current, total, onChange, totalStaff }) => {
 };
 
 const TableHeader = () => (
-  <div className="flex items-center gap-6 px-6 py-3 bg-slate-50 border-b border-slate-100 rounded-t-2xl">
+  <div className="flex items-center gap-6 px-6 py-3 bg-slate-50 border-b border-slate-100 sticky top-0 z-10">
     <div className="w-44 flex-shrink-0">
       <span className="text-[11px] uppercase tracking-widest text-slate-400 font-bold">
         Staff Member
@@ -283,8 +293,12 @@ export default function StaffDashboard() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-sky-50/30 to-slate-100 flex items-center justify-center">
         <div className="text-center">
           <p className="text-slate-600 text-lg">No staff data available</p>
-          <p className="text-slate-400 text-sm mt-2">Add staff members to see their performance</p>
-          <p className="text-slate-500 text-xs mt-4">Check browser console for API response details</p>
+          <p className="text-slate-400 text-sm mt-2">
+            Add staff members to see their performance
+          </p>
+          <p className="text-slate-500 text-xs mt-4">
+            Check browser console for API response details
+          </p>
         </div>
       </div>
     );
@@ -293,19 +307,27 @@ export default function StaffDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-sky-50/30 to-slate-100 flex items-start justify-center font-sans">
       <div className="w-full max-w-7xl">
-       
-        <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/80 border border-slate-100 ">
-          <TableHeader />
-          <div>
-            {paged.map((member, idx) => (
-              <StaffRow
-                key={member.id}
-                member={member}
-                isLast={idx === paged.length - 1}
-              />
-            ))}
+        <div className="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+          {/* 👇 important wrapper */}
+          <div className="w-full overflow-x-auto">
+            {/* 👇 min width fix (important) */}
+            <div className="min-w-[800px]">
+              <TableHeader />
+              {paged.map((member, idx) => (
+                <StaffRow
+                  key={member.id}
+                  member={member}
+                  isLast={idx === paged.length - 1}
+                />
+              ))}
+            </div>
+            <Pagination
+              current={page}
+              total={totalPages}
+              onChange={setPage}
+              totalStaff={allStaff.length}
+            />
           </div>
-          <Pagination current={page} total={totalPages} onChange={setPage} totalStaff={allStaff.length} />
         </div>
       </div>
     </div>

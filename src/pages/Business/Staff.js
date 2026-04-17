@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from "react";
 import DashboardHeader from "@/components/DashboardHeader";
 import { useRouter } from "next/router";
-import { Plus, Trash2, Search, UserPlus, CreditCard, User, CircleUserRound } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  Search,
+  UserPlus,
+  CreditCard,
+  User,
+  CircleUserRound,
+  Users2,
+} from "lucide-react";
 import { ConfirmModal } from "@/components/deleteModel";
 import { Api } from "@/services/service";
 import PriceTierModal from "@/components/Pricetier";
@@ -16,6 +25,7 @@ function Staff(props) {
   const router = useRouter();
   const { staff, loading } = useSelector((state) => state.staff);
   const dispatch = useDispatch();
+  const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
     dispatch(fetchStaff());
@@ -82,6 +92,15 @@ function Staff(props) {
     }
   };
 
+  const filteredStaff = staff.filter((item) => {
+    const search = searchText.toLowerCase();
+
+    return (
+      item?.fullname?.toLowerCase().includes(search) ||
+      item?.email?.toLowerCase().includes(search) 
+    );
+  });
+
   return (
     <div className="bg-[#f8f9fb] min-h-screen">
       <DashboardHeader title="Your Business" />
@@ -124,7 +143,9 @@ function Staff(props) {
             <input
               type="text"
               placeholder="Search staff members..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-custom-blue bg-gray-50/50"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 text-black focus:ring-custom-blue bg-gray-50/50"
             />
           </div>
           <div className="flex items-center gap-6 text-sm font-medium">
@@ -140,86 +161,91 @@ function Staff(props) {
         </div>
 
         <div className="space-y-4">
-          {staff.map((item) => (
-            <div
-              key={item.id}
-              className="bg-white rounded-xl p-4 flex flex-col gap-4 border border-gray-100 shadow-sm hover:shadow-md transition"
-            >
-              {/* Top Section */}
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-lg bg-gray-100 overflow-hidden flex items-center justify-center shrink-0">
-                  {item.photo ? (
-                    <img
-                      src={item.photo}
-                      alt={item.fullname}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="text-gray-400 w-full h-full flex items-center justify-center">
-                      <UserPlus size={20} />
+          {filteredStaff.length > 0 ? (
+            filteredStaff.map((item) => (
+              <div
+                key={item.id}
+                className="bg-white rounded-xl p-4 flex flex-col gap-4 border border-gray-100 shadow-sm hover:shadow-md transition"
+              >
+                {/* Top Section */}
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-lg bg-gray-100 overflow-hidden flex items-center justify-center shrink-0">
+                    {item.photo ? (
+                      <img
+                        src={item.photo}
+                        alt={item.fullname}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="text-gray-400 w-full h-full flex items-center justify-center">
+                        <UserPlus size={20} />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4 flex-1">
+                    <div>
+                      <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
+                        Name
+                      </label>
+                      <p className="text-sm font-bold text-slate-700 break-words">
+                        {item.fullname}
+                      </p>
                     </div>
-                  )}
-                </div>
 
-                <div className="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4 flex-1">
-                  <div>
-                    <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
-                      Name
-                    </label>
-                    <p className="text-sm font-bold text-slate-700 break-words">
-                      {item.fullname}
-                    </p>
-                  </div>
+                    <div>
+                      <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
+                        Email
+                      </label>
+                      <p className="text-sm text-slate-600 break-all">
+                        {item.email}
+                      </p>
+                    </div>
 
-                  <div>
-                    <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
-                      Email
-                    </label>
-                    <p className="text-sm text-slate-600 break-all">
-                      {item.email}
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
-                      Phone
-                    </label>
-                    <p className="text-sm text-slate-500">
-                      {item.phone || "N/A"}
-                    </p>
+                    <div>
+                      <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
+                        Phone
+                      </label>
+                      <p className="text-sm text-slate-500">
+                        {item.phone || "N/A"}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Action Buttons */}
-              <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
-                <div className="flex gap-4">
+                {/* Action Buttons */}
+                <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
+                  <div className="flex gap-4">
+                    <button
+                      onClick={() =>
+                        router.push(`/Business/AddStaffs?id=${item._id}`)
+                      }
+                      className="text-sm font-semibold text-indigo-600 hover:underline"
+                    >
+                      Edit
+                    </button>
+
+                    <button className="text-sm font-semibold text-gray-500 hover:text-gray-800">
+                      Archive
+                    </button>
+                  </div>
+
                   <button
-                    onClick={() =>
-                      router.push(`/Business/AddStaffs?id=${item._id}`)
-                    }
-                    className="text-sm font-semibold text-indigo-600 hover:underline"
+                    onClick={() => {
+                      setId(item._id);
+                      setOpen(true);
+                    }}
+                    className="p-2 rounded-md hover:bg-red-50 text-red-400 hover:text-red-600 transition"
                   >
-                    Edit
-                  </button>
-
-                  <button className="text-sm font-semibold text-gray-500 hover:text-gray-800">
-                    Archive
+                    <Trash2 size={18} />
                   </button>
                 </div>
-
-                <button
-                  onClick={() => {
-                    setId(item._id);
-                    setOpen(true);
-                  }}
-                  className="p-2 rounded-md hover:bg-red-50 text-red-400 hover:text-red-600 transition"
-                >
-                  <Trash2 size={18} />
-                </button>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p className="text-center py-12 text-gray-400 flex gap-2 flex-col items-center">
+              <Users2 /> No staff found</p>
+          )}
 
           <div
             onClick={() => router.push("/Business/StaffAnalytics")}

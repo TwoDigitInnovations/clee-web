@@ -26,8 +26,6 @@ function SidePannel({ open, setOpen }) {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.user.user);
 
-
-  
   const managementMenu = [
     {
       href: "/",
@@ -127,7 +125,10 @@ function SidePannel({ open, setOpen }) {
             { title: "Discounts", href: "/SalesTools/Discounts" },
             { title: "Promo code", href: "/SalesTools/Promocode" },
             { title: "Packages", href: "/SalesTools/Packages" },
-            {title:"Personalised plans", href : "/SalesTools/Personalisedplans"},
+            {
+              title: "Personalised plans",
+              href: "/SalesTools/Personalisedplans",
+            },
             { title: "Gift Vouchers", href: "/SalesTools/GiftVouchers" },
             { title: "Rewards", href: "/SalesTools/Rewards" },
             { title: "Sales settings", href: "/SalesTools/Salessettings" },
@@ -295,7 +296,10 @@ function SidePannel({ open, setOpen }) {
         <div className="p-4 border-t border-white/10">
           <div
             className="bg-white cursor-pointer text-black rounded-xl p-3 flex items-center gap-3 mb-3"
-            onClick={() => router.push("/auth/MyProfile")}
+            onClick={() => {
+              setOpen(!open);
+              router.push("/auth/MyProfile");
+            }}
           >
             {/* ✅ Profile Image */}
             <div className="h-10 w-10 rounded-full overflow-hidden">

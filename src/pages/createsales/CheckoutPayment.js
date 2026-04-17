@@ -176,7 +176,7 @@ function CheckoutPayment({
               <div className="space-y-4">
               
                 <div className="bg-white rounded-xl shadow-sm p-4">
-                  <h3 className="text-sm font-bold text-[#0A4D91] mb-3">{selectedClient?.fullname || selectedClient?.name || "Walk-in"}</h3>
+                  <h3 className="text-sm font-bold text-custom-blue mb-3">{selectedClient?.fullname || selectedClient?.name || "Walk-in"}</h3>
                   <p className="text-xs text-gray-500">{selectedClient?.mobile || selectedClient?.phone || ""}</p>
                 </div>
 
@@ -215,7 +215,7 @@ function CheckoutPayment({
                       </div>
                     </div>
                     <div className="pt-2 border-t border-gray-200">
-                      <p className="text-center text-sm font-bold text-[#0A4D91]">Paid in full</p>
+                      <p className="text-center text-sm font-bold text-custom-blue">Paid in full</p>
                     </div>
                   </div>
                 </div>
@@ -229,7 +229,7 @@ function CheckoutPayment({
                   <button
                     onClick={handleCompletePayment}
                     disabled={processing}
-                    className="w-full max-w-md bg-[#0A4D91] text-white py-4 rounded-xl font-bold text-lg hover:bg-[#083d73] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                    className="w-full max-w-md bg-custom-blue text-white py-4 rounded-xl font-bold text-lg hover:bg-[#083d73] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                   >
                     {processing ? (
                       <span className="flex items-center justify-center gap-2">
@@ -246,7 +246,7 @@ function CheckoutPayment({
                 </div>
 
                 <div className="mt-4 text-center">
-                  <button className="text-sm text-gray-500 hover:text-[#0A4D91] hover:underline flex items-center gap-1 mx-auto">
+                  <button className="text-sm text-gray-500 hover:text-custom-blue hover:underline flex items-center gap-1 mx-auto">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -272,10 +272,10 @@ function CheckoutPayment({
           <div className="lg:col-span-1 space-y-6">
           
             <div className="bg-white rounded-xl shadow-sm p-6">
-              <h3 className="text-xs font-bold text-[#0A4D91] uppercase mb-4">Client</h3>
+              <h3 className="text-xs font-bold text-custom-blue uppercase mb-4">Client</h3>
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-[#E2E8F0] rounded-full flex items-center justify-center">
-                  <User size={24} className="text-[#0A4D91]" />
+                  <User size={24} className="text-custom-blue" />
                 </div>
                 <div>
                   <p className="font-bold text-gray-900">{selectedClient?.name || "Walk-in"}</p>
@@ -286,7 +286,7 @@ function CheckoutPayment({
 
             {/* Sale Summary */}
             <div className="bg-white rounded-xl shadow-sm p-6">
-                <h3 className="text-xs font-bold text-[#0A4D91] uppercase mb-4">
+                <h3 className="text-xs font-bold text-custom-blue uppercase mb-4">
                   Sale Summary
                 </h3>
                 <div className="space-y-3 mb-4">
@@ -321,10 +321,10 @@ function CheckoutPayment({
                     </span>
                   </div>
                   <div className="flex justify-between pt-2 border-t border-gray-200">
-                    <span className="font-bold text-[#0A4D91]">
+                    <span className="font-bold text-custom-blue">
                       Total Amount
                     </span>
-                    <span className="text-xl font-bold text-[#0A4D91]">
+                    <span className="text-xl font-bold text-custom-blue">
                       ${(totalAmount * 1.1)?.toFixed(2)}
                     </span>
                   </div>
@@ -336,11 +336,11 @@ function CheckoutPayment({
           <div className="lg:col-span-2 space-y-6">
           
             <div className=" p-6 text-center">
-              <p className="text-xs font-bold text-[#0A4D91] uppercase mb-2">Amount to Pay</p>
-              <p className="text-5xl font-bold text-[#0A4D91] mb-2">
+              <p className="text-xs font-bold text-custom-blue uppercase mb-2">Amount to Pay</p>
+              <p className="text-5xl font-bold text-custom-blue mb-2">
                 ${(totalAmount * 1.1).toFixed(2)}
               </p>
-              <button className="text-sm text-[#0A4D91] hover:underline">
+              <button className="text-sm text-custom-blue hover:underline">
                 Edit to make partial payment
               </button>
             </div>
@@ -349,32 +349,32 @@ function CheckoutPayment({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div 
                 onClick={() => handlePaymentMethodSelect('credit-card', 'Credit card')}
-                className="bg-white rounded-xl shadow-sm p-6 border-2 border-gray-200 hover:border-[#0A4D91] transition-colors cursor-pointer"
+                className="bg-white rounded-xl shadow-sm p-6 border-2 border-gray-200 hover:border-custom-blue transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-12 h-12 bg-[#E2E8F0] rounded-full flex items-center justify-center">
-                    <CreditCard size={24} className="text-[#0A4D91]" />
+                    <CreditCard size={24} className="text-custom-blue" />
                   </div>
                   <h3 className="text-lg font-bold text-gray-900">Take card payment</h3>
                 </div>
                 <p className="text-sm text-gray-500">
                   Process via connected terminal terminal_id_G2E
                 </p>
-                <p className="text-5xl font-bold text-[#0A4D91] mb-2">
+                <p className="text-5xl font-bold text-custom-blue mb-2">
                   ${(totalAmount * 1.1)?.toFixed(2)}
                 </p>
-                <button className="text-sm text-[#0A4D91] hover:underline">
+                <button className="text-sm text-custom-blue hover:underline">
                   Edit to make partial payment
                 </button>
               </div>
 
               <div 
                 onClick={() => handlePaymentMethodSelect('cash', 'Cash')}
-                className="bg-white rounded-xl shadow-sm p-6 border-2 border-gray-200 hover:border-[#0A4D91] transition-colors cursor-pointer"
+                className="bg-white rounded-xl shadow-sm p-6 border-2 border-gray-200 hover:border-custom-blue transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-12 h-12 bg-[#E2E8F0] rounded-full flex items-center justify-center">
-                    <DollarSign size={24} className="text-[#0A4D91]" />
+                    <DollarSign size={24} className="text-custom-blue" />
                   </div>
                   <h3 className="text-lg font-bold text-gray-900">Cash</h3>
                 </div>
@@ -384,7 +384,7 @@ function CheckoutPayment({
 
             {/* Other Payment Methods */}
             <div>
-              <h3 className="text-xs font-bold text-[#0A4D91] uppercase mb-4">
+              <h3 className="text-xs font-bold text-custom-blue uppercase mb-4">
                 Other Payment Methods
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -395,7 +395,7 @@ function CheckoutPayment({
                     disabled={processing}
                     className="bg-[#E2E8F0] rounded-xl p-6 hover:bg-[#d1dce8] transition-colors text-center disabled:opacity-50"
                   >
-                    <div className="flex justify-center mb-3 text-[#0A4D91]">
+                    <div className="flex justify-center mb-3 text-custom-blue">
                       {method.icon}
                     </div>
                     <h3 className="text-sm font-bold text-gray-900 mb-1">
@@ -412,7 +412,7 @@ function CheckoutPayment({
               <button 
                 onClick={() => handlePaymentMethodSelect('account', 'Account')}
                 disabled={processing}
-                className="text-sm text-gray-500 hover:text-[#0A4D91] hover:underline disabled:opacity-50"
+                className="text-sm text-gray-500 hover:text-custom-blue hover:underline disabled:opacity-50"
               >
                 Charge to account (no payment)
               </button>
@@ -442,14 +442,14 @@ function CheckoutPayment({
                     <X size={20} className="text-gray-400" />
                   </button>
                 </div>
-                <p className="text-sm text-[#0A4D91] mb-5">
+                <p className="text-sm text-custom-blue mb-5">
                   Please enter the secure payment information.
                 </p>
 
                 {/* Card Number */}
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-2">
-                    <label className="text-xs font-bold text-[#0A4D91] uppercase">
+                    <label className="text-xs font-bold text-custom-blue uppercase">
                       Card Number
                     </label>
                     <span className="text-xs text-gray-500">
@@ -463,7 +463,7 @@ function CheckoutPayment({
                       onChange={(e) => setCardNumber(e.target.value)}
                       placeholder="0000 0000 0000 0000"
                       maxLength={19}
-                      className="w-full px-4 py-3 bg-[#E2E8F0] border-0 rounded-lg text-gray-500 focus:ring-2 focus:ring-[#0A4D91] outline-none"
+                      className="w-full px-4 py-3 bg-[#E2E8F0] border-0 rounded-lg text-gray-500 focus:ring-2 focus:ring-custom-blue outline-none"
                     />
                     <div className="absolute right-4 top-1/2 -translate-y-1/2">
                       <CreditCard size={20} className="text-gray-400" />
@@ -474,7 +474,7 @@ function CheckoutPayment({
                 {/* Expiry and CVC */}
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
-                    <label className="text-xs font-bold text-[#0A4D91] uppercase mb-2 block">
+                    <label className="text-xs font-bold text-custom-blue uppercase mb-2 block">
                       Expiry
                     </label>
                     <input
@@ -483,11 +483,11 @@ function CheckoutPayment({
                       onChange={(e) => setExpiry(e.target.value)}
                       placeholder="MM/YY"
                       maxLength={5}
-                      className="w-full px-4 py-3 bg-[#E2E8F0] border-0 rounded-lg text-gray-400 focus:ring-2 focus:ring-[#0A4D91] outline-none"
+                      className="w-full px-4 py-3 bg-[#E2E8F0] border-0 rounded-lg text-gray-400 focus:ring-2 focus:ring-custom-blue outline-none"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-[#0A4D91] uppercase mb-2 block">
+                    <label className="text-xs font-bold text-custom-blue uppercase mb-2 block">
                       CVC
                     </label>
                     <div className="relative">
@@ -497,7 +497,7 @@ function CheckoutPayment({
                         onChange={(e) => setCvc(e.target.value)}
                         placeholder="•••"
                         maxLength={4}
-                        className="w-full px-4 py-3 bg-[#E2E8F0] border-0 rounded-lg text-gray-400 focus:ring-2 focus:ring-[#0A4D91] outline-none"
+                        className="w-full px-4 py-3 bg-[#E2E8F0] border-0 rounded-lg text-gray-400 focus:ring-2 focus:ring-custom-blue outline-none"
                       />
                       <div className="absolute right-4 top-1/2 -translate-y-1/2">
                         <Shield size={18} className="text-gray-400" />
@@ -513,7 +513,7 @@ function CheckoutPayment({
                       type="checkbox"
                       checked={saveCard}
                       onChange={(e) => setSaveCard(e.target.checked)}
-                      className="w-4 h-4 mt-0.5 text-[#0A4D91] border-gray-300 rounded focus:ring-[#0A4D91]"
+                      className="w-4 h-4 mt-0.5 text-custom-blue border-gray-300 rounded focus:ring-custom-blue"
                     />
                     <span className="text-sm text-gray-700">
                       Save card details on customer's behalf for future clinical
@@ -523,11 +523,11 @@ function CheckoutPayment({
                 </div>
 
                 {/* Info Box */}
-                <div className="bg-[#E2E8F0] border-l-4 border-[#0A4D91] rounded-lg p-3 mb-4">
+                <div className="bg-[#E2E8F0] border-l-4 border-custom-blue rounded-lg p-3 mb-4">
                   <div className="flex gap-3">
                     <Shield
                       size={18}
-                      className="text-[#0A4D91] flex-shrink-0 mt-0.5"
+                      className="text-custom-blue flex-shrink-0 mt-0.5"
                     />
                     <div>
                       <p className="text-sm text-gray-700 mb-2">
@@ -558,7 +558,7 @@ function CheckoutPayment({
                     setShowAddCardModal(false);
                     setShowReviewScreen(true);
                   }}
-                  className="w-full bg-[#0A4D91] text-white py-3 rounded-lg font-bold hover:bg-[#083d73] transition-colors mb-3"
+                  className="w-full bg-custom-blue text-white py-3 rounded-lg font-bold hover:bg-[#083d73] transition-colors mb-3"
                 >
                   Save and review
                 </button>
@@ -569,7 +569,7 @@ function CheckoutPayment({
                     setShowAddCardModal(false);
                     setSelectedPaymentMethod(null);
                   }}
-                  className="w-full text-[#0A4D91] hover:underline font-medium text-sm"
+                  className="w-full text-custom-blue hover:underline font-medium text-sm"
                 >
                   Cancel and return to checkout
                 </button>

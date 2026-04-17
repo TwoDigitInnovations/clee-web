@@ -440,7 +440,7 @@ function CreateSale() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors ${
                     activeTab === tab.id
-                      ? "text-[#0A4D91] border-b-2 border-[#0A4D91]"
+                      ? "text-custom-blue border-b-2 border-custom-blue"
                       : "text-gray-500 hover:text-gray-700"
                   }`}
                 >
@@ -461,7 +461,7 @@ function CreateSale() {
                 value={productSearchQuery}
                 onChange={(e) => setProductSearchQuery(e.target.value)}
                 placeholder="Search products, SKUs, or categories..."
-                className="w-full pl-12 pr-4 py-3 text-gray-700 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A4D91] focus:border-transparent outline-none"
+                className="w-full pl-12 pr-4 py-3 text-gray-700 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom-blue focus:border-transparent outline-none"
               />
             </div>
           </div>
@@ -592,17 +592,17 @@ function CreateSale() {
                 </p>
 
                 {/* Product Name */}
-                <h2 className="text-xl font-bold text-[#0A4D91] mb-5 leading-snug">
+                <h2 className="text-xl font-bold text-custom-blue mb-5 leading-snug">
                   {selectedProductDetail.name}
                 </h2>
 
                 {/* Quantity Section */}
                 <div className="mb-5">
                   <div className="flex items-center justify-between mb-3">
-                    <label className="text-xs font-bold text-[#0A4D91] uppercase">
+                    <label className="text-xs font-bold text-custom-blue uppercase">
                       Quantity
                     </label>
-                    <label className="text-xs font-bold text-[#0A4D91] uppercase">
+                    <label className="text-xs font-bold text-custom-blue uppercase">
                       Price
                     </label>
                   </div>
@@ -612,21 +612,21 @@ function CreateSale() {
                         onClick={() =>
                           setModalQuantity(Math.max(1, modalQuantity - 1))
                         }
-                        className="w-10 h-10 flex items-center justify-center bg-white border border-gray-300 hover:border-[#0A4D91] rounded text-[#0A4D91] font-bold text-xl transition-colors"
+                        className="w-10 h-10 flex items-center justify-center bg-white border border-gray-300 hover:border-custom-blue rounded text-custom-blue font-bold text-xl transition-colors"
                       >
                         −
                       </button>
-                      <span className="text-2xl font-bold text-[#0A4D91] w-12 text-center">
+                      <span className="text-2xl font-bold text-custom-blue w-12 text-center">
                         {modalQuantity}
                       </span>
                       <button
                         onClick={() => setModalQuantity(modalQuantity + 1)}
-                        className="w-10 h-10 flex items-center justify-center bg-white border border-gray-300 hover:border-[#0A4D91] rounded text-[#0A4D91] font-bold text-xl transition-colors"
+                        className="w-10 h-10 flex items-center justify-center bg-white border border-gray-300 hover:border-custom-blue rounded text-custom-blue font-bold text-xl transition-colors"
                       >
                         +
                       </button>
                     </div>
-                    <span className="text-2xl font-bold text-[#0A4D91]">
+                    <span className="text-2xl font-bold text-custom-blue">
                       $ {selectedProductDetail.price.toFixed(2)}
                     </span>
                   </div>
@@ -661,7 +661,7 @@ function CreateSale() {
                           setDiscountValue("");
                         }
                       }}
-                      className="w-full pl-12 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-lg appearance-none cursor-pointer focus:ring-2 focus:ring-[#0A4D91] focus:border-[#0A4D91] outline-none text-gray-600 text-sm"
+                      className="w-full pl-12 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-lg appearance-none cursor-pointer focus:ring-2 focus:ring-custom-blue focus:border-custom-blue outline-none text-gray-600 text-sm"
                     >
                       <option value="no-discount">No discount</option>
                       <option value="discount">Discount</option>
@@ -691,7 +691,7 @@ function CreateSale() {
                           onClick={() => setDiscountType("percentage")}
                           className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
                             discountType === "percentage"
-                              ? "bg-[#0A4D91] text-white"
+                              ? "bg-custom-blue text-white"
                               : "bg-white text-gray-600 border border-gray-300"
                           }`}
                         >
@@ -701,7 +701,7 @@ function CreateSale() {
                           onClick={() => setDiscountType("fixed")}
                           className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
                             discountType === "fixed"
-                              ? "bg-[#0A4D91] text-white"
+                              ? "bg-custom-blue text-white"
                               : "bg-white text-gray-600 border border-gray-300"
                           }`}
                         >
@@ -712,7 +712,7 @@ function CreateSale() {
                           value={discountValue}
                           onChange={(e) => setDiscountValue(e.target.value)}
                           placeholder="0"
-                          className="flex-1 py-2 px-3 border border-gray-300 rounded-lg text-center font-bold text-gray-900 focus:ring-2 focus:ring-[#0A4D91] focus:border-[#0A4D91] outline-none"
+                          className="flex-1 py-2 px-3 border border-gray-300 rounded-lg text-center font-bold text-gray-900 focus:ring-2 focus:ring-custom-blue focus:border-custom-blue outline-none"
                         />
                       </div>
 
@@ -738,7 +738,7 @@ function CreateSale() {
                                   : `${discountValue}`}
                               </span>
                             </div>
-                            <div className="flex justify-between text-lg font-bold text-[#0A4D91] pt-2 border-t border-gray-300">
+                            <div className="flex justify-between text-lg font-bold text-custom-blue pt-2 border-t border-gray-300">
                               <span>Final Price:</span>
                               <span>
                                 ${calculateDiscountedPrice().toFixed(2)}
@@ -754,7 +754,7 @@ function CreateSale() {
                 {/* Save Button */}
                 <button
                   onClick={saveProductToCart}
-                  className="w-full bg-[#0A4D91] text-white py-3.5 rounded-lg font-bold text-base hover:bg-[#083d73] transition-colors mb-3"
+                  className="w-full bg-custom-blue text-white py-3.5 rounded-lg font-bold text-base hover:bg-[#083d73] transition-colors mb-3"
                 >
                   Save
                 </button>
@@ -808,13 +808,13 @@ function CreateSale() {
                   onChange={(e) => setSaleNote(e.target.value)}
                   placeholder="Add a note for this sale..."
                   rows={5}
-                  className="w-full text-gray-700 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A4D91] focus:border-transparent outline-none resize-none"
+                  className="w-full text-gray-700 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom-blue focus:border-transparent outline-none resize-none"
                   autoFocus
                 />
 
                 <button
                   onClick={() => setShowNoteModal(false)}
-                  className="w-full mt-4 bg-[#0A4D91] text-white py-3 rounded-lg font-bold hover:bg-[#083d73] transition-colors"
+                  className="w-full mt-4 bg-custom-blue text-white py-3 rounded-lg font-bold hover:bg-[#083d73] transition-colors"
                 >
                   Save Note
                 </button>
@@ -844,11 +844,11 @@ function CreateSale() {
                   </button>
                 </div>
 
-                <div className="bg-blue-50 border-l-4 border-[#0A4D91] p-4 mb-6 rounded">
+                <div className="bg-blue-50 border-l-4 border-custom-blue p-4 mb-6 rounded">
                   <div className="flex gap-3">
                     <div className="flex-shrink-0">
                       <svg
-                        className="w-5 h-5 text-[#0A4D91]"
+                        className="w-5 h-5 text-custom-blue"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -896,7 +896,7 @@ function CreateSale() {
                       value={overallDiscountValue}
                       onChange={(e) => setOverallDiscountValue(e.target.value)}
                       placeholder="0"
-                      className="w-full h-14 px-4 border-2 border-gray-300 rounded-lg text-center font-bold text-2xl text-gray-900 focus:ring-2 focus:ring-[#0A4D91] focus:border-[#0A4D91] outline-none"
+                      className="w-full h-14 px-4 border-2 border-gray-300 rounded-lg text-center font-bold text-2xl text-gray-900 focus:ring-2 focus:ring-custom-blue focus:border-custom-blue outline-none"
                     />
                   </div>
                 </div>
@@ -907,7 +907,7 @@ function CreateSale() {
                       <p className="text-sm text-gray-600 mb-1">
                         Total after discount
                       </p>
-                      <p className="text-3xl font-bold text-[#0A4D91]">
+                      <p className="text-3xl font-bold text-custom-blue">
                         ${getTotalWithOverallDiscount().toFixed(2)}
                       </p>
                     </div>
@@ -916,7 +916,7 @@ function CreateSale() {
 
                 <button
                   onClick={() => setShowOverallDiscountModal(false)}
-                  className="w-full bg-[#0A4D91] text-white py-3 rounded-lg font-bold hover:bg-[#083d73] transition-colors"
+                  className="w-full bg-custom-blue text-white py-3 rounded-lg font-bold hover:bg-[#083d73] transition-colors"
                 >
                   Apply discount
                 </button>
@@ -948,7 +948,7 @@ function CreateSale() {
                 <div className="space-y-3">
                   <button
                     onClick={handleSaveAndClose}
-                    className="w-full bg-[#0A4D91] text-white py-3 rounded-lg font-bold hover:bg-[#083d73] transition-colors"
+                    className="w-full bg-custom-blue text-white py-3 rounded-lg font-bold hover:bg-[#083d73] transition-colors"
                   >
                     Save and Close
                   </button>

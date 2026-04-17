@@ -157,7 +157,7 @@ function MyProfile(props) {
         <div className="max-w-7xl mx-auto">
           <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
             <div
-              className="h-32 w-full relative"
+              className="md:h-32 h-20 w-full relative"
               style={{
                 background:
                   "linear-gradient(135deg, #0A4D91 0%, #1a6bbf 50%, #65ADF5 100%)",
@@ -176,7 +176,7 @@ function MyProfile(props) {
             <div className="md:px-8 px-4 pb-6">
               <div className="relative -mt-14 mb-4 w-fit">
                 <div
-                  className="w-24 h-24 rounded-full border-4 border-white shadow-lg overflow-hidden flex items-center justify-center"
+                  className="md:w-24 md:h-24 h-20 w-20 rounded-full border-4 border-white shadow-lg overflow-hidden flex items-center justify-center"
                   style={{
                     background: "linear-gradient(135deg, #0A4D91, #65ADF5)",
                   }}
@@ -189,7 +189,7 @@ function MyProfile(props) {
                       className="object-contain"
                     />
                   ) : (
-                    <MdPerson className="text-white text-5xl" />
+                    <MdPerson className="text-white md:text-5xl text-4xl" />
                   )}
                 </div>
               </div>

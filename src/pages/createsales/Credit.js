@@ -130,7 +130,7 @@ function Credit({
                   onClick={() => handleTabClick(tab.id)}
                   className={`px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors ${
                     activeTab === tab.id
-                      ? "text-[#0A4D91] border-b-2 border-[#0A4D91]"
+                      ? "text-custom-blue border-b-2 border-custom-blue"
                       : "text-gray-500 hover:text-gray-700"
                   }`}
                 >
@@ -144,14 +144,14 @@ function Credit({
           <div className="max-w-2xl mx-auto">
             <div className="bg-white rounded-xl shadow-sm p-6 md:p-8">
               <div className="mb-6">
-                <h2 className="text-2xl md:text-3xl font-bold text-[#0A4D91] mb-2">Add Credit</h2>
+                <h2 className="text-2xl md:text-3xl font-bold text-custom-blue mb-2">Add Credit</h2>
                 <p className="text-sm text-gray-500">Assign store credit to the current transaction</p>
               </div>
 
              
               <div className="bg-gray-50 rounded-xl p-8 mb-6 text-center">
                 <div className="flex items-center justify-center">
-                  <span className="text-5xl md:text-6xl font-bold text-[#0A4D91]">$</span>
+                  <span className="text-5xl md:text-6xl font-bold text-custom-blue">$</span>
                   <input
                     type="text"
                     value={creditAmount}
@@ -159,7 +159,7 @@ function Credit({
                       const value = e.target.value.replace(/[^0-9.]/g, '');
                       setCreditAmount(value);
                     }}
-                    className="text-5xl md:text-6xl font-bold text-[#0A4D91] bg-transparent border-none outline-none text-center w-48"
+                    className="text-5xl md:text-6xl font-bold text-custom-blue bg-transparent border-none outline-none text-center w-48"
                     placeholder="0.00"
                   />
                 </div>
@@ -176,7 +176,7 @@ function Credit({
                     value={reason}
                     onChange={(e) => setReason(e.target.value)}
                     placeholder="Client loyalty, refund..."
-                    className="w-full px-4 py-2.5 border text-gray-700 border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0A4D91] focus:border-transparent outline-none"
+                    className="w-full px-4 py-2.5 border text-gray-700 border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-custom-blue focus:border-transparent outline-none"
                   />
                 </div>
                 <div>
@@ -188,7 +188,7 @@ function Credit({
                     value={expiryDate}
                     onChange={(e) => setExpiryDate(e.target.value)}
                     min={new Date().toISOString().split('T')[0]}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-700 focus:ring-2 focus:ring-[#0A4D91] focus:border-transparent outline-none"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-700 focus:ring-2 focus:ring-custom-blue focus:border-transparent outline-none"
                   />
                   {expiryDate && (
                     <button 
@@ -206,7 +206,7 @@ function Credit({
               <div className="space-y-3">
                 <button
                   onClick={handleAddCredit}
-                  className="w-full bg-[#0A4D91] text-white py-3.5 rounded-lg font-semibold hover:bg-[#083a6e] transition-colors text-sm"
+                  className="w-full bg-custom-blue text-white py-3.5 rounded-lg font-semibold hover:bg-[#083a6e] transition-colors text-sm"
                 >
                   Add credit to sale
                 </button>
@@ -265,7 +265,7 @@ function Credit({
             <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl z-50 w-full max-w-lg shadow-2xl">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-[#0A4D91]">Set variable prices</h2>
+                  <h2 className="text-xl font-bold text-custom-blue">Set variable prices</h2>
                   <button
                     onClick={() => setShowVariablePriceModal(false)}
                     className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -277,14 +277,14 @@ function Credit({
                 <div className="mb-6">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <CreditCard className="text-[#0A4D91]" size={20} />
+                      <CreditCard className="text-custom-blue" size={20} />
                     </div>
                     <span className="text-xs font-semibold text-gray-500 uppercase">Credit Amount</span>
                   </div>
 
                   <div className="bg-gray-50 rounded-xl p-6 mb-4">
                     <div className="flex items-center justify-center gap-3">
-                      <span className="text-4xl font-bold text-[#0A4D91]">$</span>
+                      <span className="text-4xl font-bold text-custom-blue">$</span>
                       <input
                         type="text"
                         value={variableCreditAmount}
@@ -292,7 +292,7 @@ function Credit({
                           const value = e.target.value.replace(/[^0-9]/g, '');
                           setVariableCreditAmount(value);
                         }}
-                        className="text-4xl font-bold text-[#0A4D91] bg-transparent border-none outline-none w-16 text-center"
+                        className="text-4xl font-bold text-custom-blue bg-transparent border-none outline-none w-16 text-center"
                         placeholder="0"
                         autoFocus
                       />
@@ -325,7 +325,7 @@ function Credit({
                 <div className="space-y-3">
                   <button
                     onClick={handleSaveVariableCredit}
-                    className="w-full bg-[#0A4D91] text-white py-3.5 rounded-lg font-semibold hover:bg-[#083a6e] transition-colors text-sm flex items-center justify-center gap-2"
+                    className="w-full bg-custom-blue text-white py-3.5 rounded-lg font-semibold hover:bg-[#083a6e] transition-colors text-sm flex items-center justify-center gap-2"
                   >
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                       <circle cx="10" cy="10" r="9" stroke="white" strokeWidth="2"/>
@@ -372,13 +372,13 @@ function Credit({
                   onChange={(e) => setSaleNote(e.target.value)}
                   placeholder="Add a note for this sale..."
                   rows={5}
-                  className="w-full text-gray-700 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A4D91] focus:border-transparent outline-none resize-none"
+                  className="w-full text-gray-700 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom-blue focus:border-transparent outline-none resize-none"
                   autoFocus
                 />
 
                 <button
                   onClick={() => setShowNoteModal(false)}
-                  className="w-full mt-4 bg-[#0A4D91] text-white py-3 rounded-lg font-bold hover:bg-[#083d73] transition-colors"
+                  className="w-full mt-4 bg-custom-blue text-white py-3 rounded-lg font-bold hover:bg-[#083d73] transition-colors"
                 >
                   Save Note
                 </button>
@@ -408,11 +408,11 @@ function Credit({
                   </button>
                 </div>
 
-                <div className="bg-blue-50 border-l-4 border-[#0A4D91] p-4 mb-6 rounded">
+                <div className="bg-blue-50 border-l-4 border-custom-blue p-4 mb-6 rounded">
                   <div className="flex gap-3">
                     <div className="flex-shrink-0">
                       <svg
-                        className="w-5 h-5 text-[#0A4D91]"
+                        className="w-5 h-5 text-custom-blue"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -460,7 +460,7 @@ function Credit({
                       value={overallDiscountValueLocal}
                       onChange={(e) => setOverallDiscountValueLocal(e.target.value)}
                       placeholder="0"
-                      className="w-full h-14 px-4 border-2 border-gray-300 rounded-lg text-center font-bold text-2xl text-gray-900 focus:ring-2 focus:ring-[#0A4D91] focus:border-[#0A4D91] outline-none"
+                      className="w-full h-14 px-4 border-2 border-gray-300 rounded-lg text-center font-bold text-2xl text-gray-900 focus:ring-2 focus:ring-custom-blue focus:border-custom-blue outline-none"
                     />
                   </div>
                 </div>
@@ -471,7 +471,7 @@ function Credit({
                       <p className="text-sm text-gray-600 mb-1">
                         Total after discount
                       </p>
-                      <p className="text-3xl font-bold text-[#0A4D91]">
+                      <p className="text-3xl font-bold text-custom-blue">
                         ${getTotalWithOverallDiscount().toFixed(2)}
                       </p>
                     </div>
@@ -480,7 +480,7 @@ function Credit({
 
                 <button
                   onClick={() => setShowOverallDiscountModal(false)}
-                  className="w-full bg-[#0A4D91] text-white py-3 rounded-lg font-bold hover:bg-[#083d73] transition-colors"
+                  className="w-full bg-custom-blue text-white py-3 rounded-lg font-bold hover:bg-[#083d73] transition-colors"
                 >
                   Apply discount
                 </button>

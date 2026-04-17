@@ -78,15 +78,9 @@ function validate(formData) {
     }
   }
 
-  if (formData.telephone) {
-    if (!/^\+?[\d\s\-()]{7,15}$/.test(formData.telephone)) {
-      errors.telephone = "Invalid telephone number";
-    }
-  }
-
   if (formData.staff_type === "fixed") {
     if (!formData.street?.trim()) {
-      errors.street = "Street is required";
+      errors.street = "Address is required";
     }
 
     if (!formData.city?.trim()) {
@@ -98,13 +92,13 @@ function validate(formData) {
     errors.service_ids = "Please assign at least one service";
   }
 
-  const hasValidDay = Object.values(formData.hours || {}).some(
-    (day) => day.enabled,
-  );
+  // const hasValidDay = Object.values(formData.hours || {}).some(
+  //   (day) => day.enabled,
+  // );
 
-  if (!hasValidDay) {
-    errors.hours = "At least one working day must be enabled";
-  }
+  // if (!hasValidDay) {
+  //   errors.hours = "At least one working day must be enabled";
+  // }
 
   // ✅ Reference Number (if provided)
   if (formData.referenceNumber && formData.referenceNumber.length < 3) {
@@ -163,6 +157,19 @@ export default function AddStaff(props) {
             city: data.address?.city || "",
             service_ids: data.service_ids || [],
             hours: data.hours || getInitialState().hours,
+            AetherGlobalCommision: data.AetherGlobalCommision || 12.5,
+            VanguardHoldingsCommision: data.VanguardHoldingsCommision || 18.2,
+            SolsticeRealEstateCommision:
+              data?.SolsticeRealEstateCommision || 5.0,
+            nickName: data?.nickName || "",
+            jobTitle: data?.jobTitle || "",
+            referenceType: data?.referenceType || "Employee ID",
+            referenceNumber: data?.referenceNumber || "",
+            bio: data?.bio || "",
+            customMessage: data?.customMessage || "",
+            syncCalendar: data?.syncCalendar || true,
+            photo: data?.photo || null,
+            photoPreview: data?.photoPreview || "",
           });
         } else {
           props.toaster("error", res?.message || "Failed to fetch staff");
@@ -251,7 +258,7 @@ export default function AddStaff(props) {
       SolsticeRealEstateCommision: formData.SolsticeRealEstateCommision,
       nickName: formData.nickName,
       jobTitle: formData.jobTitle || "",
-      referenceType: formData.referenceType ||  "Employee ID",
+      referenceType: formData.referenceType || "Employee ID",
       referenceNumber: "",
       bio: "",
       customMessage: "",
@@ -277,17 +284,17 @@ export default function AddStaff(props) {
       const res = await dispatch(saveStaff(id, form, router));
       props.loader(false);
 
-      if (res?.status) {
-        props.toaster(
-          "success",
-          id ? "Staff updated successfully" : "Staff created successfully",
-        );
+      if (res?.success) {
+        props.toaster({
+          type: "success",
+          message: id
+            ? "Staff updated successfully"
+            : "Staff created successfully",
+        });
 
         if (!id) setFormData(getInitialState());
 
         router.push("/Business/Staff");
-   
-        
       } else {
         props.toaster("error", res?.message || "Something went wrong");
       }
@@ -383,7 +390,7 @@ export default function AddStaff(props) {
             </h1>
             <div className="flex gap-2">
               <button
-                onClick={() => router.push("/Business/staffs")}
+                onClick={() => router.push("/Business/Staff")}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
               >
                 Cancel

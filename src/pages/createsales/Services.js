@@ -152,7 +152,7 @@ function Services({
                   onClick={() => handleTabClick(tab.id)}
                   className={`px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors ${
                     activeTab === tab.id
-                      ? "text-[#0A4D91] border-b-2 border-[#0A4D91]"
+                      ? "text-custom-blue border-b-2 border-custom-blue"
                       : "text-gray-500 hover:text-gray-700"
                   }`}
                 >
@@ -171,7 +171,7 @@ function Services({
                 
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <h2 className="text-xl font-bold text-[#0A4D91]">{category.name}</h2>
+                    <h2 className="text-xl font-bold text-custom-blue">{category.name}</h2>
                     <span className="text-sm text-gray-500">{category.count} SERVICES AVAILABLE</span>
                   </div>
                   <button
@@ -276,13 +276,13 @@ function Services({
                   onChange={(e) => setSaleNote(e.target.value)}
                   placeholder="Add a note for this sale..."
                   rows={5}
-                  className="w-full text-gray-700 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A4D91] focus:border-transparent outline-none resize-none"
+                  className="w-full text-gray-700 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom-blue focus:border-transparent outline-none resize-none"
                   autoFocus
                 />
 
                 <button
                   onClick={() => setShowNoteModal(false)}
-                  className="w-full mt-4 bg-[#0A4D91] text-white py-3 rounded-lg font-bold hover:bg-[#083d73] transition-colors"
+                  className="w-full mt-4 bg-custom-blue text-white py-3 rounded-lg font-bold hover:bg-[#083d73] transition-colors"
                 >
                   Save Note
                 </button>
@@ -312,11 +312,11 @@ function Services({
                   </button>
                 </div>
 
-                <div className="bg-blue-50 border-l-4 border-[#0A4D91] p-4 mb-6 rounded">
+                <div className="bg-blue-50 border-l-4 border-custom-blue p-4 mb-6 rounded">
                   <div className="flex gap-3">
                     <div className="flex-shrink-0">
                       <svg
-                        className="w-5 h-5 text-[#0A4D91]"
+                        className="w-5 h-5 text-custom-blue"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -364,7 +364,7 @@ function Services({
                       value={overallDiscountValueLocal}
                       onChange={(e) => setOverallDiscountValueLocal(e.target.value)}
                       placeholder="0"
-                      className="w-full h-14 px-4 border-2 border-gray-300 rounded-lg text-center font-bold text-2xl text-gray-900 focus:ring-2 focus:ring-[#0A4D91] focus:border-[#0A4D91] outline-none"
+                      className="w-full h-14 px-4 border-2 border-gray-300 rounded-lg text-center font-bold text-2xl text-gray-900 focus:ring-2 focus:ring-custom-blue focus:border-custom-blue outline-none"
                     />
                   </div>
                 </div>
@@ -375,7 +375,7 @@ function Services({
                       <p className="text-sm text-gray-600 mb-1">
                         Total after discount
                       </p>
-                      <p className="text-3xl font-bold text-[#0A4D91]">
+                      <p className="text-3xl font-bold text-custom-blue">
                         ${getTotalWithOverallDiscount().toFixed(2)}
                       </p>
                     </div>
@@ -384,7 +384,7 @@ function Services({
 
                 <button
                   onClick={() => setShowOverallDiscountModal(false)}
-                  className="w-full bg-[#0A4D91] text-white py-3 rounded-lg font-bold hover:bg-[#083d73] transition-colors"
+                  className="w-full bg-custom-blue text-white py-3 rounded-lg font-bold hover:bg-[#083d73] transition-colors"
                 >
                   Apply discount
                 </button>

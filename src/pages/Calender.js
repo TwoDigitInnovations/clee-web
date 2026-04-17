@@ -636,9 +636,10 @@ function Calender(props) {
             </div>
           </header>
 
-          <div className="flex-1 overflow-auto">
-            <div className="flex min-w-max">
-              <div className="w-16 shrink-0 pt-14 select-none">
+         <div className="md:w-full w-[400px] overflow-x-auto">
+
+            <div className="flex min-w-max ">
+              <div className="w-16 shrink-0 left-0  pt-14 select-none">
                 {HOURS.map((h) => (
                   <div
                     key={h}
@@ -660,12 +661,12 @@ function Calender(props) {
                 return (
                   <div
                     key={staff.id}
-                    className="flex-1 md:min-w-[200px] min-w-[165px]"
+                   className="min-w-[180px] flex-shrink-0"
                     style={{
                       borderLeft: idx === 0 ? "1px solid #e2e8f0" : "none",
                     }}
                   >
-                    <div className="flex flex-col items-center justify-center h-14 border-b border-r border-slate-100 sticky top-0 bg-white z-10 gap-1">
+                    <div className=" flex flex-col items-center justify-center h-14 border-b border-r border-slate-100 sticky top-0 bg-white z-10 gap-1">
                       <Avatar src={staff.avatar} name={staff.name} size={8} />
                       <span className="text-xs font-semibold text-slate-700">
                         {staff.name}

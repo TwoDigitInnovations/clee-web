@@ -198,7 +198,7 @@ function Vouchers({
                   onClick={() => handleTabClick(tab.id)}
                   className={`px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors ${
                     activeTab === tab.id
-                      ? "text-[#0A4D91] border-b-2 border-[#0A4D91]"
+                      ? "text-custom-blue border-b-2 border-custom-blue"
                       : "text-gray-500 hover:text-gray-700"
                   }`}
                 >
@@ -210,7 +210,7 @@ function Vouchers({
 
           {/* Header with Title */}
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-semibold text-[#0A4D91]">Sale at Chebo Clinic</h2>
+            <h2 className="text-2xl font-semibold text-custom-blue">Sale at Chebo Clinic</h2>
             <p className="text-sm text-gray-400 uppercase">Select a voucher to continue</p>
           </div>
 
@@ -223,10 +223,10 @@ function Vouchers({
             >
               <div className="flex flex-col items-center text-center">
                 <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4 shadow-sm">
-                  <Gift size={32} className="text-[#0A4D91]" />
+                  <Gift size={32} className="text-custom-blue" />
                 </div>
-                <h3 className="font-semibold text-[#0A4D91] mb-2">Enter an amount</h3>
-                <p className="text-2xl font-bold text-[#0A4D91]">$0</p>
+                <h3 className="font-semibold text-custom-blue mb-2">Enter an amount</h3>
+                <p className="text-2xl font-bold text-custom-blue">$0</p>
               </div>
             </div>
 
@@ -239,12 +239,12 @@ function Vouchers({
               >
                 <div className="flex flex-col items-center text-center">
                   <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4">
-                    <Gift size={32} className="text-[#0A4D91]" />
+                    <Gift size={32} className="text-custom-blue" />
                   </div>
-                  <h3 className="font-semibold text-[#0A4D91] mb-2 line-clamp-2">
+                  <h3 className="font-semibold text-custom-blue mb-2 line-clamp-2">
                     {voucher.GiftVoucher_name || "Voucher"}
                   </h3>
-                  <p className="text-2xl font-bold text-[#0A4D91]">
+                  <p className="text-2xl font-bold text-custom-blue">
                     ${voucher.amount ? voucher.amount.toFixed(2) : "0.00"}
                   </p>
                   {voucher.sku_handle && (
@@ -313,7 +313,7 @@ function Vouchers({
             <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl z-50 w-full max-w-md shadow-2xl">
               <div className="p-6 max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-[#0A4D91]">Enter an amount</h2>
+                  <h2 className="text-xl font-bold text-custom-blue">Enter an amount</h2>
                   <button
                     onClick={() => setShowEnterAmountModal(false)}
                     className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
@@ -326,7 +326,7 @@ function Vouchers({
 
                 {/* Amount Input */}
                 <div className="mb-6">
-                  <label className="block text-xs font-bold text-[#0A4D91] uppercase mb-3">Amount</label>
+                  <label className="block text-xs font-bold text-custom-blue uppercase mb-3">Amount</label>
                   <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                     <div className="flex items-center justify-center">
                       <span className="text-3xl font-bold text-gray-400 mr-2">$</span>
@@ -349,7 +349,7 @@ function Vouchers({
                 {/* To and From Fields */}
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   <div className="relative">
-                    <label className="block text-xs font-bold text-[#0A4D91] uppercase mb-2">To</label>
+                    <label className="block text-xs font-bold text-custom-blue uppercase mb-2">To</label>
                     <input
                       type="text"
                       value={toSearchQuery}
@@ -360,7 +360,7 @@ function Vouchers({
                       }}
                       onFocus={() => setShowToDropdown(true)}
                       placeholder="Recipient's name"
-                      className="w-full px-3 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#0A4D91] focus:border-transparent outline-none"
+                      className="w-full px-3 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-custom-blue focus:border-transparent outline-none"
                     />
                     {showToDropdown && toSearchQuery && filteredToCustomers.length > 0 && (
                       <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
@@ -378,7 +378,7 @@ function Vouchers({
                     )}
                   </div>
                   <div className="relative">
-                    <label className="block text-xs font-bold text-[#0A4D91] uppercase mb-2">From</label>
+                    <label className="block text-xs font-bold text-custom-blue uppercase mb-2">From</label>
                     <input
                       type="text"
                       value={fromSearchQuery}
@@ -389,7 +389,7 @@ function Vouchers({
                       }}
                       onFocus={() => setShowFromDropdown(true)}
                       placeholder="Sender's name"
-                      className="w-full px-3 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#0A4D91] focus:border-transparent outline-none"
+                      className="w-full px-3 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-custom-blue focus:border-transparent outline-none"
                     />
                     {showFromDropdown && fromSearchQuery && filteredFromCustomers.length > 0 && (
                       <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
@@ -415,7 +415,7 @@ function Vouchers({
                       type="checkbox"
                       checked={sendRecipientEmail}
                       onChange={(e) => setSendRecipientEmail(e.target.checked)}
-                      className="w-4 h-4 text-[#0A4D91] border-gray-300 rounded focus:ring-[#0A4D91]"
+                      className="w-4 h-4 text-custom-blue border-gray-300 rounded focus:ring-custom-blue"
                     />
                     <span className="text-sm text-gray-700">Send recipient email</span>
                   </label>
@@ -424,34 +424,34 @@ function Vouchers({
                 {/* Email Field - Show when checkbox is checked */}
                 {sendRecipientEmail && (
                   <div className="mb-4">
-                    <label className="block text-xs font-bold text-[#0A4D91] uppercase mb-2">Email</label>
+                    <label className="block text-xs font-bold text-custom-blue uppercase mb-2">Email</label>
                     <input
                       type="email"
                       value={recipientEmail}
                       onChange={(e) => setRecipientEmail(e.target.value)}
                       placeholder="Enter recipient's email"
-                      className="w-full px-3 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#0A4D91] focus:border-transparent outline-none"
+                      className="w-full px-3 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-custom-blue focus:border-transparent outline-none"
                     />
                   </div>
                 )}
 
                 {/* Message Field */}
                 <div className="mb-4">
-                  <label className="block text-xs font-bold text-[#0A4D91] uppercase mb-2">Message</label>
+                  <label className="block text-xs font-bold text-custom-blue uppercase mb-2">Message</label>
                   <textarea
                     value={voucherMessage}
                     onChange={(e) => setVoucherMessage(e.target.value)}
                     placeholder="Optional message"
                     rows={3}
-                    className="w-full px-3 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#0A4D91] focus:border-transparent outline-none resize-none"
+                    className="w-full px-3 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-custom-blue focus:border-transparent outline-none resize-none"
                   />
                 </div>
 
                 {/* Custom Voucher Code */}
                 <div className="mb-6">
-                  <label className="block text-xs font-bold text-[#0A4D91] uppercase mb-2">Custom Voucher Code</label>
+                  <label className="block text-xs font-bold text-custom-blue uppercase mb-2">Custom Voucher Code</label>
                   <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5">
-                    <svg className="w-4 h-4 text-[#0A4D91] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-custom-blue flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
                     </svg>
                     <input
@@ -467,7 +467,7 @@ function Vouchers({
                 {/* Add to Sale Button */}
                 <button
                   onClick={handleAddCustomVoucher}
-                  className="w-full bg-[#0A4D91] text-white py-3.5 rounded-lg font-bold text-base hover:bg-[#083d73] transition-colors mb-3"
+                  className="w-full bg-custom-blue text-white py-3.5 rounded-lg font-bold text-base hover:bg-[#083d73] transition-colors mb-3"
                 >
                   Add to sale
                 </button>
@@ -494,7 +494,7 @@ function Vouchers({
             <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl z-50 w-full max-w-md shadow-2xl">
               <div className="p-6 max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-[#0A4D91]">{selectedVoucherDetail.GiftVoucher_name || "Voucher"}</h2>
+                  <h2 className="text-xl font-bold text-custom-blue">{selectedVoucherDetail.GiftVoucher_name || "Voucher"}</h2>
                   <button
                     onClick={() => {
                       setShowVoucherDetailModal(false);
@@ -510,7 +510,7 @@ function Vouchers({
 
                 {/* To Field */}
                 <div className="mb-4 relative">
-                  <label className="block text-xs font-bold text-[#0A4D91] uppercase mb-2">To</label>
+                  <label className="block text-xs font-bold text-custom-blue uppercase mb-2">To</label>
                   <input
                     type="text"
                     value={toSearchQuery}
@@ -521,7 +521,7 @@ function Vouchers({
                     }}
                     onFocus={() => setShowToDropdown(true)}
                     placeholder="Recipient's name"
-                    className="w-full px-3 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#0A4D91] focus:border-transparent outline-none"
+                    className="w-full px-3 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-custom-blue focus:border-transparent outline-none"
                   />
                   {showToDropdown && toSearchQuery && filteredToCustomers.length > 0 && (
                     <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
@@ -541,7 +541,7 @@ function Vouchers({
 
                 {/* From Field */}
                 <div className="mb-4 relative">
-                  <label className="block text-xs font-bold text-[#0A4D91] uppercase mb-2">From</label>
+                  <label className="block text-xs font-bold text-custom-blue uppercase mb-2">From</label>
                   <input
                     type="text"
                     value={fromSearchQuery}
@@ -552,7 +552,7 @@ function Vouchers({
                     }}
                     onFocus={() => setShowFromDropdown(true)}
                     placeholder="Sender's name"
-                    className="w-full px-3 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#0A4D91] focus:border-transparent outline-none"
+                    className="w-full px-3 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-custom-blue focus:border-transparent outline-none"
                   />
                   {showFromDropdown && fromSearchQuery && filteredFromCustomers.length > 0 && (
                     <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
@@ -577,7 +577,7 @@ function Vouchers({
                       type="checkbox"
                       checked={sendRecipientEmail}
                       onChange={(e) => setSendRecipientEmail(e.target.checked)}
-                      className="w-4 h-4 text-[#0A4D91] border-gray-300 rounded focus:ring-[#0A4D91]"
+                      className="w-4 h-4 text-custom-blue border-gray-300 rounded focus:ring-custom-blue"
                     />
                     <span className="text-sm text-gray-700">Send recipient email</span>
                   </label>
@@ -586,34 +586,34 @@ function Vouchers({
                 {/* Email Field - Show when checkbox is checked */}
                 {sendRecipientEmail && (
                   <div className="mb-4">
-                    <label className="block text-xs font-bold text-[#0A4D91] uppercase mb-2">Email</label>
+                    <label className="block text-xs font-bold text-custom-blue uppercase mb-2">Email</label>
                     <input
                       type="email"
                       value={recipientEmail}
                       onChange={(e) => setRecipientEmail(e.target.value)}
                       placeholder="Enter recipient's email"
-                      className="w-full px-3 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#0A4D91] focus:border-transparent outline-none"
+                      className="w-full px-3 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-custom-blue focus:border-transparent outline-none"
                     />
                   </div>
                 )}
 
                 {/* Message Field */}
                 <div className="mb-4">
-                  <label className="block text-xs font-bold text-[#0A4D91] uppercase mb-2">Message</label>
+                  <label className="block text-xs font-bold text-custom-blue uppercase mb-2">Message</label>
                   <textarea
                     value={voucherMessage}
                     onChange={(e) => setVoucherMessage(e.target.value)}
                     placeholder="Optional message"
                     rows={3}
-                    className="w-full px-3 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#0A4D91] focus:border-transparent outline-none resize-none"
+                    className="w-full px-3 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-custom-blue focus:border-transparent outline-none resize-none"
                   />
                 </div>
 
                 {/* Custom Voucher Code */}
                 <div className="mb-6">
-                  <label className="block text-xs font-bold text-[#0A4D91] uppercase mb-2">Custom Voucher Code</label>
+                  <label className="block text-xs font-bold text-custom-blue uppercase mb-2">Custom Voucher Code</label>
                   <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5">
-                    <svg className="w-4 h-4 text-[#0A4D91] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-custom-blue flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
                     </svg>
                     <input
@@ -629,7 +629,7 @@ function Vouchers({
                 {/* Add to Sale Button */}
                 <button
                   onClick={handleAddVoucherFromDetail}
-                  className="w-full bg-[#0A4D91] text-white py-3.5 rounded-lg font-bold text-base hover:bg-[#083d73] transition-colors"
+                  className="w-full bg-custom-blue text-white py-3.5 rounded-lg font-bold text-base hover:bg-[#083d73] transition-colors"
                 >
                   Add to sale
                 </button>
@@ -662,13 +662,13 @@ function Vouchers({
                   onChange={(e) => setSaleNote(e.target.value)}
                   placeholder="Add a note for this sale..."
                   rows={5}
-                  className="w-full text-gray-700 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A4D91] focus:border-transparent outline-none resize-none"
+                  className="w-full text-gray-700 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom-blue focus:border-transparent outline-none resize-none"
                   autoFocus
                 />
 
                 <button
                   onClick={() => setShowNoteModal(false)}
-                  className="w-full mt-4 bg-[#0A4D91] text-white py-3 rounded-lg font-bold hover:bg-[#083d73] transition-colors"
+                  className="w-full mt-4 bg-custom-blue text-white py-3 rounded-lg font-bold hover:bg-[#083d73] transition-colors"
                 >
                   Save Note
                 </button>
@@ -698,11 +698,11 @@ function Vouchers({
                   </button>
                 </div>
 
-                <div className="bg-blue-50 border-l-4 border-[#0A4D91] p-4 mb-6 rounded">
+                <div className="bg-blue-50 border-l-4 border-custom-blue p-4 mb-6 rounded">
                   <div className="flex gap-3">
                     <div className="flex-shrink-0">
                       <svg
-                        className="w-5 h-5 text-[#0A4D91]"
+                        className="w-5 h-5 text-custom-blue"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -750,7 +750,7 @@ function Vouchers({
                       value={overallDiscountValueLocal}
                       onChange={(e) => setOverallDiscountValueLocal(e.target.value)}
                       placeholder="0"
-                      className="w-full h-14 px-4 border-2 border-gray-300 rounded-lg text-center font-bold text-2xl text-gray-900 focus:ring-2 focus:ring-[#0A4D91] focus:border-[#0A4D91] outline-none"
+                      className="w-full h-14 px-4 border-2 border-gray-300 rounded-lg text-center font-bold text-2xl text-gray-900 focus:ring-2 focus:ring-custom-blue focus:border-custom-blue outline-none"
                     />
                   </div>
                 </div>
@@ -761,7 +761,7 @@ function Vouchers({
                       <p className="text-sm text-gray-600 mb-1">
                         Total after discount
                       </p>
-                      <p className="text-3xl font-bold text-[#0A4D91]">
+                      <p className="text-3xl font-bold text-custom-blue">
                         ${getTotalWithOverallDiscount().toFixed(2)}
                       </p>
                     </div>
@@ -770,7 +770,7 @@ function Vouchers({
 
                 <button
                   onClick={() => setShowOverallDiscountModal(false)}
-                  className="w-full bg-[#0A4D91] text-white py-3 rounded-lg font-bold hover:bg-[#083d73] transition-colors"
+                  className="w-full bg-custom-blue text-white py-3 rounded-lg font-bold hover:bg-[#083d73] transition-colors"
                 >
                   Apply discount
                 </button>

@@ -117,7 +117,7 @@ export default function StaffRoster() {
       <div className="min-h-screen bg-[#f8f9fa] pb-20 font-sans">
         <div className="max-w-[1400px] mx-auto md:p-6 p-4">
           {/* Page title */}
-          <div className="flex justify-between items-start mb-6">
+          <div className="flex md:flex-row flex-col justify-between gap-2 items-start mb-6">
             <div>
               <h1 className="text-2xl font-bold text-custom-blue">
                 Staff Roster

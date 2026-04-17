@@ -12,12 +12,12 @@ function Administrators() {
     <div className="min-h-screen bg-custom-gray pb-20">
       <DashboardHeader title="Administration" />
 
-      <div className="max-w-6xl mx-auto md:p-6 p-4">
-        <h1 className="text-xl md:text-2xl font-semibold text-custom-blue mb-6">
+      <div className="max-w-7xl mx-auto md:p-6 p-4">
+        <h1 className="md:flex hidden text-xl md:text-2xl font-semibold text-custom-blue mb-6">
           Administrators
         </h1>
 
-        <div className="bg-white border-l-4 border-custom-blue rounded-xl shadow-sm p-5 mb-8 flex gap-4">
+        <div className="bg-white border-l-4 border-custom-blue rounded-xl shadow-sm p-3 md:p-5 mb-8 flex gap-4">
           <div className="mt-1">
             <div className="bg-blue-50 p-2 rounded-full">
               <Info size={20} className="text-custom-blue" />
@@ -36,7 +36,7 @@ function Administrators() {
         </div>
 
         {/* Empty State Card */}
-        <div className="bg-white border border-blue-100 rounded-[2rem] p-12 flex flex-col items-center justify-center text-center shadow-sm min-h-[450px]">
+        <div className="bg-white border border-blue-100 rounded-[2rem] md:p-12 p-6 flex flex-col items-center justify-center text-center shadow-sm min-h-[450px]">
           {/* Shield Icon Container */}
           <div className="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mb-8">
             <div className="text-custom-blue">
@@ -45,7 +45,7 @@ function Administrators() {
           </div>
 
       
-          <h2 className="text-2xl font-bold text-slate-800 mb-3">
+          <h2 className="md:text-2xl text-xl font-bold text-slate-800 mb-3">
             No administrators yet
           </h2>
           <p className="text-gray-500 text-sm max-w-md mx-auto mb-10 leading-relaxed">
