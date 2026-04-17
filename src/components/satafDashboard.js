@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchStaffStats } from "@/redux/actions/staffActions";
 
-const PER_PAGE = 3;
+const PER_PAGE = 10;
 
 const fmt = (v) => (v === 0 ? "$0" : `$${Math.abs(v).toLocaleString()}`);
 

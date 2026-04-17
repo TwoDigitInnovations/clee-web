@@ -47,15 +47,6 @@ const TIMEZONES = [
 const DATE_FORMATS = ["18 Mar 2026", "03/18/2026", "2026-03-18"];
 const TIME_FORMATS = ["6:39PM", "18:39", "6:39 PM"];
 
-const CATEGORIES = [
-  "Beauty",
-  "Health & Wellness",
-  "Fitness",
-  "Spa",
-  "Salon",
-  "Other",
-];
-
 function LogoModal({ logo, onClose, onUpload, onDelete }) {
   const fileRef = useRef();
   return (
@@ -131,10 +122,10 @@ function LogoModal({ logo, onClose, onUpload, onDelete }) {
 
 function SectionLabel({ title, description }) {
   return (
-    <div className="w-48 flex-shrink-0">
+    <div className="md:w-48 flex-shrink-0">
       <p className="text-sm font-semibold text-slate-800">{title}</p>
       {description && (
-        <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+        <p className="text-xs text-slate-500 mt-1 leading-relaxed mb-2">
           {description}
         </p>
       )}
@@ -181,6 +172,8 @@ function BusinessDetails({ loader, toaster }) {
       const fullName = user.fullname || "";
       const nameParts = fullName.trim().split(" ");
       setEditId(user._id);
+      console.log(user);
+      
       setFormData((prev) => ({
         ...prev,
 
@@ -217,7 +210,6 @@ function BusinessDetails({ loader, toaster }) {
   useEffect(() => {
     dispatch(fetchProfile);
   }, [dispatch]);
-
 
   const AllCategory = useSelector((state) => state.category?.categories);
 
@@ -288,7 +280,10 @@ function BusinessDetails({ loader, toaster }) {
           name: formData.businessName,
           logo: formData.BusinessLogo,
 
-          category: formData.businessCategory,
+          category:
+            typeof formData.businessCategory === "object"
+              ? formData.businessCategory?.value // 👈 FIX
+              : formData.businessCategory,
           description: formData.businessDescription,
 
           website: {
@@ -315,14 +310,28 @@ function BusinessDetails({ loader, toaster }) {
       const form = new FormData();
 
       Object.keys(payload).forEach((key) => {
-        form.append(key, payload[key]);
+        const value = payload[key];
+
+        if (!value) return;
+
+        if (value instanceof File) {
+          form.append(key, value);
+        } else if (typeof value === "object") {
+          try {
+            form.append(key, JSON.stringify(value));
+          } catch (err) {
+            console.log("Skipping circular field:", key);
+          }
+        } else {
+          form.append(key, value);
+        }
       });
 
       if (logo) {
         form.append("logo", logo);
       }
+
       let res;
-      console.log(editId);
 
       if (editId) {
         res = await dispatch(updateCustomerById(editId, form, router));
@@ -451,8 +460,8 @@ function BusinessDetails({ loader, toaster }) {
                   options={[
                     { label: "Select a category", value: "", disabled: true }, // placeholder
                     ...AllCategory.map((cat) => ({
-                      label: cat.name, 
-                      value: cat._id || cat.name, 
+                      label: cat.name,
+                      value: cat._id || cat.name,
                     })),
                   ]}
                   error={errors.businessCategory}
