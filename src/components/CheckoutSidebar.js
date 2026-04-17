@@ -1,5 +1,5 @@
 import React from "react";
-import { ShoppingCart, User, CreditCard, Search, X } from "lucide-react";
+import { ShoppingCart, User, CreditCard, Search, X, Trash2 } from "lucide-react";
 
 const CheckoutSidebar = ({
   selectedClient,
@@ -12,10 +12,14 @@ const CheckoutSidebar = ({
   selectedProducts = [],
   openProductDetail,
   savedSales = [],
+  onLoadSale,
+  onSaveSale,
+  onDeleteSale,
   getTotal,
   getTotalWithOverallDiscount,
   overallDiscountValue,
   overallDiscountType,
+  saleNote = "",
   onAddNote,
   onAddDiscount,
   onCheckout,
@@ -148,16 +152,29 @@ const CheckoutSidebar = ({
               {selectedProducts.map((product) => (
                 <div
                   key={product.id}
-                  onClick={() => handleProductClick(product)}
-                  className="p-4 bg-white border border-gray-200 rounded-lg cursor-pointer hover:border-[#0A4D91] transition-colors"
+                  className="p-4 bg-white border border-gray-200 rounded-lg hover:border-[#0A4D91] transition-colors group"
                 >
                   <div className="flex items-start gap-3">
                     <ShoppingCart size={20} className="text-gray-400 mt-1" />
-                    <div className="flex-1">
+                    <div 
+                      className="flex-1 cursor-pointer"
+                      onClick={() => handleProductClick(product)}
+                    >
                       <p className="font-semibold text-sm text-gray-900 mb-1">{product.name}</p>
-                      <p className="text-xs text-gray-500 italic">Staff 2</p>
+                      <p className="text-xs text-gray-500 italic">Qty: {product.quantity || 1}</p>
                     </div>
-                    <p className="font-bold text-lg text-gray-900">${product.price}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-bold text-lg text-gray-900">${(product.price * (product.quantity || 1)).toFixed(2)}</p>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedItems && setSelectedItems(selectedItems.filter(item => item.id !== product.id));
+                        }}
+                        className="p-1.5 text-red-500 hover:bg-red-50 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -175,15 +192,57 @@ const CheckoutSidebar = ({
             <div className="space-y-2">
               {savedSales.map((sale, index) => (
                 <div
-                  key={index}
-                  className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                  key={sale.id || index}
+                  className="p-3 bg-gray-50 rounded-lg hover:bg-blue-50 border border-transparent hover:border-[#0A4D91] transition-colors group"
                 >
-                  <p className="font-semibold text-sm text-gray-900">{sale.name}</p>
-                  <p className="text-xs text-gray-500">
-                    {sale.date} • ${sale.amount.toFixed(2)}
-                  </p>
+                  <div className="flex items-center justify-between gap-2">
+                    <div 
+                      className="flex-1 cursor-pointer"
+                      onClick={() => onLoadSale && onLoadSale(sale)}
+                    >
+                      <p className="font-semibold text-sm text-gray-900">
+                        {sale.client?.fullname || sale.client?.name || "Walk-in Customer"}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {sale.date} • {sale.items?.length || 0} items
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-bold text-[#0A4D91]">
+                        ${(sale.total || 0).toFixed(2)}
+                      </p>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (confirm('Are you sure you want to delete this saved sale?')) {
+                            onDeleteSale && onDeleteSale(sale.id);
+                          }
+                        }}
+                        className="p-1.5 text-red-500 hover:bg-red-50 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Sale Note Section */}
+        {saleNote && (
+          <div className="mb-6">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="flex items-start gap-2">
+                <svg className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                </svg>
+                <div className="flex-1">
+                  <p className="text-xs font-semibold text-yellow-800 uppercase mb-1">Sale Note</p>
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{saleNote}</p>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -331,19 +390,32 @@ const CheckoutSidebar = ({
                     {selectedProducts.map((product) => (
                       <div
                         key={product.id}
-                        onClick={() => {
-                          handleProductClick(product);
-                          setShowMobileCart(false);
-                        }}
-                        className="p-4 bg-white border border-gray-200 rounded-lg cursor-pointer hover:border-[#0A4D91] transition-colors"
+                        className="p-4 bg-white border border-gray-200 rounded-lg hover:border-[#0A4D91] transition-colors group"
                       >
                         <div className="flex items-start gap-3">
                           <ShoppingCart size={20} className="text-gray-400 mt-1" />
-                          <div className="flex-1">
+                          <div 
+                            className="flex-1 cursor-pointer"
+                            onClick={() => {
+                              handleProductClick(product);
+                              setShowMobileCart(false);
+                            }}
+                          >
                             <p className="font-semibold text-sm text-gray-900 mb-1">{product.name}</p>
-                            <p className="text-xs text-gray-500 italic">Staff 2</p>
+                            <p className="text-xs text-gray-500 italic">Qty: {product.quantity || 1}</p>
                           </div>
-                          <p className="font-bold text-lg text-gray-900">${product.price}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="font-bold text-lg text-gray-900">${(product.price * (product.quantity || 1)).toFixed(2)}</p>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedItems && setSelectedItems(selectedItems.filter(item => item.id !== product.id));
+                              }}
+                              className="p-1.5 text-red-500 hover:bg-red-50 rounded"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -361,15 +433,60 @@ const CheckoutSidebar = ({
                   <div className="space-y-2">
                     {savedSales.map((sale, index) => (
                       <div
-                        key={index}
-                        className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                        key={sale.id || index}
+                        className="p-3 bg-gray-50 rounded-lg hover:bg-blue-50 border border-transparent hover:border-[#0A4D91] transition-colors group"
                       >
-                        <p className="font-semibold text-sm text-gray-900">{sale.name}</p>
-                        <p className="text-xs text-gray-500">
-                          {sale.date} • ${sale.amount.toFixed(2)}
-                        </p>
+                        <div className="flex items-center justify-between gap-2">
+                          <div 
+                            className="flex-1 cursor-pointer"
+                            onClick={() => {
+                              onLoadSale && onLoadSale(sale);
+                              setShowMobileCart(false);
+                            }}
+                          >
+                            <p className="font-semibold text-sm text-gray-900">
+                              {sale.client?.fullname || sale.client?.name || "Walk-in Customer"}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {sale.date} • {sale.items?.length || 0} items
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-bold text-[#0A4D91]">
+                              ${(sale.total || 0).toFixed(2)}
+                            </p>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (confirm('Are you sure you want to delete this saved sale?')) {
+                                  onDeleteSale && onDeleteSale(sale.id);
+                                }
+                              }}
+                              className="p-1.5 text-red-500 hover:bg-red-50 rounded"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Sale Note Section - Mobile */}
+              {saleNote && (
+                <div className="mb-6">
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <div className="flex items-start gap-2">
+                      <svg className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                      </svg>
+                      <div className="flex-1">
+                        <p className="text-xs font-semibold text-yellow-800 uppercase mb-1">Sale Note</p>
+                        <p className="text-sm text-gray-700 whitespace-pre-wrap">{saleNote}</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
@@ -443,7 +560,7 @@ const CheckoutSidebar = ({
         </>
       )}
 
-      {/* Client Search Modal */}
+     
       {showClientSearch && (
         <>
           <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setShowClientSearch(false)} />
@@ -451,19 +568,19 @@ const CheckoutSidebar = ({
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xl font-bold text-gray-900">Select client</h3>
-                <button onClick={() => setShowClientSearch(false)} className="p-2 hover:bg-gray-100 rounded-full">
+                <button onClick={() => setShowClientSearch(false)} className="p-2 hover:bg-gray-400 text-gray-500 rounded-full">
                   <X size={20} />
                 </button>
               </div>
 
               <div className="relative mb-4">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700" size={20} />
                 <input
                   type="text"
                   value={clientSearchQuery}
                   onChange={(e) => setClientSearchQuery(e.target.value)}
                   placeholder="Search clients..."
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A4D91] focus:border-transparent outline-none"
+                  className="w-full pl-10 text-gray-700 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A4D91] focus:border-transparent outline-none"
                   autoFocus
                 />
               </div>

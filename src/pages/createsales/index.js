@@ -37,15 +37,142 @@ function CreateSale() {
   const [overallDiscountValue, setOverallDiscountValue] = useState("");
   const [showCheckout, setShowCheckout] = useState(false);
   const [customers, setCustomers] = useState([]);
+  const [productSearchQuery, setProductSearchQuery] = useState("");
+  const [savedSalesList, setSavedSalesList] = useState([]);
+  const [showUnsavedChangesModal, setShowUnsavedChangesModal] = useState(false);
+  const [pendingRoute, setPendingRoute] = useState(null);
+
+  // Load saved sales from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("savedSales");
+    if (saved) {
+      setSavedSalesList(JSON.parse(saved));
+    }
+    
+    // Load last unsaved sale if exists
+    const unsavedSale = localStorage.getItem("currentSale");
+    if (unsavedSale) {
+      const saleData = JSON.parse(unsavedSale);
+      setSelectedItems(saleData.items || []);
+      setSelectedClient(saleData.client || null);
+      setSaleNote(saleData.note || "");
+      setOverallDiscountValue(saleData.discountValue || "");
+      setOverallDiscountType(saleData.discountType || "percentage");
+    }
+  }, []);
+
+  // Auto-save current sale to localStorage
+  useEffect(() => {
+    if (selectedItems.length > 0 || selectedClient || saleNote) {
+      const currentSale = {
+        items: selectedItems,
+        client: selectedClient,
+        note: saleNote,
+        discountValue: overallDiscountValue,
+        discountType: overallDiscountType,
+        timestamp: new Date().toISOString(),
+      };
+      localStorage.setItem("currentSale", JSON.stringify(currentSale));
+    }
+  }, [selectedItems, selectedClient, saleNote, overallDiscountValue, overallDiscountType]);
+
+  // Route change warning
+  useEffect(() => {
+    const handleRouteChange = (url) => {
+      if (selectedItems.length > 0 || selectedClient) {
+        setPendingRoute(url);
+        setShowUnsavedChangesModal(true);
+        router.events.emit('routeChangeError');
+        throw 'Route change aborted.';
+      }
+    };
+
+    router.events.on('routeChangeStart', handleRouteChange);
+    return () => {
+      router.events.off('routeChangeStart', handleRouteChange);
+    };
+  }, [selectedItems, selectedClient, router]);
 
   useEffect(() => {
     dispatch(fetchProducts(router));
     loadCustomers();
   }, []);
-  const role = "user";
+
   const loadCustomers = async () => {
-    const customersList = await dispatch(fetchUsers(role));
+    const customersList = await dispatch(fetchUsers(router, "user"));
     setCustomers(customersList);
+  };
+
+  // Save current sale
+  const saveSale = () => {
+    const saleData = {
+      id: Date.now(),
+      items: selectedItems,
+      client: selectedClient,
+      note: saleNote,
+      discountValue: overallDiscountValue,
+      discountType: overallDiscountType,
+      total: getTotalWithOverallDiscount(),
+      timestamp: new Date().toISOString(),
+      date: new Date().toLocaleString(),
+    };
+
+    const existingSales = JSON.parse(localStorage.getItem("savedSales") || "[]");
+    existingSales.unshift(saleData);
+    localStorage.setItem("savedSales", JSON.stringify(existingSales));
+    setSavedSalesList(existingSales);
+    
+    // Clear current sale
+    clearSale();
+  };
+
+  // Delete a saved sale
+  const deleteSavedSale = (saleId) => {
+    const existingSales = JSON.parse(localStorage.getItem("savedSales") || "[]");
+    const updatedSales = existingSales.filter(sale => sale.id !== saleId);
+    localStorage.setItem("savedSales", JSON.stringify(updatedSales));
+    setSavedSalesList(updatedSales);
+  };
+
+  // Load a saved sale
+  const loadSavedSale = (sale) => {
+    setSelectedItems(sale.items || []);
+    setSelectedClient(sale.client || null);
+    setSaleNote(sale.note || "");
+    setOverallDiscountValue(sale.discountValue || "");
+    setOverallDiscountType(sale.discountType || "percentage");
+  };
+
+  // Clear current sale
+  const clearSale = () => {
+    setSelectedItems([]);
+    setSelectedClient(null);
+    setSaleNote("");
+    setOverallDiscountValue("");
+    setOverallDiscountType("percentage");
+    localStorage.removeItem("currentSale");
+  };
+
+  // Handle route change with unsaved changes
+  const handleDiscardAndLeave = () => {
+    clearSale();
+    setShowUnsavedChangesModal(false);
+    if (pendingRoute) {
+      router.push(pendingRoute);
+    }
+  };
+
+  const handleSaveAndClose = () => {
+    saveSale();
+    setShowUnsavedChangesModal(false);
+    if (pendingRoute) {
+      router.push(pendingRoute);
+    }
+  };
+
+  const handleContinueSale = () => {
+    setShowUnsavedChangesModal(false);
+    setPendingRoute(null);
   };
 
   const tabs = [
@@ -67,11 +194,14 @@ function CreateSale() {
         stock: product.stock || 0,
       }))
     : [];
-
-  const savedSales = [
-    { name: "Elena Rodriguez", date: "Yesterday 4:35 PM", amount: 245.0 },
-    { name: "Julian Thorne", date: "2 days ago", amount: 120.5 },
-  ];
+ 
+  const filteredProducts = products.filter((product) => {
+    const searchLower = productSearchQuery.toLowerCase();
+    return (
+      product.name.toLowerCase().includes(searchLower) ||
+      product.sku.toLowerCase().includes(searchLower)
+    );
+  });
 
   const addToCart = (item) => {
     const existing = selectedItems.find((p) => p.id === item.id);
@@ -181,7 +311,7 @@ function CreateSale() {
     );
   }
 
-  // Show Services page if services tab is active
+ 
   if (activeTab === "services") {
     return (
       <Services
@@ -199,6 +329,8 @@ function CreateSale() {
         setShowMobileCart={setShowMobileCart}
         overallDiscountValue={overallDiscountValue}
         overallDiscountType={overallDiscountType}
+        saleNote={saleNote}
+        setSaleNote={setSaleNote}
         showNoteModal={showNoteModal}
         setShowNoteModal={setShowNoteModal}
         showOverallDiscountModal={showOverallDiscountModal}
@@ -208,7 +340,7 @@ function CreateSale() {
     );
   }
 
-  // Show Vouchers page if vouchers tab is active
+  
   if (activeTab === "vouchers") {
     return (
       <Vouchers
@@ -226,6 +358,8 @@ function CreateSale() {
         setShowMobileCart={setShowMobileCart}
         overallDiscountValue={overallDiscountValue}
         overallDiscountType={overallDiscountType}
+        saleNote={saleNote}
+        setSaleNote={setSaleNote}
         showNoteModal={showNoteModal}
         setShowNoteModal={setShowNoteModal}
         showOverallDiscountModal={showOverallDiscountModal}
@@ -253,6 +387,8 @@ function CreateSale() {
         setShowMobileCart={setShowMobileCart}
         overallDiscountValue={overallDiscountValue}
         overallDiscountType={overallDiscountType}
+        saleNote={saleNote}
+        setSaleNote={setSaleNote}
         showNoteModal={showNoteModal}
         setShowNoteModal={setShowNoteModal}
         showOverallDiscountModal={showOverallDiscountModal}
@@ -279,6 +415,8 @@ function CreateSale() {
         setShowMobileCart={setShowMobileCart}
         overallDiscountValue={overallDiscountValue}
         overallDiscountType={overallDiscountType}
+        saleNote={saleNote}
+        setSaleNote={setSaleNote}
         showNoteModal={showNoteModal}
         setShowNoteModal={setShowNoteModal}
         showOverallDiscountModal={showOverallDiscountModal}
@@ -320,8 +458,10 @@ function CreateSale() {
               />
               <input
                 type="text"
+                value={productSearchQuery}
+                onChange={(e) => setProductSearchQuery(e.target.value)}
                 placeholder="Search products, SKUs, or categories..."
-                className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A4D91] focus:border-transparent outline-none"
+                className="w-full pl-12 pr-4 py-3 text-gray-700 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A4D91] focus:border-transparent outline-none"
               />
             </div>
           </div>
@@ -337,12 +477,12 @@ function CreateSale() {
                 </p>
               </div>
               <p className="text-sm text-gray-500">
-                {products.length} PRODUCTS FOUND
+                {filteredProducts.length} PRODUCTS FOUND
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((product) => (
+              {filteredProducts.map((product) => (
                 <div
                   key={product.id}
                   onClick={() => addToCart(product)}
@@ -388,11 +528,15 @@ function CreateSale() {
           selectedItems={selectedItems}
           setSelectedItems={setSelectedItems}
           openProductDetail={openProductDetail}
-          savedSales={savedSales}
+          savedSales={savedSalesList}
+          onLoadSale={loadSavedSale}
+          onSaveSale={saveSale}
+          onDeleteSale={deleteSavedSale}
           getTotal={getTotal}
           getTotalWithOverallDiscount={getTotalWithOverallDiscount}
           overallDiscountValue={overallDiscountValue}
           overallDiscountType={overallDiscountType}
+          saleNote={saleNote}
           onAddNote={() => setShowNoteModal(true)}
           onAddDiscount={() => setShowOverallDiscountModal(true)}
           onCheckout={() => {
@@ -776,6 +920,51 @@ function CreateSale() {
                 >
                   Apply discount
                 </button>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Unsaved Changes Modal */}
+        {showUnsavedChangesModal && (
+          <>
+            <div className="fixed inset-0 bg-black/50 z-50" />
+            <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl z-50 w-full max-w-md shadow-2xl">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-gray-900">Unsaved Changes</h3>
+                  <button
+                    onClick={handleContinueSale}
+                    className="p-2 hover:bg-gray-100 rounded-full"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <p className="text-gray-600 mb-6">
+                  You have unsaved changes in your current sale. What would you like to do?
+                </p>
+
+                <div className="space-y-3">
+                  <button
+                    onClick={handleSaveAndClose}
+                    className="w-full bg-[#0A4D91] text-white py-3 rounded-lg font-bold hover:bg-[#083d73] transition-colors"
+                  >
+                    Save and Close
+                  </button>
+                  <button
+                    onClick={handleDiscardAndLeave}
+                    className="w-full bg-red-500 text-white py-3 rounded-lg font-bold hover:bg-red-600 transition-colors"
+                  >
+                    Discard Changes
+                  </button>
+                  <button
+                    onClick={handleContinueSale}
+                    className="w-full border border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+                  >
+                    Continue with Sale
+                  </button>
+                </div>
               </div>
             </div>
           </>
