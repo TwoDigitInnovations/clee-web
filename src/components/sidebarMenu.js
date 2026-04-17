@@ -27,8 +27,8 @@ const MenuItem = ({ item, router, level = 0, setOpen1, open1 }) => {
       <div
         onClick={() => {
           item.children
-            ? setOpen(!open)
-            : item.href &&  router.push(item.href);
+            ? setOpen((prev) => !prev)
+            : item.href && (setOpen1((prev) => !prev), router.push(item.href));
         }}
         className={`flex items-center justify-between px-4 py-2 rounded-md mb-1 cursor-pointer
         ${
@@ -58,6 +58,8 @@ const MenuItem = ({ item, router, level = 0, setOpen1, open1 }) => {
               item={child}
               router={router}
               level={level + 1}
+              setOpen1={setOpen1} // 👈 add this
+              open1={open1}
             />
           ))}
         </div>

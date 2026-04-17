@@ -167,7 +167,7 @@ function Rewards({ loader, toaster }) {
         showToCustomers: editData.showToCustomers,
       });
     }
-  });
+  },[editData]);
 
   const handleSave = async () => {
     try {
@@ -203,7 +203,7 @@ function Rewards({ loader, toaster }) {
 
   useEffect(() => {
     dispatch(fetchServices(router));
-  }, []);
+  }, [dispatch]);
 
   const fetchRewards = async () => {
     try {
