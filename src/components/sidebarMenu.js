@@ -28,7 +28,7 @@ const MenuItem = ({ item, router, level = 0, setOpen1, open1 }) => {
         onClick={() => {
           item.children
             ? setOpen(!open)
-            : item.href && <>setOpen1(!open1); router.push(item.href);</>;
+            : item.href &&  router.push(item.href);
         }}
         className={`flex items-center justify-between px-4 py-2 rounded-md mb-1 cursor-pointer
         ${
