@@ -463,7 +463,7 @@ function CheckoutPayment({
                       onChange={(e) => setCardNumber(e.target.value)}
                       placeholder="0000 0000 0000 0000"
                       maxLength={19}
-                      className="w-full px-4 py-3 bg-[#E2E8F0] border-0 rounded-lg text-gray-400 focus:ring-2 focus:ring-[#0A4D91] outline-none"
+                      className="w-full px-4 py-3 bg-[#E2E8F0] border-0 rounded-lg text-gray-500 focus:ring-2 focus:ring-[#0A4D91] outline-none"
                     />
                     <div className="absolute right-4 top-1/2 -translate-y-1/2">
                       <CreditCard size={20} className="text-gray-400" />

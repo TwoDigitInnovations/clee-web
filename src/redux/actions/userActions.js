@@ -91,11 +91,15 @@ export const fetchUsers =
 
       if (res?.status) {
         dispatch(setUsers(res.data?.data || []));
+        dispatch(setLoading(false));
+        return res.data?.data || [];
       }
 
       dispatch(setLoading(false));
+      return [];
     } catch (err) {
       dispatch(setLoading(false));
+      return [];
     }
   };
 
