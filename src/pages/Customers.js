@@ -367,7 +367,7 @@ function Customers(props) {
                   )}
 
                   <span className="text-[10px] sm:text-xs text-slate-400 font-medium">
-                    ID: {selected?._id}
+                    ID: {selected?.CustomerId || "RISH20260418163845"}
                   </span>
                 </div>
               </div>

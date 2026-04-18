@@ -145,7 +145,6 @@ export default function Referrals() {
         </div>
 
         <div className="max-w-7xl mx-auto md:px-6 px-4 py-0 space-y-6">
-      
           {stats && (
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <StatCard
@@ -176,6 +175,100 @@ export default function Referrals() {
             </div>
           )}
 
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-base font-semibold text-slate-900">
+                  Reward tiers
+                </h2>
+                <button className="flex items-center gap-1 text-xs text-slate-500 border border-slate-200 rounded-lg px-2.5 py-1 hover:bg-slate-50 transition-colors">
+                  <Edit2 size={11} /> Edit
+                </button>
+              </div>
+              <div className="space-y-3">
+                {rewardTiers.map((tier, i) => (
+                  <div
+                    key={i}
+                    className={`flex items-center gap-3 rounded-xl px-4 py-3 border transition-all ${
+                      tier.active
+                        ? "bg-[#0A4D911A] text-black"
+                        : "bg-slate-50 border-slate-100 text-slate-800"
+                    }`}
+                  >
+                    {tier.rank && (
+                      <span
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0 ${
+                          tier.active
+                            ? "bg-custom-blue  text-white"
+                            : "bg-white text-slate-700 border border-slate-200"
+                        }`}
+                      >
+                        {tier.rank}
+                      </span>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p
+                        className={`text-sm font-semibold ${tier.active ? "text-custom-blue" : "text-slate-900"}`}
+                      >
+                        {tier.label}
+                      </p>
+                      <p
+                        className={`text-xs ${tier.active ? "text-gray-700" : "text-slate-400"}`}
+                      >
+                        {tier.description}
+                      </p>
+                    </div>
+                    {tier.active && (
+                      <Star
+                        size={16}
+                        className="text-custom-blue flex-shrink-0"
+                        fill="currentColor"
+                      />
+                    )}
+                    {tier.badge && (
+                      <span className="bg-custom-blue text-white text-xs font-bold px-2 py-0.5 rounded-lg">
+                        {tier.badge}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-base font-semibold text-slate-900">
+                  Top referrers
+                </h2>
+                <button className="text-xs text-custom-blue font-medium hover:underline flex items-center gap-0.5">
+                  View all <ChevronRight size={12} />
+                </button>
+              </div>
+              <div className="space-y-4">
+                {topReferrers.map((r) => (
+                  <div key={r.rank} className="flex items-center gap-3">
+                    <span className="w-5 text-sm font-bold text-slate-400">
+                      {r.rank}
+                    </span>
+                    <Avatar initials={r.avatar} color={r.color} size="lg" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-slate-900 truncate">
+                        {r.name}
+                      </p>
+                      <p className="text-xs text-slate-400">{r.since}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-bold text-indigo-600">
+                        {r.referrals} referrals
+                      </p>
+                      <p className="text-xs text-slate-400">
+                        ${r.revenue.toLocaleString()} revenue
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between px-4 md:px-6 py-4 border-b border-slate-100 gap-3">
@@ -200,7 +293,6 @@ export default function Referrals() {
               </div>
             </div>
 
-       
             <div className="hidden md:grid md:grid-cols-6 px-6 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-50">
               <span className="col-span-2">Referred by</span>
               <span>Friend referred</span>
@@ -209,7 +301,6 @@ export default function Referrals() {
               <span className="text-right">Booking value</span>
             </div>
 
-           
             {filtered.length === 0 ? (
               <div className="px-6 py-12 text-center text-slate-400 text-sm">
                 No referrals found for this filter.
@@ -222,7 +313,6 @@ export default function Referrals() {
                     i === filtered.length - 1 ? "border-none" : ""
                   }`}
                 >
-                 
                   <div className="hidden md:grid grid-cols-6 items-center px-6 py-4 hover:bg-slate-50 transition-colors">
                     <div className="col-span-2 flex items-center gap-3">
                       <Avatar
@@ -314,105 +404,6 @@ export default function Referrals() {
                 </div>
               ))
             )}
-          </div>
-
-     
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-     
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="text-base font-semibold text-slate-900">
-                  Top referrers
-                </h2>
-                <button className="text-xs text-custom-blue font-medium hover:underline flex items-center gap-0.5">
-                  View all <ChevronRight size={12} />
-                </button>
-              </div>
-              <div className="space-y-4">
-                {topReferrers.map((r) => (
-                  <div key={r.rank} className="flex items-center gap-3">
-                    <span className="w-5 text-sm font-bold text-slate-400">
-                      {r.rank}
-                    </span>
-                    <Avatar initials={r.avatar} color={r.color} size="lg" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-slate-900 truncate">
-                        {r.name}
-                      </p>
-                      <p className="text-xs text-slate-400">{r.since}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-bold text-indigo-600">
-                        {r.referrals} referrals
-                      </p>
-                      <p className="text-xs text-slate-400">
-                        ${r.revenue.toLocaleString()} revenue
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Reward Tiers */}
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="text-base font-semibold text-slate-900">
-                  Reward tiers
-                </h2>
-                <button className="flex items-center gap-1 text-xs text-slate-500 border border-slate-200 rounded-lg px-2.5 py-1 hover:bg-slate-50 transition-colors">
-                  <Edit2 size={11} /> Edit
-                </button>
-              </div>
-              <div className="space-y-3">
-                {rewardTiers.map((tier, i) => (
-                  <div
-                    key={i}
-                    className={`flex items-center gap-3 rounded-xl px-4 py-3 border transition-all ${
-                      tier.active
-                        ? "bg-[#0A4D911A] text-black"
-                        : "bg-slate-50 border-slate-100 text-slate-800"
-                    }`}
-                  >
-                    {tier.rank && (
-                      <span
-                        className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0 ${
-                          tier.active
-                            ? "bg-custom-blue  text-white"
-                            : "bg-white text-slate-700 border border-slate-200"
-                        }`}
-                      >
-                        {tier.rank}
-                      </span>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p
-                        className={`text-sm font-semibold ${tier.active ? "text-custom-blue" : "text-slate-900"}`}
-                      >
-                        {tier.label}
-                      </p>
-                      <p
-                        className={`text-xs ${tier.active ? "text-gray-700" : "text-slate-400"}`}
-                      >
-                        {tier.description}
-                      </p>
-                    </div>
-                    {tier.active && (
-                      <Star
-                        size={16}
-                        className="text-custom-blue flex-shrink-0"
-                        fill="currentColor"
-                      />
-                    )}
-                    {tier.badge && (
-                      <span className="bg-custom-blue text-white text-xs font-bold px-2 py-0.5 rounded-lg">
-                        {tier.badge}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
       </div>
