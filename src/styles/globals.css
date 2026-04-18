@@ -42,3 +42,24 @@ body {
     -ms-overflow-style: none;
   }
 }
+
+.PhoneInput {
+  display: flex;
+  align-items: center;
+}
+
+.PhoneInputCountry {
+  margin-right: 8px;
+}
+
+.PhoneInputCountryIcon {
+  width: 20px !important;
+  height: 14px !important;
+}
+
+.PhoneInputInput {
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  font-size: 14px;
+}

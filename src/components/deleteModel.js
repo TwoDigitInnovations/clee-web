@@ -7,9 +7,10 @@ export const ConfirmModal = ({
   onConfirm,
   yesText = "Yes",
   noText = "No",
+  onCancel,
 }) => {
   return (
-    <AnimatePresence >
+    <AnimatePresence>
       {isOpen && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -24,11 +25,9 @@ export const ConfirmModal = ({
             transition={{ duration: 0.3, ease: "easeOut" }}
             className="bg-white border border-[#fff]/30 rounded-2xl p-6 w-full max-w-md shadow-[0_0_25px_rgba(224,243,73,0.3)]"
           >
-           
             <h2 className="text-black text-2xl font-semibold mb-3 text-start text-custom-yellow">
               {title}
             </h2>
-
 
             <p className="text-start text-gray-800 mb-6">{message}</p>
 
@@ -37,7 +36,13 @@ export const ConfirmModal = ({
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setIsOpen(false)}
+                onClick={() => {
+                  if (onCancel) {
+                    onCancel();
+                  }
+
+                  setIsOpen(false);
+                }}
                 className="px-5 py-2 cursor-pointer bg-gray-800 border border-gray-500 text-gray-200 rounded-lg text-md hover:bg-gray-700 transition-all duration-200"
               >
                 {noText}

@@ -165,6 +165,19 @@ export const deleteCustomerById = (id, router) => async (dispatch) => {
     throw err;
   }
 };
+export const blockUnblockCustomer = (data, router) => async (dispatch) => {
+  try {
+    const res = await Api("put", `auth/block-customer`, data, router);
+
+    if (res?.status) {
+      dispatch(updateCustomer(res.data));
+    }
+
+    return res;
+  } catch (err) {
+    throw err;
+  }
+};
 
 export const sendOTPAction = (data) => async () => {
   return await Api("post", "auth/sendOTP", data);

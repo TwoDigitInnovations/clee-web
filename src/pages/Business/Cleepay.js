@@ -23,6 +23,8 @@ import {
   BookOpen,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchLocations } from "@/redux/actions/locationActions";
 
 function Toggle({ checked, onChange }) {
   return (
@@ -133,28 +135,29 @@ export default function Cleepay(props) {
   const [surchargeMethod, setSurchargeMethod] = useState("fixed");
   const [surchargePercent, setSurchargePercent] = useState("1.5");
   const [locations, setLocations] = useState([]);
+  const location = useSelector((state) => state.location?.locations || []);
 
-  const dummyLocations = [
-    {
-      id: 1,
-      name: "Chebo Clinic",
-      address: "59 Montgomery Street Kogarah, Sydney",
-    },
-  ];
+  // const dummyLocations = [
+  //   {
+  //     id: 1,
+  //     name: "Chebo Clinic",
+  //     address: "59 Montgomery Street Kogarah, Sydney",
+  //   },
+  // ];
 
-  const fetchLocations = async () => {
-    try {
-      props.loader(true);
-      const res = await Api("get", `location/getAll`, "", router);
-      props.loader(false);
-      if (res?.status === true) {
-        setLocations(res.data.data || [dummyLocations]);
-      }
-    } catch (err) {
-      props.loader(false);
-      props.toaster({ type: "error", message: "Failed to fetch locations" });
-    }
-  };
+  // const fetchLocations = async () => {
+  //   try {
+  //     props.loader(true);
+  //     const res = await Api("get", `location/getAll`, "", router);
+  //     props.loader(false);
+  //     if (res?.status === true) {
+  //       setLocations(res.data.data || [dummyLocations]);
+  //     }
+  //   } catch (err) {
+  //     props.loader(false);
+  //     props.toaster({ type: "error", message: "Failed to fetch locations" });
+  //   }
+  // };
 
   const fetchCards = async () => {
     try {
@@ -168,9 +171,10 @@ export default function Cleepay(props) {
     }
   };
 
+  const dispatch = useDispatch();
   useEffect(() => {
     fetchCards();
-    fetchLocations();
+    dispatch(fetchLocations());
   }, []);
 
   const handleUnpair = () => {
@@ -293,7 +297,7 @@ export default function Cleepay(props) {
               value={newReaderLocation}
               onChange={setNewReaderLocation}
               placeholder="Location name"
-              options={locations.map((l) => l.location_name)}
+              options={location.map((l) => l.location_name)}
             />
           </div>
         </div>
@@ -360,7 +364,7 @@ export default function Cleepay(props) {
             </button>
           </div>
 
-          {locations.map((loc) => {
+          {location.map((loc) => {
             const locCards = cards.filter((c) => c.locationId === loc._id);
             return (
               <div

@@ -8,13 +8,13 @@ import {
   CreditCard,
   Bell,
   Camera,
-  Plus,
-  Minus,
   Upload,
   Shield,
   Copy,
 } from "lucide-react";
 import InputField from "./UI/InputField";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 import SelectField from "./UI/SelectField";
 import TextareaField from "./UI/TextAreaField";
 import { useRouter } from "next/router";
@@ -24,6 +24,7 @@ import {
   updateCustomerById,
 } from "@/redux/actions/userActions";
 import { useDispatch, useSelector } from "react-redux";
+import { isValidPhoneNumber } from "react-phone-number-input";
 
 const Toggle = ({ checked, onChange, label }) => (
   <label className="flex items-center gap-2 cursor-pointer select-none">
@@ -110,7 +111,6 @@ const TABS = [
 const getInitialState = () => ({
   first_name: "",
   last_name: "",
-  telephone: "",
   mobile: "",
   email: "",
   occupation: "",
@@ -138,7 +138,6 @@ const getInitialState = () => ({
   timezone: "(GMT-08:00) Pacific Time",
   alerts: "",
   is_active: true,
-  no_shows: 0,
   // Cards
   card_number: "",
   card_expiry: "",
@@ -160,25 +159,16 @@ const getInitialState = () => ({
 const validateCustomerForm = (form) => {
   const errors = {};
 
-  // ✅ First Name
   if (!form.first_name?.trim()) {
     errors.first_name = "First name is required";
   }
 
-  // ✅ Mobile
-  if (!form.mobile?.trim()) {
+  if (!form.mobile) {
     errors.mobile = "Mobile number is required";
-  } else {
-    const cleaned = form.mobile.replace(/\D/g, "");
-
-    if (!/^[0-9]+$/.test(cleaned)) {
-      errors.mobile = "Only numbers are allowed";
-    } else if (cleaned.length < 7 || cleaned.length > 10) {
-      errors.mobile = "Number must be between 7 to 10 digits";
-    }
+  } else if (!isValidPhoneNumber(form.mobile)) {
+    errors.mobile = "Invalid mobile number";
   }
 
-  // ✅ Email
   if (!form.email?.trim()) {
     errors.email = "Email is required";
   } else {
@@ -188,29 +178,6 @@ const validateCustomerForm = (form) => {
       errors.email = "Invalid email format";
     }
   }
-
-  // ✅ Photo
-  if (!form.photo) {
-    errors.photo = "Photo is required";
-  }
-
-  // if (form?.postal_address?.postal_postcode) {
-  //   if (form.postal_address.postal_postcode.length !== 6) {
-  //     errors.postal_address = {
-  //       ...(errors.postal_address || {}),
-  //       postal_postcode: "Postal postcode must be 6 digits",
-  //     };
-  //   }
-  // }
-
-  // if (form?.physical_address?.physical_postcode) {
-  //   if (form.physical_address.physical_postcode.length !== 6) {
-  //     errors.physical_address = {
-  //       ...(errors.physical_address || {}),
-  //       physical_postcode: "Physical postcode must be 6 digits",
-  //     };
-  //   }
-  // }
 
   return {
     isValid: Object.keys(errors).length === 0,
@@ -460,21 +427,48 @@ const AddCustomer = ({
         onChange={handleChange}
         placeholder="Enter last name"
       />
-      <InputField
-        label="Telephone"
-        name="telephone"
-        value={formData.telephone}
-        onChange={handleChange}
-        placeholder="Enter telephone"
-      />
-      <InputField
+      {/* <InputField
         label="Mobile number"
         name="mobile"
         value={formData.mobile}
         onChange={handleChange}
         placeholder="+61"
         error={errors.mobile}
-      />
+      /> */}
+
+      <div className="w-full">
+        <label className="block text-sm font-medium text-slate-700 mb-1">
+          Mobile Number
+        </label>
+
+        <div
+          className={`flex items-center border rounded-lg px-3 h-[42px] bg-[#F8FAFC] ${
+            errors.mobile
+              ? "border-red-500"
+              : "border-slate-300 focus-within:ring-1 focus-within:ring-blue-400"
+          }`}
+        >
+          <PhoneInput
+            international
+            defaultCountry="US"
+            value={formData.mobile}
+            onChange={(value) => {
+              const updatedForm = { ...formData, mobile: value };
+
+              setFormData(updatedForm);
+
+              const { errors } = validateCustomerForm(updatedForm);
+              setErrors(errors);
+            }}
+            className="w-full text-sm outline-none bg-transparent"
+          />
+        </div>
+
+        {errors.mobile && (
+          <p className="text-red-500 text-xs mt-1">{errors.mobile}</p>
+        )}
+      </div>
+
       <InputField
         label="Email address"
         name="email"
@@ -587,37 +581,6 @@ const AddCustomer = ({
           onChange={() => handleToggle("is_active")}
           label="Active Customer"
         />
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-600 font-medium">
-            Number of no-shows
-          </span>
-          <div className="flex items-center gap-2 border border-gray-200 rounded-lg px-3 py-1">
-            <button
-              type="button"
-              onClick={() =>
-                setFormData((p) => ({
-                  ...p,
-                  no_shows: Math.max(0, p.no_shows - 1),
-                }))
-              }
-              className="text-gray-500 hover:text-gray-800"
-            >
-              <Minus size={14} />
-            </button>
-            <span className="text-sm font-semibold w-6 text-center">
-              {formData.no_shows}
-            </span>
-            <button
-              type="button"
-              onClick={() =>
-                setFormData((p) => ({ ...p, no_shows: p.no_shows + 1 }))
-              }
-              className="text-gray-500 hover:text-gray-800"
-            >
-              <Plus size={14} />
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );

@@ -3,7 +3,10 @@ import DashboardHeader from "@/components/DashboardHeader";
 import { ConfirmModal } from "@/components/deleteModel";
 import ImportCustomer from "@/components/ImportCustomer";
 import isAuth from "@/components/isAuth";
-import { deleteCustomerById } from "@/redux/actions/userActions";
+import {
+  blockUnblockCustomer,
+  deleteCustomerById,
+} from "@/redux/actions/userActions";
 import { deleteCustomer } from "@/redux/slices/userSlice";
 import { Api } from "@/services/service";
 import {
@@ -86,6 +89,12 @@ function Customers(props) {
   const [loadingBookings, setLoadingBookings] = useState(false);
   const menuRef = useRef();
 
+  const [actionType, setActionType] = useState(""); // "delete" | "block"
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isBlockOpen, setIsBlockOpen] = useState(false);
+
+  const [selectedUser, setSelectedUser] = useState(null);
+
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -164,13 +173,13 @@ function Customers(props) {
 
   const dispatch = useDispatch();
 
-  const handleDeleteConfirm = async () => {
-    if (!editId) return;
+  const handleDeleteConfirm = async (id) => {
+    if (!id) return;
 
     try {
       props.loader(true);
 
-      const res = await dispatch(deleteCustomerById(editId, router));
+      const res = await dispatch(deleteCustomerById(id, router));
 
       if (res?.status === true) {
         props.toaster({
@@ -180,7 +189,7 @@ function Customers(props) {
 
         getCustomer();
         setEditId("");
-        setIsConfirmOpen(false);
+        setIsDeleteOpen(false);
       } else {
         props.toaster({
           type: "error",
@@ -286,7 +295,10 @@ function Customers(props) {
               ) : (
                 // ❌ Empty State (Desktop)
                 <div className="flex flex-col gap-2  items-center justify-center h-full py-10 text-center">
-                  <div className="bg-gray-100 p-3 rounded-md"> <Users2 /> </div>
+                  <div className="bg-gray-100 p-3 rounded-md">
+                    {" "}
+                    <Users2 />{" "}
+                  </div>
                   <p className="text-sm text-slate-400">No customers found</p>
                 </div>
               )}
@@ -401,19 +413,23 @@ function Customers(props) {
 
                       <button
                         onClick={() => {
-                          // setOpen(false);
-                          // onMessage();
+                          setSelectedUser(selected);
+                          setIsBlockOpen(true);
                         }}
                         className="flex items-center gap-2 w-full px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
                       >
                         <ShieldAlert size={16} />
-                        Block
+                        {selected.isBlocked ? "Unblock" : "Block"}
                       </button>
 
                       <button
+                        // onClick={() => {
+                        //   setIsConfirmOpen(true);
+                        //   setEditId(selected._id);
+                        // }}
                         onClick={() => {
-                          setIsConfirmOpen(true);
-                          setEditId(selected._id);
+                          setSelectedUser(selected);
+                          setIsDeleteOpen(true);
                         }}
                         className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                       >
@@ -869,14 +885,75 @@ function Customers(props) {
         )}
 
         <ConfirmModal
-          isOpen={isConfirmOpen}
-          setIsOpen={setIsConfirmOpen}
+          isOpen={isDeleteOpen}
+          setIsOpen={setIsDeleteOpen}
           title="Delete Customer"
-          message={`Are you sure you want to delete this Customer ?`}
-          onConfirm={handleDeleteConfirm}
+          message="Are you sure you want to delete this customer?"
+          onConfirm={() => {
+            handleDeleteConfirm(selectedUser._id);
+            setIsDeleteOpen(false);
+            setSelectedUser(null);
+          }}
           yesText="Yes, Delete"
           noText="Cancel"
+          onCancel={() => {
+            setIsDeleteOpen(false);
+            setSelectedUser(null);
+          }}
         />
+
+        <ConfirmModal
+          isOpen={isBlockOpen}
+          setIsOpen={setIsBlockOpen}
+          title={
+            selectedUser?.isBlocked ? "Unblock Customer" : "Block Customer"
+          }
+          message={
+            selectedUser?.isBlocked
+              ? "Do you want to unblock this customer?"
+              : "Are you sure you want to block this customer?"
+          }
+          onConfirm={async () => {
+            try {
+              const res = await dispatch(
+                blockUnblockCustomer({
+                  userId: selectedUser._id,
+                  isBlocked: !selectedUser.isBlocked,
+                }),
+              );
+
+              if (res?.status) {
+                props.toaster({
+                  type: "success",
+                  message: selectedUser.isBlocked
+                    ? "Customer unblocked successfully"
+                    : "Customer blocked successfully",
+                });
+              } else {
+                props.toaster({
+                  type: "error",
+                  message: "Something went wrong",
+                });
+              }
+            } catch (err) {
+              props.toaster({
+                type: "error",
+                message: "Failed to update customer",
+              });
+            }
+
+            setIsBlockOpen(false);
+            setSelectedUser(null);
+            getCustomer();
+          }}
+          yesText={selectedUser?.isBlocked ? "Yes, Unblock" : "Yes, Block"}
+          noText="Cancel"
+          onCancel={() => {
+            setIsBlockOpen(false);
+            setSelectedUser(null);
+          }}
+        />
+
         {openCustomer && (
           <ImportCustomer
             onClose={() => setOpenCustomer(false)}
